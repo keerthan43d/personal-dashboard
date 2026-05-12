@@ -56,7 +56,7 @@ export default function MoviesPage() {
         subtitle={`${counts.watched} watched · ${counts.watchlist} watchlist${avgRating ? ` · ★ ${avgRating} avg` : ""}`}
         actions={
           <Button onClick={() => setDialogOpen(true)} size="sm"
-            className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold h-8 gap-1.5">
+            className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] h-8 gap-1.5">
             <Plus className="w-3.5 h-3.5" /> Add Movie
           </Button>
         }
@@ -91,7 +91,7 @@ export default function MoviesPage() {
             description={!search ? "Start tracking movies you've watched or want to watch." : undefined}
             action={!search ? (
               <Button onClick={() => setDialogOpen(true)} size="sm"
-                className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold gap-1.5">
+                className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] gap-1.5">
                 <Plus className="w-3.5 h-3.5" /> Add Movie
               </Button>
             ) : undefined}
@@ -142,7 +142,7 @@ function MovieCard({ movie, onEdit, onRemove }: {
       {/* Hover action buttons */}
       <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-          className="w-6 h-6 rounded bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-[#06b6d4]/20 transition-colors">
+          className="w-6 h-6 rounded bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-[#FFD600]/10 transition-colors">
           <Pencil className="w-3 h-3 text-white/70" />
         </button>
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onRemove(); }}

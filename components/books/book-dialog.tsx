@@ -126,12 +126,12 @@ export function BookDialog({ open, onClose, existing }: BookDialogProps) {
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Title *</Label>
                 <Input value={form.title} onChange={set("title")} placeholder="Atomic Habits"
-                  className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" required />
+                  className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" required />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Author *</Label>
                 <Input value={form.author} onChange={set("author")} placeholder="James Clear"
-                  className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" required />
+                  className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" required />
               </div>
             </div>
           </div>
@@ -185,7 +185,7 @@ export function BookDialog({ open, onClose, existing }: BookDialogProps) {
               <Label className="text-xs text-muted-foreground">ISBN (for auto cover)</Label>
               <div className="flex gap-2">
                 <Input value={form.isbn} onChange={set("isbn")} placeholder="9780735211292"
-                  className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 flex-1 h-9" />
+                  className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 flex-1 h-9" />
                 <Button type="button" variant="outline" size="sm" onClick={lookupCover} disabled={searching}
                   className="border-white/10 bg-white/5 hover:bg-white/8 text-[#d4d4d8] h-9 gap-1.5 flex-shrink-0">
                   {searching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
@@ -210,7 +210,7 @@ export function BookDialog({ open, onClose, existing }: BookDialogProps) {
           <DialogFooter className="gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={onClose} className="text-muted-foreground">Cancel</Button>
             <Button type="submit" disabled={saving || !form.title.trim() || !form.author.trim()}
-              className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold">
+              className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em]">
               {saving ? "Saving…" : existing ? "Save Changes" : "Add Book"}
             </Button>
           </DialogFooter>

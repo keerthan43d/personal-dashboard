@@ -143,14 +143,14 @@ export default function SettingsPage() {
 
             <div className="rounded-xl border border-white/6 bg-[#111111] p-4">
               <div className="flex items-start gap-3 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-[#06b6d4]/10 border border-[#06b6d4]/25 flex items-center justify-center flex-shrink-0">
-                  <CloudOff className="w-4 h-4 text-[#06b6d4]" />
+                <div className="w-8 h-8 rounded-lg bg-[#FFD600]/10 border border-[#FFD600]/20 flex items-center justify-center flex-shrink-0">
+                  <CloudOff className="w-4 h-4 text-[#FFD600]" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-[#f5f5f5]">Migrate to Supabase</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    When ready: create a Supabase project, set <code className="text-[#06b6d4] bg-white/5 px-1 rounded text-[10px]">NEXT_PUBLIC_DB=supabase</code> in
-                    {" "}<code className="text-[#06b6d4] bg-white/5 px-1 rounded text-[10px]">.env.local</code>, then run the migration script.
+                    When ready: create a Supabase project, set <code className="text-[#FFD600] bg-white/5 px-1 rounded text-[10px]">NEXT_PUBLIC_DB=supabase</code> in
+                    {" "}<code className="text-[#FFD600] bg-white/5 px-1 rounded text-[10px]">.env.local</code>, then run the migration script.
                   </p>
                 </div>
               </div>

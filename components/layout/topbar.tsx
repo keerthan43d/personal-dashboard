@@ -51,17 +51,17 @@ export function Topbar({ title, subtitle, actions }: TopbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-md px-4">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-white/10 bg-black px-4">
         {/* Sidebar toggle */}
-        <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+        <SidebarTrigger className="text-white/35 hover:text-white/70 transition-colors duration-150" />
 
         {/* Title */}
         <div className="flex-1 min-w-0">
-          <h1 className="font-display font-semibold text-base text-[#f5f5f5] leading-tight truncate">
+          <h1 className="font-sans font-black text-[11px] tracking-[0.18em] uppercase text-white leading-tight truncate">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+            <p className="text-[10px] text-white/35 tracking-[0.08em] uppercase truncate mt-0.5">{subtitle}</p>
           )}
         </div>
 
@@ -72,15 +72,15 @@ export function Topbar({ title, subtitle, actions }: TopbarProps) {
           <button
             onClick={() => setOpen(true)}
             className={cn(
-              "hidden sm:flex items-center gap-2 h-8 px-3 rounded-lg",
-              "bg-white/5 border border-white/8 text-muted-foreground",
-              "hover:bg-white/8 hover:text-foreground transition-all duration-150",
-              "text-xs cursor-pointer"
+              "hidden sm:flex items-center gap-2 h-8 px-3",
+              "bg-transparent border border-white/10 text-white/35",
+              "hover:border-white/20 hover:text-white/70 transition-all duration-150",
+              "text-[10px] font-black tracking-[0.1em] uppercase cursor-pointer"
             )}
           >
             <Search className="w-3.5 h-3.5" />
             <span>Search</span>
-            <kbd className="ml-1 font-mono text-[10px] bg-white/10 px-1.5 py-0.5 rounded">
+            <kbd className="ml-1 font-mono text-[10px] bg-white/8 px-1.5 py-0.5">
               ⌘K
             </kbd>
           </button>

@@ -61,7 +61,7 @@ export default function ClientsPage() {
           <Button
             onClick={() => setDialogOpen(true)}
             size="sm"
-            className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold h-8 gap-1.5"
+            className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] h-8 gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
             New Client
@@ -111,7 +111,7 @@ export default function ClientsPage() {
             action={
               !search ? (
                 <Button onClick={() => setDialogOpen(true)} size="sm"
-                  className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold gap-1.5">
+                  className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] gap-1.5">
                   <Plus className="w-3.5 h-3.5" />
                   Add Client
                 </Button>

@@ -139,7 +139,7 @@ export function MovieDialog({ open, onClose, existing }: MovieDialogProps) {
                 <Label className="text-xs text-muted-foreground">Title *</Label>
                 <div className="flex gap-2">
                   <Input value={form.title} onChange={set("title")} placeholder="Dune: Part Two"
-                    className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 flex-1 h-9" required />
+                    className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 flex-1 h-9" required />
                   <Button type="button" variant="outline" size="sm" onClick={searchTMDB} disabled={searching}
                     className="border-white/10 bg-white/5 hover:bg-white/8 text-[#d4d4d8] h-9 gap-1 flex-shrink-0">
                     {searching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
@@ -206,7 +206,7 @@ export function MovieDialog({ open, onClose, existing }: MovieDialogProps) {
                   <button key={g} type="button" onClick={() => toggleGenre(g)}
                     className={`px-2.5 py-0.5 rounded-full text-xs border cursor-pointer transition-all ${
                       form.genres.includes(g)
-                        ? "bg-[#06b6d4]/20 border-[#06b6d4]/40 text-cyan-400"
+                        ? "bg-[#FFD600]/10 border-[#FFD600]/35 text-[#FFD600]"
                         : "bg-white/4 border-white/10 text-muted-foreground hover:border-white/20"
                     }`}>
                     {g}
@@ -225,7 +225,7 @@ export function MovieDialog({ open, onClose, existing }: MovieDialogProps) {
           <DialogFooter className="gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={onClose} className="text-muted-foreground">Cancel</Button>
             <Button type="submit" disabled={saving || !form.title.trim()}
-              className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold">
+              className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em]">
               {saving ? "Saving…" : existing ? "Save Changes" : "Add Movie"}
             </Button>
           </DialogFooter>

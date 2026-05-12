@@ -160,8 +160,8 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                       transition={{ delay: i * 0.05 }}
                       className="group flex items-start gap-3 p-3 rounded-lg bg-white/3 border border-white/5 hover:border-white/8"
                     >
-                      <div className="w-5 h-5 rounded-full bg-[#06b6d4]/15 border border-[#06b6d4]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span className="text-[10px] font-numeric text-[#06b6d4] font-medium">{i+1}</span>
+                      <div className="w-5 h-5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <span className="text-[10px] font-numeric text-[#FFD600] font-medium">{i+1}</span>
                       </div>
                       <p className="text-sm text-[#d4d4d8] flex-1 leading-relaxed">{t}</p>
                       <button onClick={() => removeTakeaway(i)}
@@ -175,9 +175,9 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                 {/* Add takeaway inline */}
                 {addingTakeaway && (
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="flex items-start gap-3 p-3 rounded-lg bg-white/4 border border-[#06b6d4]/20">
-                    <div className="w-5 h-5 rounded-full bg-[#06b6d4]/15 border border-[#06b6d4]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <span className="text-[10px] font-numeric text-[#06b6d4] font-medium">{book.takeaways.length + 1}</span>
+                    className="flex items-start gap-3 p-3 rounded-lg bg-white/4 border border-[#FFD600]/15">
+                    <div className="w-5 h-5 rounded-full bg-[#FFD600]/10 border border-[#FFD600]/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-[10px] font-numeric text-[#FFD600] font-medium">{book.takeaways.length + 1}</span>
                     </div>
                     <textarea
                       autoFocus

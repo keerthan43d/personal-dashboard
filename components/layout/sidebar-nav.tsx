@@ -8,8 +8,6 @@ import {
   BookOpen,
   Film,
   Settings,
-  ChevronRight,
-  Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -24,10 +22,10 @@ import {
 } from "@/components/ui/sidebar";
 
 const NAV = [
-  { href: "/",         label: "Dashboard",  icon: LayoutDashboard },
-  { href: "/clients",  label: "Clients",    icon: Users },
-  { href: "/books",    label: "Library",    icon: BookOpen },
-  { href: "/movies",   label: "Visions",    icon: Film },
+  { href: "/",        label: "DASHBOARD", icon: LayoutDashboard },
+  { href: "/clients", label: "CLIENTS",   icon: Users },
+  { href: "/books",   label: "LIBRARY",   icon: BookOpen },
+  { href: "/movies",  label: "VISIONS",   icon: Film },
 ];
 
 export function SidebarNav() {
@@ -35,12 +33,14 @@ export function SidebarNav() {
   const { open } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-white/5 bg-[#0d0d0d]">
-      {/* ── Logo ─────────────────────────────────────────────── */}
-      <SidebarHeader className="px-4 py-5 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[#06b6d4]/15 border border-[#06b6d4]/30 flex items-center justify-center glow-cyan">
-            <Flame className="w-4 h-4 text-[#06b6d4]" strokeWidth={2} />
+    <Sidebar collapsible="icon" className="border-r border-white/8 bg-black">
+
+      {/* ── Logo / Brand ─────────────────────────────────────── */}
+      <SidebarHeader className="px-4 py-4 border-b border-white/8">
+        <Link href="/" className="flex items-center gap-3 group">
+          {/* Constructivist square mark */}
+          <div className="flex-shrink-0 w-8 h-8 border border-[#FFD600] flex items-center justify-center">
+            <div className="w-3 h-3 bg-[#FFD600]" />
           </div>
           <AnimatePresence>
             {open && (
@@ -48,14 +48,14 @@ export function SidebarNav() {
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: "auto" }}
                 exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.15, ease: "linear" }}
                 className="overflow-hidden"
               >
-                <span className="font-display font-semibold text-[#f5f5f5] text-sm tracking-wide whitespace-nowrap">
-                  Command
+                <span className="text-[12px] font-black tracking-[0.14em] uppercase text-white whitespace-nowrap">
+                  COMMAND
                 </span>
-                <span className="font-display font-semibold text-[#06b6d4] text-sm tracking-wide ml-1 whitespace-nowrap">
-                  Chamber
+                <span className="text-[12px] font-black tracking-[0.14em] uppercase text-[#FFD600] ml-1.5 whitespace-nowrap">
+                  CHAMBER
                 </span>
               </motion.div>
             )}
@@ -64,7 +64,7 @@ export function SidebarNav() {
       </SidebarHeader>
 
       {/* ── Nav ──────────────────────────────────────────────── */}
-      <SidebarContent className="py-3 px-2">
+      <SidebarContent className="py-2 px-2">
         <SidebarMenu>
           {NAV.map(({ href, label, icon: Icon }) => {
             const active =
@@ -77,41 +77,28 @@ export function SidebarNav() {
                   isActive={active}
                   tooltip={label}
                   className={cn(
-                    "group relative h-9 rounded-lg transition-all duration-150",
+                    "group relative h-9 transition-all duration-150 ease-linear border-l-2",
                     active
-                      ? "bg-[#1a1a1a] text-[#f5f5f5]"
-                      : "text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#161616]"
+                      ? "border-l-[#FFD600] bg-white/[0.03] text-white"
+                      : "border-l-transparent text-white/35 hover:text-white/70 hover:bg-white/[0.02]"
                   )}
                 >
                   <Link href={href} className="flex items-center gap-3 px-3">
-                    {/* Active indicator */}
-                    {active && (
-                      <motion.div
-                        layoutId="nav-indicator"
-                        className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-[#06b6d4] glow-cyan"
-                        transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                      />
-                    )}
-
                     <Icon
                       className={cn(
-                        "w-4 h-4 flex-shrink-0 transition-colors",
-                        active ? "text-[#06b6d4]" : ""
+                        "w-4 h-4 flex-shrink-0 transition-colors duration-150",
+                        active ? "text-[#FFD600]" : ""
                       )}
                       strokeWidth={active ? 2 : 1.75}
                     />
-
                     <AnimatePresence>
                       {open && (
                         <motion.span
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15 }}
-                          className={cn(
-                            "text-sm font-medium tracking-wide whitespace-nowrap",
-                            active ? "text-[#f5f5f5]" : ""
-                          )}
+                          transition={{ duration: 0.12, ease: "linear" }}
+                          className="text-[10px] font-black tracking-[0.12em] uppercase whitespace-nowrap"
                         >
                           {label}
                         </motion.span>
@@ -126,30 +113,34 @@ export function SidebarNav() {
       </SidebarContent>
 
       {/* ── Footer ───────────────────────────────────────────── */}
-      <SidebarFooter className="px-2 pb-3 border-t border-white/5 pt-3">
+      <SidebarFooter className="px-2 pb-3 border-t border-white/8 pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
               tooltip="Settings"
               className={cn(
-                "h-9 rounded-lg transition-all duration-150",
+                "h-9 transition-all duration-150 ease-linear border-l-2",
                 pathname === "/settings"
-                  ? "bg-[#1a1a1a] text-[#f5f5f5]"
-                  : "text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#161616]"
+                  ? "border-l-[#FFD600] bg-white/[0.03] text-white"
+                  : "border-l-transparent text-white/35 hover:text-white/70 hover:bg-white/[0.02]"
               )}
             >
               <Link href="/settings" className="flex items-center gap-3 px-3">
-                <Settings className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+                <Settings
+                  className={cn("w-4 h-4 flex-shrink-0", pathname === "/settings" ? "text-[#FFD600]" : "")}
+                  strokeWidth={1.75}
+                />
                 <AnimatePresence>
                   {open && (
                     <motion.span
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="text-sm font-medium"
+                      transition={{ duration: 0.12, ease: "linear" }}
+                      className="text-[10px] font-black tracking-[0.12em] uppercase"
                     >
-                      Settings
+                      SETTINGS
                     </motion.span>
                   )}
                 </AnimatePresence>

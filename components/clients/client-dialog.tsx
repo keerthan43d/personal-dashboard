@@ -78,17 +78,17 @@ export function ClientDialog({ open, onClose, existing }: ClientDialogProps) {
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Name *</Label>
               <Input value={form.name} onChange={set("name")} placeholder="Arjun Mehta"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" required />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" required />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Company</Label>
               <Input value={form.company} onChange={set("company")} placeholder="Aura Studio"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Email</Label>
               <Input value={form.email} onChange={set("email")} type="email" placeholder="hello@…"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Status</Label>
@@ -107,7 +107,7 @@ export function ClientDialog({ open, onClose, existing }: ClientDialogProps) {
               <Label className="text-xs text-muted-foreground">Hourly Rate</Label>
               <div className="flex gap-1.5">
                 <Input value={form.hourlyRate} onChange={set("hourlyRate")} type="number" placeholder="75"
-                  className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 w-full" />
+                  className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 w-full" />
                 <Select value={form.currency} onValueChange={(v) => setForm((f) => ({ ...f, currency: v }))}>
                   <SelectTrigger className="bg-white/5 border-white/10 w-20 h-9 flex-shrink-0">
                     <SelectValue />
@@ -123,7 +123,7 @@ export function ClientDialog({ open, onClose, existing }: ClientDialogProps) {
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Notes</Label>
               <Textarea value={form.notes} onChange={set("notes")} rows={3} placeholder="Any context…"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 resize-none text-sm" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 resize-none text-sm" />
             </div>
           </div>
 
@@ -132,7 +132,7 @@ export function ClientDialog({ open, onClose, existing }: ClientDialogProps) {
               Cancel
             </Button>
             <Button type="submit" disabled={saving || !form.name.trim()}
-              className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold">
+              className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em]">
               {saving ? "Saving…" : existing ? "Save Changes" : "Add Client"}
             </Button>
           </DialogFooter>

@@ -121,7 +121,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
               className="flex flex-col sm:flex-row gap-4 mb-6 p-5 rounded-xl border border-white/6 bg-[#111111]"
             >
               <Avatar className="w-14 h-14 rounded-xl border border-white/10 flex-shrink-0">
-                <AvatarFallback className="rounded-xl bg-[#06b6d4]/15 text-[#06b6d4] text-lg font-semibold">
+                <AvatarFallback className="rounded-xl bg-[#FFD600]/10 text-[#FFD600] text-lg font-semibold">
                   {initials(client.name)}
                 </AvatarFallback>
               </Avatar>
@@ -143,7 +143,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                   <p className="text-[10px] text-muted-foreground">Projects</p>
                 </div>
                 <div className="rounded-lg bg-white/3 border border-white/5 px-3 py-2 text-center sm:min-w-[100px]">
-                  <p className="font-numeric text-lg font-semibold text-cyan-400">{formatHours(totalHours)}</p>
+                  <p className="font-numeric text-lg font-semibold text-[#FFD600]">{formatHours(totalHours)}</p>
                   <p className="text-[10px] text-muted-foreground">Hours</p>
                 </div>
                 {totalOwed > 0 && (
@@ -174,19 +174,19 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                 <div className="flex gap-2">
                   {activeTab === "projects" && (
                     <Button onClick={() => setNewProjectOpen(true)} size="sm"
-                      className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold h-8 gap-1.5">
+                      className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] h-8 gap-1.5">
                       <Plus className="w-3.5 h-3.5" /> Project
                     </Button>
                   )}
                   {activeTab === "time" && (
                     <Button onClick={() => setLogHoursOpen(true)} size="sm"
-                      className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold h-8 gap-1.5">
+                      className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] h-8 gap-1.5">
                       <Plus className="w-3.5 h-3.5" /> Log Hours
                     </Button>
                   )}
                   {activeTab === "deliverables" && (
                     <Button onClick={() => setDeliverableOpen(true)} size="sm"
-                      className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold h-8 gap-1.5">
+                      className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] h-8 gap-1.5">
                       <Plus className="w-3.5 h-3.5" /> Deliverable
                     </Button>
                   )}
@@ -200,7 +200,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                     description="Create a project to start tracking tasks and progress."
                     action={
                       <Button onClick={() => setNewProjectOpen(true)} size="sm"
-                        className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold gap-1.5">
+                        className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] gap-1.5">
                         <Plus className="w-3.5 h-3.5" /> New Project
                       </Button>
                     }
@@ -252,7 +252,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                         {project.paymentAmount && (
                           <span className={cn(
                             "font-numeric font-medium",
-                            project.paymentStatus === "paid" ? "text-emerald-400" : "text-cyan-400"
+                            project.paymentStatus === "paid" ? "text-emerald-400" : "text-[#FFD600]"
                           )}>
                             {formatCurrency(project.paymentAmount, client.currency)}
                           </span>
@@ -260,7 +260,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                         {project.deadline && (
                           <span className={cn(
                             overdue ? "text-rose-400" :
-                            dueSoon ? "text-cyan-400" : ""
+                            dueSoon ? "text-[#FFD600]" : ""
                           )}>
                             <Clock className="w-3 h-3 inline mr-1" />
                             {fmt.date(project.deadline)}
@@ -278,7 +278,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                           </div>
                           <div className="h-1 rounded-full bg-white/5 overflow-hidden">
                             <div
-                              className="h-full rounded-full transition-all duration-500 bg-[#06b6d4]"
+                              className="h-full rounded-full transition-all duration-500 bg-[#FFD600]"
                               style={{ width: `${progress}%` }}
                             />
                           </div>
@@ -296,8 +296,8 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                               className={cn(
                                 "w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-all cursor-pointer",
                                 task.done
-                                  ? "bg-[#06b6d4] border-[#06b6d4]"
-                                  : "border-white/20 hover:border-[#06b6d4]/60"
+                                  ? "bg-[#FFD600] border-[#FFD600]"
+                                  : "border-white/20 hover:border-[#FFD600]/60"
                               )}
                             >
                               {task.done && (
@@ -357,7 +357,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                   <EmptyState icon={<Timer className="w-6 h-6" />} title="No time logged yet"
                     action={
                       <Button onClick={() => setLogHoursOpen(true)} size="sm"
-                        className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold gap-1.5">
+                        className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] gap-1.5">
                         <Plus className="w-3.5 h-3.5" /> Log Hours
                       </Button>
                     }
@@ -373,7 +373,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                           transition={{ delay: li * 0.03 }}
                           className="group flex items-center gap-3 px-4 py-3 rounded-lg border border-white/5 bg-[#111111] hover:border-white/8"
                         >
-                          <span className="font-numeric text-sm font-medium text-cyan-400 w-10 flex-shrink-0">
+                          <span className="font-numeric text-sm font-medium text-[#FFD600] w-10 flex-shrink-0">
                             {log.hours}h
                           </span>
                           <div className="flex-1 min-w-0">
@@ -395,7 +395,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
 
                     <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/5 mt-2">
                       <span className="text-xs text-muted-foreground">Total logged:</span>
-                      <span className="font-numeric font-semibold text-cyan-400">{formatHours(totalHours)}</span>
+                      <span className="font-numeric font-semibold text-[#FFD600]">{formatHours(totalHours)}</span>
                       {client.hourlyRate && (
                         <span className="text-xs text-muted-foreground">
                           · {formatCurrency(totalHours * client.hourlyRate, client.currency)} value
@@ -412,7 +412,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                   <EmptyState icon={<Package className="w-6 h-6" />} title="No deliverables yet"
                     action={
                       <Button onClick={() => setDeliverableOpen(true)} size="sm"
-                        className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold gap-1.5">
+                        className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] gap-1.5">
                         <Plus className="w-3.5 h-3.5" /> Add Deliverable
                       </Button>
                     }
@@ -438,7 +438,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
                           <span className="text-xs text-muted-foreground flex-shrink-0">{fmt.date(d.deliveredAt)}</span>
                           {d.url && (
                             <a href={d.url} target="_blank" rel="noreferrer"
-                              className="text-muted-foreground/60 hover:text-[#06b6d4] transition-colors cursor-pointer">
+                              className="text-muted-foreground/60 hover:text-[#FFD600] transition-colors cursor-pointer">
                               <ExternalLink className="w-3.5 h-3.5" />
                             </a>
                           )}

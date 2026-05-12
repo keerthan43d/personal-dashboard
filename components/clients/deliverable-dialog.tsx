@@ -68,7 +68,7 @@ export function DeliverableDialog({ open, onClose, clientId, projects }: Deliver
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Title *</Label>
               <Input value={form.title} onChange={set("title")} placeholder="Final Logo Files"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" required />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" required />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Type</Label>
@@ -84,7 +84,7 @@ export function DeliverableDialog({ open, onClose, clientId, projects }: Deliver
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Delivered On</Label>
               <Input value={form.deliveredAt} onChange={set("deliveredAt")} type="date"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 [color-scheme:dark]" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 [color-scheme:dark]" />
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Project</Label>
@@ -101,19 +101,19 @@ export function DeliverableDialog({ open, onClose, clientId, projects }: Deliver
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">URL / Drive Link</Label>
               <Input value={form.url} onChange={set("url")} type="url" placeholder="https://…"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" />
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Notes</Label>
               <Textarea value={form.notes} onChange={set("notes")} rows={2}
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 resize-none text-sm" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 resize-none text-sm" />
             </div>
           </div>
 
           <DialogFooter className="gap-2 pt-1">
             <Button type="button" variant="ghost" onClick={onClose} className="text-muted-foreground">Cancel</Button>
             <Button type="submit" disabled={saving || !form.title.trim()}
-              className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold">
+              className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em]">
               {saving ? "Saving…" : "Add Deliverable"}
             </Button>
           </DialogFooter>

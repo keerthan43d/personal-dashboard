@@ -44,7 +44,7 @@ export function ClientCard({ client, projects, index }: ClientCardProps) {
 
           <div className="flex items-start gap-3">
             <Avatar className="w-10 h-10 rounded-lg flex-shrink-0 border border-white/10">
-              <AvatarFallback className="rounded-lg bg-[#06b6d4]/15 text-[#06b6d4] text-sm font-semibold">
+              <AvatarFallback className="rounded-lg bg-[#FFD600]/10 text-[#FFD600] text-sm font-semibold">
                 {initials(client.name)}
               </AvatarFallback>
             </Avatar>
@@ -76,7 +76,7 @@ export function ClientCard({ client, projects, index }: ClientCardProps) {
             <div className="rounded-lg bg-white/3 border border-white/5 p-2.5 text-center">
               <p className={cn(
                 "font-numeric text-base font-medium",
-                totalOwed > 0 ? "text-cyan-400" : "text-[#f5f5f5]"
+                totalOwed > 0 ? "text-[#FFD600]" : "text-[#f5f5f5]"
               )}>
                 {totalOwed > 0 ? formatCurrency(totalOwed, client.currency) : "—"}
               </p>
@@ -92,7 +92,7 @@ export function ClientCard({ client, projects, index }: ClientCardProps) {
             </div>
           )}
 
-          <ChevronRight className="absolute bottom-5 right-4 w-4 h-4 text-muted-foreground/40 group-hover:text-[#06b6d4] group-hover:translate-x-0.5 transition-all duration-150" />
+          <ChevronRight className="absolute bottom-5 right-4 w-4 h-4 text-muted-foreground/40 group-hover:text-[#FFD600] group-hover:translate-x-0.5 transition-all duration-150" />
         </div>
       </Link>
     </motion.div>

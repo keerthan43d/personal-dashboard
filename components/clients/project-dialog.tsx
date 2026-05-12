@@ -76,13 +76,13 @@ export function ProjectDialog({ open, onClose, clientId, existing }: ProjectDial
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Project Title *</Label>
               <Input value={form.title} onChange={set("title")} placeholder="Brand Identity Package"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" required />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" required />
             </div>
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Description</Label>
               <Textarea value={form.description} onChange={set("description")} rows={2}
                 placeholder="What's included…"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 resize-none text-sm" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 resize-none text-sm" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Status</Label>
@@ -98,12 +98,12 @@ export function ProjectDialog({ open, onClose, clientId, existing }: ProjectDial
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Deadline</Label>
               <Input value={form.deadline} onChange={set("deadline")} type="date"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 [color-scheme:dark]" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 [color-scheme:dark]" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Payment ($)</Label>
               <Input value={form.paymentAmount} onChange={set("paymentAmount")} type="number" placeholder="1500"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40" />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Payment Status</Label>
@@ -119,7 +119,7 @@ export function ProjectDialog({ open, onClose, clientId, existing }: ProjectDial
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Notes</Label>
               <Textarea value={form.notes} onChange={set("notes")} rows={2} placeholder="Any notes…"
-                className="bg-white/5 border-white/10 focus:border-[#06b6d4]/50 resize-none text-sm" />
+                className="bg-white/5 border-white/10 focus:border-[#FFD600]/40 resize-none text-sm" />
             </div>
           </div>
 
@@ -128,7 +128,7 @@ export function ProjectDialog({ open, onClose, clientId, existing }: ProjectDial
               Cancel
             </Button>
             <Button type="submit" disabled={saving || !form.title.trim()}
-              className="bg-[#06b6d4] hover:bg-[#0891b2] text-black font-semibold">
+              className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em]">
               {saving ? "Saving…" : existing ? "Save Changes" : "Create Project"}
             </Button>
           </DialogFooter>

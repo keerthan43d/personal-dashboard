@@ -29,7 +29,7 @@ export function StarRating({ value = 0, max = 5, size = "sm", onRate, readonly }
             )}
           >
             <Star
-              className={cn(sz, filled ? "fill-cyan-400 text-cyan-400" : "text-zinc-700")}
+              className={cn(sz, filled ? "fill-[#FFD600] text-[#FFD600]" : "text-zinc-700")}
               strokeWidth={1.5}
             />
           </button>
