@@ -166,7 +166,7 @@ export function MovieDialog({ open, onClose, existing }: MovieDialogProps) {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
+            <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Rating</Label>
               <div className="h-9 flex items-center">
                 <StarRating value={form.rating} max={10} size="md" onRate={(n) => setForm((f) => ({ ...f, rating: n }))} />
