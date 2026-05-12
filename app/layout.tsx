@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Cinzel } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LoadingScreen } from "@/components/ui/loading-screen";
@@ -19,6 +19,13 @@ const jbMono = JetBrains_Mono({
   display: "swap",
 });
 
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Command Chamber",
   description: "Your personal command center — clients, books, movies.",
@@ -32,7 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${jbMono.variable} dark h-full`}
+      className={`${inter.variable} ${jbMono.variable} ${cinzel.variable} dark h-full`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground grain">
