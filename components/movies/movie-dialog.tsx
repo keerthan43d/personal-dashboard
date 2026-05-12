@@ -115,14 +115,15 @@ export function MovieDialog({ open, onClose, existing }: MovieDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="bg-[#161616] border-white/10 text-foreground max-w-lg">
+      <DialogContent className="bg-[#161616] border-white/10 text-foreground max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="font-display text-lg">
             {existing ? "Edit Movie" : "Add to Visions"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 mt-1">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden mt-1">
+          <div className="overflow-y-auto flex-1 space-y-4 pr-1">
           <div className="flex gap-4">
             {/* Poster preview */}
             <div className="flex-shrink-0 w-16 h-24 rounded-lg border border-white/10 bg-white/4 overflow-hidden flex items-center justify-center">
@@ -222,7 +223,8 @@ export function MovieDialog({ open, onClose, existing }: MovieDialogProps) {
             </div>
           </div>
 
-          <DialogFooter className="gap-2 pt-1">
+          </div>
+          <DialogFooter className="gap-2 pt-3 border-t border-white/8 mt-3">
             <Button type="button" variant="ghost" onClick={onClose} className="text-muted-foreground">Cancel</Button>
             <Button type="submit" disabled={saving || !form.title.trim()}
               className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em]">
