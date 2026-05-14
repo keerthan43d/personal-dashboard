@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Users, BookOpen, Film } from "lucide-react";
+import { Search, Users, BookOpen, Film, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
@@ -47,6 +47,7 @@ export function Topbar({ title, subtitle, actions }: TopbarProps) {
     { label: "Go to Clients",    icon: <Users className="w-4 h-4" />, onSelect: () => router.push("/clients") },
     { label: "Go to Library",    icon: <BookOpen className="w-4 h-4" />, onSelect: () => router.push("/books") },
     { label: "Go to Visions",    icon: <Film className="w-4 h-4" />, onSelect: () => router.push("/movies") },
+    { label: "Go to TV Shows",   icon: <Tv className="w-4 h-4" />, onSelect: () => router.push("/tv-shows") },
   ];
 
   return (

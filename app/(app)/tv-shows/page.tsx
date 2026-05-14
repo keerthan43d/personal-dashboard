@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Film, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Tv, Search, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,52 +12,51 @@ import { PageShell }   from "@/components/shared/page-shell";
 import { EmptyState }  from "@/components/shared/empty-state";
 import { StarRating }  from "@/components/shared/star-rating";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { MovieDialog } from "@/components/movies/movie-dialog";
-import { useMovies }   from "@/lib/hooks/use-movies";
-import { fmt }         from "@/lib/utils/date";
+import { TvShowDialog } from "@/components/tv-shows/tv-show-dialog";
+import { useTvShows }   from "@/lib/hooks/use-tv-shows";
 import { cn }          from "@/lib/utils";
-import type { Movie }  from "@/lib/db/schemas";
+import type { TvShow }  from "@/lib/db/schemas";
 
 type Tab = "all" | "watched" | "watching" | "watchlist";
 
-export default function MoviesPage() {
-  const { movies, loading, load, edit, remove } = useMovies();
+export default function TvShowsPage() {
+  const { shows, loading, load, edit, remove } = useTvShows();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editMovie,  setEditMovie]  = useState<Movie | undefined>();
+  const [editShow,   setEditShow]   = useState<TvShow | undefined>();
   const [tab,    setTab]    = useState<Tab>("all");
   const [search, setSearch] = useState("");
 
   useEffect(() => { load(); }, []);
 
-  const filtered = movies
-    .filter((m) => tab === "all" || m.status === tab)
-    .filter((m) => !search ||
-      m.title.toLowerCase().includes(search.toLowerCase()) ||
-      m.director?.toLowerCase().includes(search.toLowerCase())
+  const filtered = shows
+    .filter((s) => tab === "all" || s.status === tab)
+    .filter((s) => !search ||
+      s.title.toLowerCase().includes(search.toLowerCase()) ||
+      s.creator?.toLowerCase().includes(search.toLowerCase())
     );
 
   const counts = {
-    all:       movies.length,
-    watched:   movies.filter((m) => m.status === "watched").length,
-    watching:  movies.filter((m) => m.status === "watching").length,
-    watchlist: movies.filter((m) => m.status === "watchlist").length,
+    all:       shows.length,
+    watched:   shows.filter((s) => s.status === "watched").length,
+    watching:  shows.filter((s) => s.status === "watching").length,
+    watchlist: shows.filter((s) => s.status === "watchlist").length,
   };
 
   const avgRating = (() => {
-    const rated = movies.filter((m) => m.rating);
+    const rated = shows.filter((s) => s.rating);
     if (!rated.length) return null;
-    return (rated.reduce((s, m) => s + m.rating!, 0) / rated.length).toFixed(1);
+    return (rated.reduce((sum, s) => sum + s.rating!, 0) / rated.length).toFixed(1);
   })();
 
   return (
     <>
       <Topbar
-        title="Visions"
+        title="TV Shows"
         subtitle={`${counts.watched} watched · ${counts.watchlist} watchlist${avgRating ? ` · ★ ${avgRating} avg` : ""}`}
         actions={
           <Button onClick={() => setDialogOpen(true)} size="sm"
             className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] h-8 gap-1.5">
-            <Plus className="w-3.5 h-3.5" /> Add Movie
+            <Plus className="w-3.5 h-3.5" /> Add Show
           </Button>
         }
       />
@@ -67,7 +66,7 @@ export default function MoviesPage() {
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <Input value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search movies…" className="pl-9 h-9 bg-white/5 border-white/10 text-sm" />
+              placeholder="Search shows…" className="pl-9 h-9 bg-white/5 border-white/10 text-sm" />
           </div>
           <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
             <TabsList className="bg-white/5 border border-white/8 h-9">
@@ -86,32 +85,32 @@ export default function MoviesPage() {
             {Array.from({ length: 10 }).map((_, i) => <div key={i} className="h-72 rounded-xl skeleton" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <EmptyState icon={<Film className="w-6 h-6" />}
-            title={search ? "No movies match" : "No movies yet"}
-            description={!search ? "Start tracking movies you've watched or want to watch." : undefined}
+          <EmptyState icon={<Tv className="w-6 h-6" />}
+            title={search ? "No shows match" : "No TV shows yet"}
+            description={!search ? "Start tracking shows you've watched or want to watch." : undefined}
             action={!search ? (
               <Button onClick={() => setDialogOpen(true)} size="sm"
                 className="bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] gap-1.5">
-                <Plus className="w-3.5 h-3.5" /> Add Movie
+                <Plus className="w-3.5 h-3.5" /> Add Show
               </Button>
             ) : undefined}
           />
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             <AnimatePresence>
-              {filtered.map((movie, i) => (
-                <motion.div key={movie.id}
+              {filtered.map((show, i) => (
+                <motion.div key={show.id}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: i * 0.04, duration: 0.25 }}
                 >
-                  <MovieCard
-                    movie={movie}
-                    onEdit={() => setEditMovie(movie)}
+                  <ShowCard
+                    show={show}
+                    onEdit={() => setEditShow(show)}
                     onRemove={async () => {
-                      if (!confirm("Remove this movie?")) return;
-                      await remove(movie.id);
+                      if (!confirm("Remove this show?")) return;
+                      await remove(show.id);
                       toast.success("Removed");
                     }}
                   />
@@ -122,16 +121,16 @@ export default function MoviesPage() {
         )}
       </PageShell>
 
-      <MovieDialog open={dialogOpen || !!editMovie}
-        onClose={() => { setDialogOpen(false); setEditMovie(undefined); load(); }}
-        existing={editMovie}
+      <TvShowDialog open={dialogOpen || !!editShow}
+        onClose={() => { setDialogOpen(false); setEditShow(undefined); load(); }}
+        existing={editShow}
       />
     </>
   );
 }
 
-function MovieCard({ movie, onEdit, onRemove }: {
-  movie: Movie; onEdit: () => void; onRemove: () => void;
+function ShowCard({ show, onEdit, onRemove }: {
+  show: TvShow; onEdit: () => void; onRemove: () => void;
 }) {
   return (
     <div className={cn(
@@ -139,7 +138,6 @@ function MovieCard({ movie, onEdit, onRemove }: {
       "hover:border-white/12 hover:-translate-y-1 transition-[transform,border-color,box-shadow] duration-200",
       "hover:shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
     )}>
-      {/* Hover action buttons */}
       <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
           className="w-6 h-6 rounded bg-black/60 backdrop-blur-sm flex items-center justify-center hover:bg-[#FFD600]/10 transition-colors">
@@ -151,43 +149,41 @@ function MovieCard({ movie, onEdit, onRemove }: {
         </button>
       </div>
 
-      <Link href={`/movies/${movie.id}`} className="block cursor-pointer">
-        {/* Poster */}
+      <Link href={`/tv-shows/${show.id}`} className="block cursor-pointer">
         <div className="relative h-52 bg-[#1a1a1a] overflow-hidden">
-          {movie.posterUrl ? (
+          {show.posterUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={movie.posterUrl} alt={movie.title}
+            <img src={show.posterUrl} alt={show.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Film className="w-10 h-10 text-muted-foreground/30" />
+              <Tv className="w-10 h-10 text-muted-foreground/30" />
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-transparent opacity-80" />
           <div className="absolute top-2 left-2">
-            <StatusBadge status={movie.status} />
+            <StatusBadge status={show.status} />
           </div>
-          {movie.year && (
+          {show.year && (
             <span className="absolute top-2 right-2 text-[10px] text-white/60 font-numeric bg-black/40 px-1.5 py-0.5 rounded">
-              {movie.year}
+              {show.year}
             </span>
           )}
         </div>
 
-        {/* Info */}
         <div className="p-3 space-y-1.5">
-          <h3 className="text-xs font-semibold text-[#f5f5f5] leading-snug line-clamp-2">{movie.title}</h3>
-          {movie.director && <p className="text-[10px] text-muted-foreground truncate">{movie.director}</p>}
+          <h3 className="text-xs font-semibold text-[#f5f5f5] leading-snug line-clamp-2">{show.title}</h3>
+          {show.creator && <p className="text-[10px] text-muted-foreground truncate">{show.creator}</p>}
 
           <div className="flex items-center justify-between pt-0.5">
-            <StarRating value={movie.rating ?? 0} readonly />
-            {movie.runtime && (
-              <span className="text-[10px] text-muted-foreground font-numeric">{movie.runtime}m</span>
+            <StarRating value={show.rating ?? 0} readonly />
+            {show.seasons && (
+              <span className="text-[10px] text-muted-foreground font-numeric">{show.seasons}S</span>
             )}
           </div>
 
-          {movie.genres.length > 0 && (
-            <p className="text-[10px] text-muted-foreground/70 truncate">{movie.genres.slice(0,3).join(" · ")}</p>
+          {show.genres.length > 0 && (
+            <p className="text-[10px] text-muted-foreground/70 truncate">{show.genres.slice(0,3).join(" · ")}</p>
           )}
         </div>
       </Link>

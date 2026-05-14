@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Users, BookOpen, Film, Clock, DollarSign,
+  Users, BookOpen, Film, Tv, Clock, DollarSign,
   TrendingUp, ArrowRight, CheckCircle2,
 } from "lucide-react";
 import { Topbar }    from "@/components/layout/topbar";
@@ -15,7 +15,7 @@ import { repo }      from "@/lib/db";
 import { fmt, isDueSoon, isOverdue, lastNDays } from "@/lib/utils/date";
 import { formatCurrency, formatHours, initials, taskProgress } from "@/lib/utils/format";
 import { cn } from "@/lib/utils";
-import type { Client, Project, Book, Movie, TimeLog, Task } from "@/lib/db/schemas";
+import type { Client, Project, Book, Movie, TvShow, TimeLog, Task } from "@/lib/db/schemas";
 
 interface DashData {
   clients:  Client[];
@@ -24,6 +24,7 @@ interface DashData {
   timeLogs: TimeLog[];
   books:    Book[];
   movies:   Movie[];
+  tvShows:  TvShow[];
 }
 
 export default function DashboardPage() {
@@ -38,8 +39,9 @@ export default function DashboardPage() {
       repo.listTimeLogs(),
       repo.listBooks(),
       repo.listMovies(),
-    ]).then(([clients, projects, tasks, timeLogs, books, movies]) => {
-      setData({ clients, projects, tasks, timeLogs, books, movies });
+      repo.listTvShows(),
+    ]).then(([clients, projects, tasks, timeLogs, books, movies, tvShows]) => {
+      setData({ clients, projects, tasks, timeLogs, books, movies, tvShows });
       setLoading(false);
     });
   }, []);
@@ -64,7 +66,7 @@ export default function DashboardPage() {
     );
   }
 
-  const { clients, projects, tasks, timeLogs, books, movies } = data;
+  const { clients, projects, tasks, timeLogs, books, movies, tvShows } = data;
 
   // ── Computed stats ──────────────────────────────────────────
   const activeClients  = clients.filter((c) => c.status === "active");
@@ -92,6 +94,11 @@ export default function DashboardPage() {
 
   const recentMovies = [...movies]
     .filter((m) => m.status === "watched")
+    .sort((a, b) => (b.watchedAt ?? b.createdAt) > (a.watchedAt ?? a.createdAt) ? 1 : -1)
+    .slice(0, 4);
+
+  const recentTvShows = [...tvShows]
+    .filter((s) => s.status === "watched" || s.status === "watching")
     .sort((a, b) => (b.watchedAt ?? b.createdAt) > (a.watchedAt ?? a.createdAt) ? 1 : -1)
     .slice(0, 4);
 
@@ -392,6 +399,51 @@ export default function DashboardPage() {
                           </p>
                           <StarRating value={movie.rating ?? 0} readonly />
                         </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+
+            {/* TV Shows */}
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.36, ease: "linear" }}
+              className="border border-white/10 bg-[#080808] p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-sans font-black text-[11px] tracking-[0.1em] uppercase text-white flex items-center gap-2">
+                  <Tv className="w-3.5 h-3.5 text-white/35" />
+                  TV Shows
+                </h3>
+                <Link href="/tv-shows" className="text-[10px] text-white/35 hover:text-[#FFD600] transition-colors duration-150 link-draw">
+                  View all →
+                </Link>
+              </div>
+
+              {recentTvShows.length === 0 ? (
+                <p className="text-xs text-white/35 py-2">No shows yet</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {recentTvShows.map((show) => (
+                    <Link key={show.id} href={`/tv-shows/${show.id}`}>
+                      <div className="group flex items-center gap-3 hover:bg-white/[0.03] p-1.5 -mx-1.5 transition-colors duration-150 cursor-pointer">
+                        <div className="w-8 h-11 border border-white/10 overflow-hidden flex-shrink-0 bg-[#111111]">
+                          {show.posterUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={show.posterUrl} alt={show.title} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Tv className="w-3 h-3 text-white/20" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-white/80 truncate">{show.title}</p>
+                          <p className="text-[10px] text-white/35 truncate">
+                            {show.creator ?? ""}{show.year ? ` · ${show.year}` : ""}
+                          </p>
+                          <StarRating value={show.rating ?? 0} readonly />
+                        </div>
+                        <StatusBadge status={show.status} />
                       </div>
                     </Link>
                   ))}

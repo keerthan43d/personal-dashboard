@@ -10,6 +10,7 @@ import type {
   Deliverable, DeliverableInput,
   Book,      BookInput,
   Movie,     MovieInput,
+  TvShow,    TvShowInput,
   ExportSnapshot,
 } from "./schemas";
 
@@ -61,6 +62,13 @@ export interface DataRepository {
   createMovie(data: MovieInput): Promise<Movie>;
   updateMovie(id: string, data: Partial<MovieInput>): Promise<Movie>;
   deleteMovie(id: string): Promise<void>;
+
+  // ── TV Shows ─────────────────────────────────────────────────
+  listTvShows(opts?: { status?: TvShow["status"] }): Promise<TvShow[]>;
+  getTvShow(id: string): Promise<TvShow | undefined>;
+  createTvShow(data: TvShowInput): Promise<TvShow>;
+  updateTvShow(id: string, data: Partial<TvShowInput>): Promise<TvShow>;
+  deleteTvShow(id: string): Promise<void>;
 
   // ── Export / Import ──────────────────────────────────────────
   exportAll(): Promise<ExportSnapshot>;

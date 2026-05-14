@@ -13,6 +13,7 @@ import type {
   Deliverable, DeliverableInput,
   Book,      BookInput,
   Movie,     MovieInput,
+  TvShow,    TvShowInput,
   ExportSnapshot,
 } from "./schemas";
 import type { DataRepository } from "./repository";
@@ -26,6 +27,7 @@ class CommandChamberDB extends Dexie {
   deliverables!: Table<Deliverable>;
   books!:        Table<Book>;
   movies!:       Table<Movie>;
+  tvShows!:      Table<TvShow>;
 
   constructor() {
     super("CommandChamberDB");
@@ -37,6 +39,16 @@ class CommandChamberDB extends Dexie {
       deliverables: "id, clientId, projectId, deliveredAt, createdAt",
       books:        "id, status, createdAt, finishedAt",
       movies:       "id, status, createdAt, watchedAt",
+    });
+    this.version(2).stores({
+      clients:      "id, status, createdAt",
+      projects:     "id, clientId, status, deadline, createdAt",
+      tasks:        "id, projectId, clientId, done, order, createdAt",
+      timeLogs:     "id, clientId, projectId, date, createdAt",
+      deliverables: "id, clientId, projectId, deliveredAt, createdAt",
+      books:        "id, status, createdAt, finishedAt",
+      movies:       "id, status, createdAt, watchedAt",
+      tvShows:      "id, status, createdAt, watchedAt",
     });
   }
 }
@@ -265,9 +277,34 @@ export class LocalRepository implements DataRepository {
     await db.movies.delete(id);
   }
 
+  // ── TV Shows ─────────────────────────────────────────────────
+  async listTvShows(opts?: { status?: TvShow["status"] }): Promise<TvShow[]> {
+    const all = await db.tvShows.orderBy("createdAt").reverse().toArray();
+    return opts?.status ? all.filter((s) => s.status === opts.status) : all;
+  }
+
+  async getTvShow(id: string): Promise<TvShow | undefined> {
+    return db.tvShows.get(id);
+  }
+
+  async createTvShow(data: TvShowInput): Promise<TvShow> {
+    const show: TvShow = { ...data, id: uuid(), createdAt: now() };
+    await db.tvShows.add(show);
+    return show;
+  }
+
+  async updateTvShow(id: string, data: Partial<TvShowInput>): Promise<TvShow> {
+    await db.tvShows.update(id, data);
+    return (await db.tvShows.get(id))!;
+  }
+
+  async deleteTvShow(id: string): Promise<void> {
+    await db.tvShows.delete(id);
+  }
+
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [clients, projects, tasks, timeLogs, deliverables, books, movies] =
+    const [clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows] =
       await Promise.all([
         db.clients.toArray(),
         db.projects.toArray(),
@@ -276,12 +313,13 @@ export class LocalRepository implements DataRepository {
         db.deliverables.toArray(),
         db.books.toArray(),
         db.movies.toArray(),
+        db.tvShows.toArray(),
       ]);
-    return { version: 1, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies };
+    return { version: 1, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows };
   }
 
   async importAll(snapshot: ExportSnapshot, merge = false): Promise<void> {
-    await db.transaction("rw", [db.clients, db.projects, db.tasks, db.timeLogs, db.deliverables, db.books, db.movies], async () => {
+    await db.transaction("rw", [db.clients, db.projects, db.tasks, db.timeLogs, db.deliverables, db.books, db.movies, db.tvShows], async () => {
       if (!merge) await this.clearAll();
       await db.clients.bulkPut(snapshot.clients);
       await db.projects.bulkPut(snapshot.projects);
@@ -290,6 +328,7 @@ export class LocalRepository implements DataRepository {
       await db.deliverables.bulkPut(snapshot.deliverables);
       await db.books.bulkPut(snapshot.books);
       await db.movies.bulkPut(snapshot.movies);
+      if (snapshot.tvShows) await db.tvShows.bulkPut(snapshot.tvShows);
     });
   }
 
@@ -297,6 +336,7 @@ export class LocalRepository implements DataRepository {
     await Promise.all([
       db.clients.clear(), db.projects.clear(), db.tasks.clear(),
       db.timeLogs.clear(), db.deliverables.clear(), db.books.clear(), db.movies.clear(),
+      db.tvShows.clear(),
     ]);
   }
 }
