@@ -5,12 +5,18 @@
  * Falls back to LocalRepository (Dexie/IndexedDB) when env vars are absent.
  */
 import { repo as localRepo } from "./local";
-import { supabaseRepo } from "./supabase-repository";
 import type { DataRepository } from "./repository";
 
-export const repo: DataRepository = process.env.NEXT_PUBLIC_SUPABASE_URL
-  ? supabaseRepo
-  : localRepo;
+function getRepo(): DataRepository {
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { supabaseRepo } = require("./supabase-repository");
+    return supabaseRepo;
+  }
+  return localRepo;
+}
+
+export const repo: DataRepository = getRepo();
 
 export type { DataRepository } from "./repository";
 export * from "./schemas";

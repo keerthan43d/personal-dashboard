@@ -8,6 +8,7 @@ import {
   BookOpen,
   Film,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -20,6 +21,7 @@ import {
   SidebarFooter,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/lib/hooks/use-auth";
 
 const NAV = [
   { href: "/",        label: "DASHBOARD", icon: LayoutDashboard },
@@ -31,6 +33,7 @@ const NAV = [
 export function SidebarNav() {
   const pathname = usePathname();
   const { open } = useSidebar();
+  const { logout } = useAuth();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-white/8 bg-black">
@@ -145,6 +148,30 @@ export function SidebarNav() {
                   )}
                 </AnimatePresence>
               </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              tooltip="Logout"
+              onClick={logout}
+              className="h-9 transition-all duration-150 ease-linear border-l-2 border-l-transparent text-white/35 hover:text-rose-400 hover:bg-rose-500/5 cursor-pointer"
+            >
+              <div className="flex items-center gap-3 px-3">
+                <LogOut className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />
+                <AnimatePresence>
+                  {open && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.12, ease: "linear" }}
+                      className="text-[10px] font-black tracking-[0.12em] uppercase"
+                    >
+                      LOGOUT
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
