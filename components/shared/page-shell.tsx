@@ -8,7 +8,7 @@ interface PageShellProps {
 /** Scrollable content area below the Topbar */
 export function PageShell({ children, className }: PageShellProps) {
   return (
-    <div className={cn("flex-1 overflow-y-auto", className)}>
+    <div className={cn("flex-1 overflow-y-auto scroll-smooth", className)}>
       <div className="px-6 py-6 max-w-7xl mx-auto">
         {children}
       </div>
