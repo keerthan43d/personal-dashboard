@@ -136,7 +136,7 @@ function MovieCard({ movie, onEdit, onRemove }: {
   return (
     <div className={cn(
       "group relative rounded-xl border border-white/6 bg-[#111111] overflow-hidden",
-      "hover:border-white/12 hover:-translate-y-1 transition-all duration-200",
+      "hover:border-white/12 hover:-translate-y-1 transition-[transform,border-color,box-shadow] duration-200",
       "hover:shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
     )}>
       {/* Hover action buttons */}

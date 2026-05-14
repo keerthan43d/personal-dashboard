@@ -135,7 +135,7 @@ function ShowCard({ show, onEdit, onRemove }: {
   return (
     <div className={cn(
       "group relative rounded-xl border border-white/6 bg-[#111111] overflow-hidden",
-      "hover:border-white/12 hover:-translate-y-1 transition-all duration-200",
+      "hover:border-white/12 hover:-translate-y-1 transition-[transform,border-color,box-shadow] duration-200",
       "hover:shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
     )}>
       <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
