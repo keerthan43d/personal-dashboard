@@ -9,6 +9,7 @@ import type {
   Deliverable, DeliverableInput,
   Book,        BookInput,
   Movie,       MovieInput,
+  TvShow,      TvShowInput,
   ExportSnapshot,
 } from "./schemas";
 import type { DataRepository } from "./repository";
@@ -49,6 +50,12 @@ type MovieRow = {
   poster_url: string | null; tmdb_id: number | null; genres: string[]; status: string;
   rating: number | null; notes: string | null; watched_at: string | null;
   runtime: number | null; created_at: string;
+};
+type TvShowRow = {
+  id: string; title: string; creator: string | null; year: number | null;
+  poster_url: string | null; tmdb_id: number | null; genres: string[]; status: string;
+  rating: number | null; notes: string | null; watched_at: string | null;
+  seasons: number | null; episodes: number | null; network: string | null; created_at: string;
 };
 
 // ─── Row → Entity ─────────────────────────────────────────────
@@ -127,6 +134,22 @@ function fromMovieRow(r: MovieRow): Movie {
     ...(r.notes     != null && { notes:     r.notes }),
     ...(r.watched_at!= null && { watchedAt: r.watched_at }),
     ...(r.runtime   != null && { runtime:   r.runtime }),
+  };
+}
+function fromTvShowRow(r: TvShowRow): TvShow {
+  return {
+    id: r.id, title: r.title, status: r.status as TvShow["status"],
+    genres: r.genres ?? [], createdAt: r.created_at,
+    ...(r.creator   != null && { creator:   r.creator }),
+    ...(r.year      != null && { year:      r.year }),
+    ...(r.poster_url!= null && { posterUrl: r.poster_url }),
+    ...(r.tmdb_id   != null && { tmdbId:    r.tmdb_id }),
+    ...(r.rating    != null && { rating:    r.rating }),
+    ...(r.notes     != null && { notes:     r.notes }),
+    ...(r.watched_at!= null && { watchedAt: r.watched_at }),
+    ...(r.seasons   != null && { seasons:   r.seasons }),
+    ...(r.episodes  != null && { episodes:  r.episodes }),
+    ...(r.network   != null && { network:   r.network }),
   };
 }
 
@@ -216,6 +239,23 @@ function toMovieRow(d: Partial<MovieInput>): Partial<MovieRow> {
   if (d.notes     !== undefined) r.notes      = d.notes     ?? null;
   if (d.watchedAt !== undefined) r.watched_at = d.watchedAt ?? null;
   if (d.runtime   !== undefined) r.runtime    = d.runtime   ?? null;
+  return r;
+}
+function toTvShowRow(d: Partial<TvShowInput>): Partial<TvShowRow> {
+  const r: Partial<TvShowRow> = {};
+  if (d.title     !== undefined) r.title      = d.title;
+  if (d.creator   !== undefined) r.creator    = d.creator   ?? null;
+  if (d.year      !== undefined) r.year       = d.year      ?? null;
+  if (d.posterUrl !== undefined) r.poster_url = d.posterUrl ?? null;
+  if (d.tmdbId    !== undefined) r.tmdb_id    = d.tmdbId    ?? null;
+  if (d.genres    !== undefined) r.genres     = d.genres    ?? [];
+  if (d.status    !== undefined) r.status     = d.status;
+  if (d.rating    !== undefined) r.rating     = d.rating    ?? null;
+  if (d.notes     !== undefined) r.notes      = d.notes     ?? null;
+  if (d.watchedAt !== undefined) r.watched_at = d.watchedAt ?? null;
+  if (d.seasons   !== undefined) r.seasons    = d.seasons   ?? null;
+  if (d.episodes  !== undefined) r.episodes   = d.episodes  ?? null;
+  if (d.network   !== undefined) r.network    = d.network   ?? null;
   return r;
 }
 
@@ -433,9 +473,38 @@ export class SupabaseRepository implements DataRepository {
     if (error) fail(error, "deleteMovie");
   }
 
+  // ── TV Shows ────────────────────────────────────────────────
+  async listTvShows(opts?: { status?: TvShow["status"] }): Promise<TvShow[]> {
+    let q = supabase.from("tv_shows").select("*").order("created_at", { ascending: false });
+    if (opts?.status) q = q.eq("status", opts.status);
+    const { data, error } = await q;
+    if (error) fail(error, "listTvShows");
+    return (data as TvShowRow[]).map(fromTvShowRow);
+  }
+  async getTvShow(id: string): Promise<TvShow | undefined> {
+    const { data, error } = await supabase.from("tv_shows").select("*").eq("id", id).maybeSingle();
+    if (error) fail(error, "getTvShow");
+    return data ? fromTvShowRow(data as TvShowRow) : undefined;
+  }
+  async createTvShow(input: TvShowInput): Promise<TvShow> {
+    const row = { id: uuid(), created_at: now(), ...toTvShowRow(input) };
+    const { data, error } = await supabase.from("tv_shows").insert(row).select().single();
+    if (error) fail(error, "createTvShow");
+    return fromTvShowRow(data as TvShowRow);
+  }
+  async updateTvShow(id: string, input: Partial<TvShowInput>): Promise<TvShow> {
+    const { data, error } = await supabase.from("tv_shows").update(toTvShowRow(input)).eq("id", id).select().single();
+    if (error) fail(error, "updateTvShow");
+    return fromTvShowRow(data as TvShowRow);
+  }
+  async deleteTvShow(id: string): Promise<void> {
+    const { error } = await supabase.from("tv_shows").delete().eq("id", id);
+    if (error) fail(error, "deleteTvShow");
+  }
+
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [c, p, t, l, d, b, m] = await Promise.all([
+    const [c, p, t, l, d, b, m, tv] = await Promise.all([
       supabase.from("clients").select("*"),
       supabase.from("projects").select("*"),
       supabase.from("tasks").select("*"),
@@ -443,6 +512,7 @@ export class SupabaseRepository implements DataRepository {
       supabase.from("deliverables").select("*"),
       supabase.from("books").select("*"),
       supabase.from("movies").select("*"),
+      supabase.from("tv_shows").select("*"),
     ]);
     return {
       version: 1, exportedAt: now(),
@@ -453,6 +523,7 @@ export class SupabaseRepository implements DataRepository {
       deliverables: ((d.data ?? []) as DeliverableRow[]).map(fromDeliverableRow),
       books:        ((b.data ?? []) as BookRow[]).map(fromBookRow),
       movies:       ((m.data ?? []) as MovieRow[]).map(fromMovieRow),
+      tvShows:      ((tv.data ?? []) as TvShowRow[]).map(fromTvShowRow),
     };
   }
 
@@ -468,6 +539,9 @@ export class SupabaseRepository implements DataRepository {
       supabase.from("movies").upsert(
         snapshot.movies.map(e => ({ ...toMovieRow(e), id: e.id, created_at: e.createdAt }))
       ),
+      ...(snapshot.tvShows?.length ? [supabase.from("tv_shows").upsert(
+        snapshot.tvShows.map(e => ({ ...toTvShowRow(e), id: e.id, created_at: e.createdAt }))
+      )] : []),
     ]);
     // projects/tasks/timeLogs/deliverables depend on clients — insert after
     await Promise.all([
@@ -497,6 +571,7 @@ export class SupabaseRepository implements DataRepository {
     await supabase.from("clients").delete().not("id", "is", null);
     await supabase.from("books").delete().not("id", "is", null);
     await supabase.from("movies").delete().not("id", "is", null);
+    await supabase.from("tv_shows").delete().not("id", "is", null);
   }
 }
 

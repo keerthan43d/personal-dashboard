@@ -7,6 +7,7 @@ import {
   Users,
   BookOpen,
   Film,
+  Tv,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -24,10 +25,11 @@ import {
 import { useAuth } from "@/lib/hooks/use-auth";
 
 const NAV = [
-  { href: "/",        label: "DASHBOARD", icon: LayoutDashboard },
-  { href: "/clients", label: "CLIENTS",   icon: Users },
-  { href: "/books",   label: "LIBRARY",   icon: BookOpen },
-  { href: "/movies",  label: "VISIONS",   icon: Film },
+  { href: "/",          label: "DASHBOARD", icon: LayoutDashboard },
+  { href: "/clients",   label: "CLIENTS",   icon: Users },
+  { href: "/books",     label: "LIBRARY",   icon: BookOpen },
+  { href: "/movies",    label: "VISIONS",   icon: Film },
+  { href: "/tv-shows",  label: "TV SHOWS",  icon: Tv },
 ];
 
 export function SidebarNav() {
