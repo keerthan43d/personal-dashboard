@@ -103,7 +103,7 @@ export const MovieSchema = z.object({
   tmdbId:     z.number().int().optional(),
   genres:     z.array(z.string()).default([]),
   status:     z.enum(["watched", "watching", "watchlist"]).default("watchlist"),
-  rating:     z.number().int().min(1).max(5).optional(),
+  rating:     z.number().int().min(1).max(10).optional(),
   notes:      z.string().optional(),
   watchedAt:  z.string().optional(), // "YYYY-MM-DD"
   runtime:    z.number().int().positive().optional(), // minutes
