@@ -25,7 +25,7 @@ type SaveStatus = "idle" | "saving" | "saved";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/35 mb-2">
+    <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/60 mb-2">
       {children}
     </p>
   );

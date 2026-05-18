@@ -26,11 +26,11 @@ export function EnergyPicker({ value, onChange }: Props) {
         ))}
       </div>
       {value ? (
-        <span className="text-[10px] font-black tracking-[0.1em] uppercase text-white/40">
+        <span className="text-[10px] font-black tracking-[0.1em] uppercase text-white/60">
           {ENERGY_LABELS[value]}
         </span>
       ) : (
-        <span className="text-[10px] font-black tracking-[0.1em] uppercase text-white/20">
+        <span className="text-[10px] font-black tracking-[0.1em] uppercase text-white/35">
           tap to set
         </span>
       )}

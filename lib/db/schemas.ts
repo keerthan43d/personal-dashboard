@@ -111,6 +111,26 @@ export const MovieSchema = z.object({
 });
 export type Movie = z.infer<typeof MovieSchema>;
 
+// ─── TV Show ──────────────────────────────────────────────────
+export const TvShowSchema = z.object({
+  id:         z.string().uuid(),
+  title:      z.string().min(1),
+  creator:    z.string().optional(),
+  year:       z.number().int().min(1928).max(2100).optional(),
+  posterUrl:  z.string().optional(),
+  tmdbId:     z.number().int().optional(),
+  genres:     z.array(z.string()).default([]),
+  status:     z.enum(["watched", "watching", "watchlist"]).default("watchlist"),
+  rating:     z.number().int().min(1).max(10).optional(),
+  notes:      z.string().optional(),
+  watchedAt:  z.string().optional(),
+  seasons:    z.number().int().positive().optional(),
+  episodes:   z.number().int().positive().optional(),
+  network:    z.string().optional(),
+  createdAt:  z.string().datetime({ offset: true }),
+});
+export type TvShow = z.infer<typeof TvShowSchema>;
+
 // ─── Input types (for forms — omit generated fields) ──────────
 export type ClientInput     = Omit<Client,     "id" | "createdAt">;
 export type ProjectInput    = Omit<Project,    "id" | "createdAt">;
@@ -119,6 +139,7 @@ export type TimeLogInput    = Omit<TimeLog,    "id" | "createdAt">;
 export type DeliverableInput= Omit<Deliverable,"id" | "createdAt">;
 export type BookInput       = Omit<Book,       "id" | "createdAt">;
 export type MovieInput      = Omit<Movie,      "id" | "createdAt">;
+export type TvShowInput     = Omit<TvShow,     "id" | "createdAt">;
 
 // ─── Journal Entry ────────────────────────────────────────────
 export const JournalEntrySchema = z.object({
@@ -167,7 +188,7 @@ export type JournalHabitInput = Omit<JournalHabit, "id" | "createdAt">;
 
 // ─── Export snapshot (for export/import) ─────────────────────
 export const ExportSnapshotSchema = z.object({
-  version:       z.literal(2),
+  version:       z.literal(3),
   exportedAt:    z.string().datetime({ offset: true }),
   clients:       z.array(ClientSchema),
   projects:      z.array(ProjectSchema),
@@ -176,6 +197,7 @@ export const ExportSnapshotSchema = z.object({
   deliverables:  z.array(DeliverableSchema),
   books:         z.array(BookSchema),
   movies:        z.array(MovieSchema),
+  tvShows:       z.array(TvShowSchema).default([]),
   journalEntries: z.array(JournalEntrySchema).default([]),
   problemLogs:   z.array(ProblemLogSchema).default([]),
   journalHabits: z.array(JournalHabitSchema).default([]),

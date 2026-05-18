@@ -9,6 +9,7 @@ import type {
   Deliverable, DeliverableInput,
   Book,        BookInput,
   Movie,       MovieInput,
+  TvShow,      TvShowInput,
   JournalEntry,  JournalEntryInput,
   ProblemLog,    ProblemLogInput,
   JournalHabit,  JournalHabitInput,
@@ -52,6 +53,12 @@ type MovieRow = {
   poster_url: string | null; tmdb_id: number | null; genres: string[]; status: string;
   rating: number | null; notes: string | null; watched_at: string | null;
   runtime: number | null; created_at: string;
+};
+type TvShowRow = {
+  id: string; title: string; creator: string | null; year: number | null;
+  poster_url: string | null; tmdb_id: number | null; genres: string[]; status: string;
+  rating: number | null; notes: string | null; watched_at: string | null;
+  seasons: number | null; episodes: number | null; network: string | null; created_at: string;
 };
 type JournalEntryRow = {
   id: string; date: string; mood: number | null; energy: number | null;
@@ -235,6 +242,40 @@ function toMovieRow(d: Partial<MovieInput>): Partial<MovieRow> {
   if (d.notes     !== undefined) r.notes      = d.notes     ?? null;
   if (d.watchedAt !== undefined) r.watched_at = d.watchedAt ?? null;
   if (d.runtime   !== undefined) r.runtime    = d.runtime   ?? null;
+  return r;
+}
+
+function fromTvShowRow(r: TvShowRow): TvShow {
+  return {
+    id: r.id, title: r.title, status: r.status as TvShow["status"],
+    genres: r.genres ?? [], createdAt: r.created_at,
+    ...(r.creator   != null && { creator:   r.creator }),
+    ...(r.year      != null && { year:      r.year }),
+    ...(r.poster_url!= null && { posterUrl: r.poster_url }),
+    ...(r.tmdb_id   != null && { tmdbId:    r.tmdb_id }),
+    ...(r.rating    != null && { rating:    r.rating }),
+    ...(r.notes     != null && { notes:     r.notes }),
+    ...(r.watched_at!= null && { watchedAt: r.watched_at }),
+    ...(r.seasons   != null && { seasons:   r.seasons }),
+    ...(r.episodes  != null && { episodes:  r.episodes }),
+    ...(r.network   != null && { network:   r.network }),
+  };
+}
+function toTvShowRow(d: Partial<TvShow>): Partial<TvShowRow> {
+  const r: Partial<TvShowRow> = {};
+  if (d.title     !== undefined) r.title      = d.title;
+  if (d.creator   !== undefined) r.creator    = d.creator   ?? null;
+  if (d.year      !== undefined) r.year       = d.year      ?? null;
+  if (d.posterUrl !== undefined) r.poster_url = d.posterUrl ?? null;
+  if (d.tmdbId    !== undefined) r.tmdb_id    = d.tmdbId    ?? null;
+  if (d.genres    !== undefined) r.genres     = d.genres    ?? [];
+  if (d.status    !== undefined) r.status     = d.status;
+  if (d.rating    !== undefined) r.rating     = d.rating    ?? null;
+  if (d.notes     !== undefined) r.notes      = d.notes     ?? null;
+  if (d.watchedAt !== undefined) r.watched_at = d.watchedAt ?? null;
+  if (d.seasons   !== undefined) r.seasons    = d.seasons   ?? null;
+  if (d.episodes  !== undefined) r.episodes   = d.episodes  ?? null;
+  if (d.network   !== undefined) r.network    = d.network   ?? null;
   return r;
 }
 
@@ -490,6 +531,40 @@ export class SupabaseRepository implements DataRepository {
     if (error) fail(error, "deleteMovie");
   }
 
+  // ── TV Shows ─────────────────────────────────────────────────
+  async listTvShows(opts?: { status?: TvShow["status"] }): Promise<TvShow[]> {
+    let q = supabase.from("tv_shows").select("*").order("created_at", { ascending: false });
+    if (opts?.status) q = q.eq("status", opts.status) as typeof q;
+    const { data, error } = await q;
+    if (error) fail(error, "listTvShows");
+    return (data as TvShowRow[]).map(fromTvShowRow);
+  }
+
+  async getTvShow(id: string): Promise<TvShow | undefined> {
+    const { data, error } = await supabase.from("tv_shows").select("*").eq("id", id).single();
+    if (error) return undefined;
+    return fromTvShowRow(data as TvShowRow);
+  }
+
+  async createTvShow(data: TvShowInput): Promise<TvShow> {
+    const row = toTvShowRow({ ...data, id: uuid(), createdAt: now() });
+    const { data: d, error } = await supabase.from("tv_shows").insert(row).select().single();
+    if (error) fail(error, "createTvShow");
+    return fromTvShowRow(d as TvShowRow);
+  }
+
+  async updateTvShow(id: string, data: Partial<TvShowInput>): Promise<TvShow> {
+    const row = toTvShowRow(data as TvShow);
+    const { data: d, error } = await supabase.from("tv_shows").update(row).eq("id", id).select().single();
+    if (error) fail(error, "updateTvShow");
+    return fromTvShowRow(d as TvShowRow);
+  }
+
+  async deleteTvShow(id: string): Promise<void> {
+    const { error } = await supabase.from("tv_shows").delete().eq("id", id);
+    if (error) fail(error, "deleteTvShow");
+  }
+
   // ── Journal Entries ──────────────────────────────────────────
   async listJournalEntries(opts?: { since?: string; until?: string }): Promise<JournalEntry[]> {
     let q = supabase.from("journal_entries").select("*").order("date", { ascending: false });
@@ -599,7 +674,7 @@ export class SupabaseRepository implements DataRepository {
 
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [c, p, t, l, d, b, m, je, pl, jh] = await Promise.all([
+    const [c, p, t, l, d, b, m, tv, je, pl, jh] = await Promise.all([
       supabase.from("clients").select("*"),
       supabase.from("projects").select("*"),
       supabase.from("tasks").select("*"),
@@ -607,12 +682,13 @@ export class SupabaseRepository implements DataRepository {
       supabase.from("deliverables").select("*"),
       supabase.from("books").select("*"),
       supabase.from("movies").select("*"),
+      supabase.from("tv_shows").select("*"),
       supabase.from("journal_entries").select("*"),
       supabase.from("problem_logs").select("*"),
       supabase.from("journal_habits").select("*"),
     ]);
     return {
-      version: 2, exportedAt: now(),
+      version: 3, exportedAt: now(),
       clients:       ((c.data ?? []) as ClientRow[]).map(fromClientRow),
       projects:      ((p.data ?? []) as ProjectRow[]).map(fromProjectRow),
       tasks:         ((t.data ?? []) as TaskRow[]).map(fromTaskRow),
@@ -620,6 +696,7 @@ export class SupabaseRepository implements DataRepository {
       deliverables:  ((d.data ?? []) as DeliverableRow[]).map(fromDeliverableRow),
       books:         ((b.data ?? []) as BookRow[]).map(fromBookRow),
       movies:        ((m.data ?? []) as MovieRow[]).map(fromMovieRow),
+      tvShows:       ((tv.data ?? []) as TvShowRow[]).map(fromTvShowRow),
       journalEntries: ((je.data ?? []) as JournalEntryRow[]).map(fromJournalEntryRow),
       problemLogs:   ((pl.data ?? []) as ProblemLogRow[]).map(fromProblemLogRow),
       journalHabits: ((jh.data ?? []) as JournalHabitRow[]).map(fromJournalHabitRow),
@@ -632,6 +709,7 @@ export class SupabaseRepository implements DataRepository {
       supabase.from("clients").upsert(snapshot.clients.map(e => ({ ...toClientRow(e), id: e.id, created_at: e.createdAt }))),
       supabase.from("books").upsert(snapshot.books.map(e => ({ ...toBookRow(e), id: e.id, created_at: e.createdAt }))),
       supabase.from("movies").upsert(snapshot.movies.map(e => ({ ...toMovieRow(e), id: e.id, created_at: e.createdAt }))),
+      supabase.from("tv_shows").upsert((snapshot.tvShows ?? []).map(e => ({ ...toTvShowRow(e), id: e.id, created_at: e.createdAt }))),
       supabase.from("journal_entries").upsert((snapshot.journalEntries ?? []).map(e => ({
         id: e.id, date: e.date, mood: e.mood ?? null, energy: e.energy ?? null,
         free_write: e.freeWrite ?? null, wins: e.wins, ideas: e.ideas,
@@ -663,6 +741,7 @@ export class SupabaseRepository implements DataRepository {
     await supabase.from("clients").delete().not("id", "is", null);
     await supabase.from("books").delete().not("id", "is", null);
     await supabase.from("movies").delete().not("id", "is", null);
+    await supabase.from("tv_shows").delete().not("id", "is", null);
     await supabase.from("journal_entries").delete().not("id", "is", null);
     await supabase.from("problem_logs").delete().not("id", "is", null);
     await supabase.from("journal_habits").delete().not("id", "is", null);

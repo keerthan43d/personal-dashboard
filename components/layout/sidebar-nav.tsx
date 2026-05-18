@@ -7,6 +7,7 @@ import {
   Users,
   BookOpen,
   Film,
+  Tv,
   Settings,
   LogOut,
   BookMarked,
@@ -28,8 +29,9 @@ const NAV = [
   { href: "/",        label: "DASHBOARD", icon: LayoutDashboard },
   { href: "/journal", label: "JOURNAL",   icon: BookMarked },
   { href: "/clients", label: "CLIENTS",   icon: Users },
-  { href: "/books",   label: "LIBRARY",   icon: BookOpen },
-  { href: "/movies",  label: "VISIONS",   icon: Film },
+  { href: "/books",     label: "LIBRARY",   icon: BookOpen },
+  { href: "/movies",    label: "VISIONS",   icon: Film },
+  { href: "/tv-shows",  label: "TV SHOWS",  icon: Tv },
 ];
 
 export function SidebarNav() {

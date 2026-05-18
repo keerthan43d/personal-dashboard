@@ -13,6 +13,7 @@ import type {
   Deliverable, DeliverableInput,
   Book,      BookInput,
   Movie,     MovieInput,
+  TvShow,    TvShowInput,
   JournalEntry,  JournalEntryInput,
   ProblemLog,    ProblemLogInput,
   JournalHabit,  JournalHabitInput,
@@ -29,6 +30,7 @@ class CommandChamberDB extends Dexie {
   deliverables!:  Table<Deliverable>;
   books!:         Table<Book>;
   movies!:        Table<Movie>;
+  tvShows!:       Table<TvShow>;
   journalEntries!: Table<JournalEntry>;
   problemLogs!:   Table<ProblemLog>;
   journalHabits!: Table<JournalHabit>;
@@ -52,6 +54,19 @@ class CommandChamberDB extends Dexie {
       deliverables:  "id, clientId, projectId, deliveredAt, createdAt",
       books:         "id, status, createdAt, finishedAt",
       movies:        "id, status, createdAt, watchedAt",
+      journalEntries: "id, date, updatedAt",
+      problemLogs:   "id, entryDate, createdAt, *tags",
+      journalHabits: "id, order, active",
+    });
+    this.version(3).stores({
+      clients:       "id, status, createdAt",
+      projects:      "id, clientId, status, deadline, createdAt",
+      tasks:         "id, projectId, clientId, done, order, createdAt",
+      timeLogs:      "id, clientId, projectId, date, createdAt",
+      deliverables:  "id, clientId, projectId, deliveredAt, createdAt",
+      books:         "id, status, createdAt, finishedAt",
+      movies:        "id, status, createdAt, watchedAt",
+      tvShows:       "id, status, createdAt, watchedAt",
       journalEntries: "id, date, updatedAt",
       problemLogs:   "id, entryDate, createdAt, *tags",
       journalHabits: "id, order, active",
@@ -283,6 +298,31 @@ export class LocalRepository implements DataRepository {
     await db.movies.delete(id);
   }
 
+  // ── TV Shows ─────────────────────────────────────────────────
+  async listTvShows(opts?: { status?: TvShow["status"] }): Promise<TvShow[]> {
+    const all = await db.tvShows.orderBy("createdAt").reverse().toArray();
+    return opts?.status ? all.filter((s) => s.status === opts.status) : all;
+  }
+
+  async getTvShow(id: string): Promise<TvShow | undefined> {
+    return db.tvShows.get(id);
+  }
+
+  async createTvShow(data: TvShowInput): Promise<TvShow> {
+    const show: TvShow = { ...data, id: uuid(), createdAt: now() };
+    await db.tvShows.add(show);
+    return show;
+  }
+
+  async updateTvShow(id: string, data: Partial<TvShowInput>): Promise<TvShow> {
+    await db.tvShows.update(id, data);
+    return (await db.tvShows.get(id))!;
+  }
+
+  async deleteTvShow(id: string): Promise<void> {
+    await db.tvShows.delete(id);
+  }
+
   // ── Journal Entries ──────────────────────────────────────────
   async listJournalEntries(opts?: { since?: string; until?: string }): Promise<JournalEntry[]> {
     let all = await db.journalEntries.orderBy("date").toArray();
@@ -384,7 +424,7 @@ export class LocalRepository implements DataRepository {
 
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [clients, projects, tasks, timeLogs, deliverables, books, movies, journalEntries, problemLogs, journalHabits] =
+    const [clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows, journalEntries, problemLogs, journalHabits] =
       await Promise.all([
         db.clients.toArray(),
         db.projects.toArray(),
@@ -393,17 +433,18 @@ export class LocalRepository implements DataRepository {
         db.deliverables.toArray(),
         db.books.toArray(),
         db.movies.toArray(),
+        db.tvShows.toArray(),
         db.journalEntries.toArray(),
         db.problemLogs.toArray(),
         db.journalHabits.toArray(),
       ]);
-    return { version: 2, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies, journalEntries, problemLogs, journalHabits };
+    return { version: 3, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows, journalEntries, problemLogs, journalHabits };
   }
 
   async importAll(snapshot: ExportSnapshot, merge = false): Promise<void> {
     await db.transaction("rw", [
       db.clients, db.projects, db.tasks, db.timeLogs, db.deliverables,
-      db.books, db.movies, db.journalEntries, db.problemLogs, db.journalHabits,
+      db.books, db.movies, db.tvShows, db.journalEntries, db.problemLogs, db.journalHabits,
     ], async () => {
       if (!merge) await this.clearAll();
       await db.clients.bulkPut(snapshot.clients);
@@ -413,6 +454,7 @@ export class LocalRepository implements DataRepository {
       await db.deliverables.bulkPut(snapshot.deliverables);
       await db.books.bulkPut(snapshot.books);
       await db.movies.bulkPut(snapshot.movies);
+      if (snapshot.tvShows)        await db.tvShows.bulkPut(snapshot.tvShows);
       if (snapshot.journalEntries) await db.journalEntries.bulkPut(snapshot.journalEntries);
       if (snapshot.problemLogs)    await db.problemLogs.bulkPut(snapshot.problemLogs);
       if (snapshot.journalHabits)  await db.journalHabits.bulkPut(snapshot.journalHabits);
@@ -422,7 +464,8 @@ export class LocalRepository implements DataRepository {
   async clearAll(): Promise<void> {
     await Promise.all([
       db.clients.clear(), db.projects.clear(), db.tasks.clear(),
-      db.timeLogs.clear(), db.deliverables.clear(), db.books.clear(), db.movies.clear(),
+      db.timeLogs.clear(), db.deliverables.clear(), db.books.clear(),
+      db.movies.clear(), db.tvShows.clear(),
       db.journalEntries.clear(), db.problemLogs.clear(), db.journalHabits.clear(),
     ]);
   }
