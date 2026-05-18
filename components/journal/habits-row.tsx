@@ -13,7 +13,7 @@ export function HabitsRow({ habits, checked, onChange }: Props) {
 
   if (active.length === 0) {
     return (
-      <p className="text-xs text-white/25 italic">
+      <p className="text-xs text-white/30 italic">
         No habits configured. Add some in Settings → Habits.
       </p>
     );
@@ -23,22 +23,52 @@ export function HabitsRow({ habits, checked, onChange }: Props) {
     onChange({ ...checked, [name]: !checked[name] });
   }
 
+  const doneCount   = active.filter((h) => checked[h.name]).length;
+  const totalCount  = active.length;
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {active.map((h) => (
-        <button
-          key={h.id}
-          onClick={() => toggle(h.name)}
-          className={cn(
-            "px-3 py-1.5 text-[11px] font-black tracking-[0.1em] uppercase border transition-all duration-100",
-            checked[h.name]
-              ? "border-[#FFD600]/50 bg-[#FFD600]/8 text-[#FFD600]"
-              : "border-white/10 text-white/35 hover:border-white/20 hover:text-white/55"
-          )}
-        >
-          {h.name}
-        </button>
-      ))}
+    <div className="space-y-3">
+      {totalCount > 0 && (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-0.5 bg-white/8">
+            <div
+              className="h-full bg-[#FFD600] transition-all duration-300"
+              style={{ width: `${(doneCount / totalCount) * 100}%` }}
+            />
+          </div>
+          <span className="text-[9px] font-black tracking-[0.12em] uppercase text-white/40">
+            {doneCount}/{totalCount}
+          </span>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {active.map((h) => {
+          const isDone = !!checked[h.name];
+          return (
+            <button
+              key={h.id}
+              onClick={() => toggle(h.name)}
+              className={cn(
+                "relative px-3 py-1.5 text-[10px] font-black tracking-[0.1em] uppercase border transition-all duration-150 cursor-pointer overflow-hidden",
+                isDone
+                  ? "border-[#FFD600]/60 text-[#FFD600] bg-[#FFD600]/8"
+                  : "border-white/10 text-white/40 hover:border-white/22 hover:text-white/60 hover:bg-white/[0.02]"
+              )}
+              style={
+                isDone
+                  ? { boxShadow: "0 0 10px rgba(255,214,0,0.12)" }
+                  : undefined
+              }
+            >
+              {isDone && (
+                <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#FFD600]" />
+              )}
+              {h.name}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

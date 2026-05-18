@@ -36,14 +36,17 @@ export function ListSection({ items, onChange, placeholder = "Add item…" }: Pr
   }
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       {items.map((item, i) => (
-        <div key={i} className="group flex items-center gap-2 py-1">
-          <span className="text-white/20 text-xs select-none">—</span>
-          <span className="text-sm text-white/75 flex-1">{item}</span>
+        <div
+          key={i}
+          className="group flex items-center gap-3 py-2 px-3 hover:bg-white/[0.03] transition-colors"
+        >
+          <div className="w-1.5 h-1.5 bg-[#FFD600] shrink-0" />
+          <span className="text-sm text-white/80 flex-1 leading-relaxed">{item}</span>
           <button
             onClick={() => remove(i)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/30 hover:text-rose-400"
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/30 hover:text-rose-400 cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -51,8 +54,8 @@ export function ListSection({ items, onChange, placeholder = "Add item…" }: Pr
       ))}
 
       {adding ? (
-        <div className="flex items-center gap-2 py-1">
-          <span className="text-white/20 text-xs">—</span>
+        <div className="flex items-center gap-3 py-2 px-3 border border-[#FFD600]/25 bg-[#FFD600]/[0.02]">
+          <div className="w-1.5 h-1.5 bg-[#FFD600]/50 shrink-0" />
           <input
             ref={inputRef}
             value={draft}
@@ -63,18 +66,18 @@ export function ListSection({ items, onChange, placeholder = "Add item…" }: Pr
             }}
             onBlur={commit}
             placeholder={placeholder}
-            className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/20 outline-none border-b border-white/20 focus:border-[#FFD600]/40 pb-0.5 transition-colors"
+            className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/25 outline-none"
           />
         </div>
       ) : (
         <button
           onClick={startAdd}
           className={cn(
-            "flex items-center gap-1.5 text-[10px] font-black tracking-[0.1em] uppercase",
-            "text-white/25 hover:text-white/50 transition-colors mt-1"
+            "flex items-center gap-2 text-[10px] font-black tracking-[0.12em] uppercase mt-2",
+            "text-white/30 hover:text-[#FFD600] transition-colors cursor-pointer"
           )}
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-3.5 h-3.5" />
           Add
         </button>
       )}
