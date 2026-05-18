@@ -9,6 +9,9 @@ import type {
   Deliverable, DeliverableInput,
   Book,        BookInput,
   Movie,       MovieInput,
+  JournalEntry,  JournalEntryInput,
+  ProblemLog,    ProblemLogInput,
+  JournalHabit,  JournalHabitInput,
   ExportSnapshot,
 } from "./schemas";
 import type { DataRepository } from "./repository";
@@ -49,6 +52,22 @@ type MovieRow = {
   poster_url: string | null; tmdb_id: number | null; genres: string[]; status: string;
   rating: number | null; notes: string | null; watched_at: string | null;
   runtime: number | null; created_at: string;
+};
+type JournalEntryRow = {
+  id: string; date: string; mood: number | null; energy: number | null;
+  free_write: string | null; wins: string[]; ideas: string[];
+  tomorrow_focus: string | null; habits: Record<string, boolean>;
+  updated_at: string; created_at: string;
+};
+type ProblemLogRow = {
+  id: string; entry_date: string; title: string;
+  what_the_problem_was: string | null; context: string | null;
+  what_didnt_work: string | null; what_solved_it: string | null;
+  why_it_worked: string | null; tags: string[];
+  created_at: string; updated_at: string;
+};
+type JournalHabitRow = {
+  id: string; name: string; order: number; active: boolean; created_at: string;
 };
 
 // ─── Row → Entity ─────────────────────────────────────────────
@@ -216,6 +235,44 @@ function toMovieRow(d: Partial<MovieInput>): Partial<MovieRow> {
   if (d.notes     !== undefined) r.notes      = d.notes     ?? null;
   if (d.watchedAt !== undefined) r.watched_at = d.watchedAt ?? null;
   if (d.runtime   !== undefined) r.runtime    = d.runtime   ?? null;
+  return r;
+}
+
+function fromJournalEntryRow(r: JournalEntryRow): JournalEntry {
+  return {
+    id: r.id, date: r.date, wins: r.wins ?? [], ideas: r.ideas ?? [],
+    habits: r.habits ?? {}, updatedAt: r.updated_at, createdAt: r.created_at,
+    ...(r.mood          != null && { mood:          r.mood }),
+    ...(r.energy        != null && { energy:        r.energy }),
+    ...(r.free_write    != null && { freeWrite:     r.free_write }),
+    ...(r.tomorrow_focus!= null && { tomorrowFocus: r.tomorrow_focus }),
+  };
+}
+function fromProblemLogRow(r: ProblemLogRow): ProblemLog {
+  return {
+    id: r.id, entryDate: r.entry_date, title: r.title,
+    tags: r.tags ?? [], createdAt: r.created_at, updatedAt: r.updated_at,
+    ...(r.what_the_problem_was != null && { whatTheProblemWas: r.what_the_problem_was }),
+    ...(r.context              != null && { context:           r.context }),
+    ...(r.what_didnt_work      != null && { whatDidntWork:     r.what_didnt_work }),
+    ...(r.what_solved_it       != null && { whatSolvedIt:      r.what_solved_it }),
+    ...(r.why_it_worked        != null && { whyItWorked:       r.why_it_worked }),
+  };
+}
+function fromJournalHabitRow(r: JournalHabitRow): JournalHabit {
+  return { id: r.id, name: r.name, order: r.order, active: r.active, createdAt: r.created_at };
+}
+
+function toProblemLogRow(d: Partial<ProblemLogInput>): Partial<ProblemLogRow> {
+  const r: Partial<ProblemLogRow> = {};
+  if (d.entryDate          !== undefined) r.entry_date             = d.entryDate;
+  if (d.title              !== undefined) r.title                  = d.title;
+  if (d.whatTheProblemWas  !== undefined) r.what_the_problem_was   = d.whatTheProblemWas  ?? null;
+  if (d.context            !== undefined) r.context                = d.context            ?? null;
+  if (d.whatDidntWork      !== undefined) r.what_didnt_work        = d.whatDidntWork      ?? null;
+  if (d.whatSolvedIt       !== undefined) r.what_solved_it         = d.whatSolvedIt       ?? null;
+  if (d.whyItWorked        !== undefined) r.why_it_worked          = d.whyItWorked        ?? null;
+  if (d.tags               !== undefined) r.tags                   = d.tags               ?? [];
   return r;
 }
 
@@ -433,9 +490,116 @@ export class SupabaseRepository implements DataRepository {
     if (error) fail(error, "deleteMovie");
   }
 
+  // ── Journal Entries ──────────────────────────────────────────
+  async listJournalEntries(opts?: { since?: string; until?: string }): Promise<JournalEntry[]> {
+    let q = supabase.from("journal_entries").select("*").order("date", { ascending: false });
+    if (opts?.since) q = q.gte("date", opts.since);
+    if (opts?.until) q = q.lte("date", opts.until);
+    const { data, error } = await q;
+    if (error) fail(error, "listJournalEntries");
+    return (data as JournalEntryRow[]).map(fromJournalEntryRow);
+  }
+  async getJournalEntry(date: string): Promise<JournalEntry | undefined> {
+    const { data, error } = await supabase.from("journal_entries").select("*").eq("date", date).maybeSingle();
+    if (error) fail(error, "getJournalEntry");
+    return data ? fromJournalEntryRow(data as JournalEntryRow) : undefined;
+  }
+  async upsertJournalEntry(data: JournalEntryInput & { id?: string }): Promise<JournalEntry> {
+    const row = {
+      id: data.id ?? uuid(),
+      date: data.date,
+      mood: data.mood ?? null,
+      energy: data.energy ?? null,
+      free_write: data.freeWrite ?? null,
+      wins: data.wins ?? [],
+      ideas: data.ideas ?? [],
+      tomorrow_focus: data.tomorrowFocus ?? null,
+      habits: data.habits ?? {},
+      updated_at: now(),
+    };
+    const { data: out, error } = await supabase
+      .from("journal_entries").upsert(row, { onConflict: "date" }).select().single();
+    if (error) fail(error, "upsertJournalEntry");
+    return fromJournalEntryRow(out as JournalEntryRow);
+  }
+  async deleteJournalEntry(id: string): Promise<void> {
+    const { error } = await supabase.from("journal_entries").delete().eq("id", id);
+    if (error) fail(error, "deleteJournalEntry");
+  }
+
+  // ── Problem Logs ─────────────────────────────────────────────
+  async listProblemLogs(opts?: { entryDate?: string; tag?: string; search?: string }): Promise<ProblemLog[]> {
+    let q = supabase.from("problem_logs").select("*").order("created_at", { ascending: false });
+    if (opts?.entryDate) q = q.eq("entry_date", opts.entryDate);
+    if (opts?.tag)       q = q.contains("tags", [opts.tag]);
+    const { data, error } = await q;
+    if (error) fail(error, "listProblemLogs");
+    let results = (data as ProblemLogRow[]).map(fromProblemLogRow);
+    if (opts?.search) {
+      const s = opts.search.toLowerCase();
+      results = results.filter((p) =>
+        p.title.toLowerCase().includes(s) ||
+        p.whatTheProblemWas?.toLowerCase().includes(s) ||
+        p.context?.toLowerCase().includes(s) ||
+        p.whatSolvedIt?.toLowerCase().includes(s)
+      );
+    }
+    return results;
+  }
+  async getProblemLog(id: string): Promise<ProblemLog | undefined> {
+    const { data, error } = await supabase.from("problem_logs").select("*").eq("id", id).maybeSingle();
+    if (error) fail(error, "getProblemLog");
+    return data ? fromProblemLogRow(data as ProblemLogRow) : undefined;
+  }
+  async createProblemLog(input: ProblemLogInput): Promise<ProblemLog> {
+    const row = { id: uuid(), created_at: now(), updated_at: now(), ...toProblemLogRow(input) };
+    const { data, error } = await supabase.from("problem_logs").insert(row).select().single();
+    if (error) fail(error, "createProblemLog");
+    return fromProblemLogRow(data as ProblemLogRow);
+  }
+  async updateProblemLog(id: string, input: Partial<ProblemLogInput>): Promise<ProblemLog> {
+    const { data, error } = await supabase.from("problem_logs")
+      .update({ ...toProblemLogRow(input), updated_at: now() }).eq("id", id).select().single();
+    if (error) fail(error, "updateProblemLog");
+    return fromProblemLogRow(data as ProblemLogRow);
+  }
+  async deleteProblemLog(id: string): Promise<void> {
+    const { error } = await supabase.from("problem_logs").delete().eq("id", id);
+    if (error) fail(error, "deleteProblemLog");
+  }
+
+  // ── Journal Habits ───────────────────────────────────────────
+  async listJournalHabits(): Promise<JournalHabit[]> {
+    const { data, error } = await supabase.from("journal_habits").select("*").order("order");
+    if (error) fail(error, "listJournalHabits");
+    return (data as JournalHabitRow[]).map(fromJournalHabitRow);
+  }
+  async createJournalHabit(input: JournalHabitInput): Promise<JournalHabit> {
+    const row = { id: uuid(), created_at: now(), name: input.name, order: input.order ?? 0, active: input.active ?? true };
+    const { data, error } = await supabase.from("journal_habits").insert(row).select().single();
+    if (error) fail(error, "createJournalHabit");
+    return fromJournalHabitRow(data as JournalHabitRow);
+  }
+  async updateJournalHabit(id: string, input: Partial<JournalHabitInput>): Promise<JournalHabit> {
+    const { data, error } = await supabase.from("journal_habits").update(input).eq("id", id).select().single();
+    if (error) fail(error, "updateJournalHabit");
+    return fromJournalHabitRow(data as JournalHabitRow);
+  }
+  async deleteJournalHabit(id: string): Promise<void> {
+    const { error } = await supabase.from("journal_habits").delete().eq("id", id);
+    if (error) fail(error, "deleteJournalHabit");
+  }
+  async reorderJournalHabits(orderedIds: string[]): Promise<void> {
+    const results = await Promise.all(
+      orderedIds.map((id, i) => supabase.from("journal_habits").update({ order: i }).eq("id", id))
+    );
+    const failed = results.find(r => r.error);
+    if (failed?.error) fail(failed.error, "reorderJournalHabits");
+  }
+
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [c, p, t, l, d, b, m] = await Promise.all([
+    const [c, p, t, l, d, b, m, je, pl, jh] = await Promise.all([
       supabase.from("clients").select("*"),
       supabase.from("projects").select("*"),
       supabase.from("tasks").select("*"),
@@ -443,53 +607,55 @@ export class SupabaseRepository implements DataRepository {
       supabase.from("deliverables").select("*"),
       supabase.from("books").select("*"),
       supabase.from("movies").select("*"),
+      supabase.from("journal_entries").select("*"),
+      supabase.from("problem_logs").select("*"),
+      supabase.from("journal_habits").select("*"),
     ]);
     return {
-      version: 1, exportedAt: now(),
-      clients:      ((c.data ?? []) as ClientRow[]).map(fromClientRow),
-      projects:     ((p.data ?? []) as ProjectRow[]).map(fromProjectRow),
-      tasks:        ((t.data ?? []) as TaskRow[]).map(fromTaskRow),
-      timeLogs:     ((l.data ?? []) as TimeLogRow[]).map(fromTimeLogRow),
-      deliverables: ((d.data ?? []) as DeliverableRow[]).map(fromDeliverableRow),
-      books:        ((b.data ?? []) as BookRow[]).map(fromBookRow),
-      movies:       ((m.data ?? []) as MovieRow[]).map(fromMovieRow),
+      version: 2, exportedAt: now(),
+      clients:       ((c.data ?? []) as ClientRow[]).map(fromClientRow),
+      projects:      ((p.data ?? []) as ProjectRow[]).map(fromProjectRow),
+      tasks:         ((t.data ?? []) as TaskRow[]).map(fromTaskRow),
+      timeLogs:      ((l.data ?? []) as TimeLogRow[]).map(fromTimeLogRow),
+      deliverables:  ((d.data ?? []) as DeliverableRow[]).map(fromDeliverableRow),
+      books:         ((b.data ?? []) as BookRow[]).map(fromBookRow),
+      movies:        ((m.data ?? []) as MovieRow[]).map(fromMovieRow),
+      journalEntries: ((je.data ?? []) as JournalEntryRow[]).map(fromJournalEntryRow),
+      problemLogs:   ((pl.data ?? []) as ProblemLogRow[]).map(fromProblemLogRow),
+      journalHabits: ((jh.data ?? []) as JournalHabitRow[]).map(fromJournalHabitRow),
     };
   }
 
   async importAll(snapshot: ExportSnapshot, merge = false): Promise<void> {
     if (!merge) await this.clearAll();
     await Promise.all([
-      supabase.from("clients").upsert(
-        snapshot.clients.map(e => ({ ...toClientRow(e), id: e.id, created_at: e.createdAt }))
-      ),
-      supabase.from("books").upsert(
-        snapshot.books.map(e => ({ ...toBookRow(e), id: e.id, created_at: e.createdAt }))
-      ),
-      supabase.from("movies").upsert(
-        snapshot.movies.map(e => ({ ...toMovieRow(e), id: e.id, created_at: e.createdAt }))
-      ),
+      supabase.from("clients").upsert(snapshot.clients.map(e => ({ ...toClientRow(e), id: e.id, created_at: e.createdAt }))),
+      supabase.from("books").upsert(snapshot.books.map(e => ({ ...toBookRow(e), id: e.id, created_at: e.createdAt }))),
+      supabase.from("movies").upsert(snapshot.movies.map(e => ({ ...toMovieRow(e), id: e.id, created_at: e.createdAt }))),
+      supabase.from("journal_entries").upsert((snapshot.journalEntries ?? []).map(e => ({
+        id: e.id, date: e.date, mood: e.mood ?? null, energy: e.energy ?? null,
+        free_write: e.freeWrite ?? null, wins: e.wins, ideas: e.ideas,
+        tomorrow_focus: e.tomorrowFocus ?? null, habits: e.habits,
+        updated_at: e.updatedAt, created_at: e.createdAt,
+      }))),
+      supabase.from("problem_logs").upsert((snapshot.problemLogs ?? []).map(e => ({
+        ...toProblemLogRow(e), id: e.id, created_at: e.createdAt, updated_at: e.updatedAt,
+      }))),
+      supabase.from("journal_habits").upsert((snapshot.journalHabits ?? []).map(e => ({
+        id: e.id, name: e.name, order: e.order, active: e.active, created_at: e.createdAt,
+      }))),
     ]);
-    // projects/tasks/timeLogs/deliverables depend on clients — insert after
     await Promise.all([
-      supabase.from("projects").upsert(
-        snapshot.projects.map(e => ({ ...toProjectRow(e), id: e.id, created_at: e.createdAt }))
-      ),
+      supabase.from("projects").upsert(snapshot.projects.map(e => ({ ...toProjectRow(e), id: e.id, created_at: e.createdAt }))),
     ]);
     await Promise.all([
-      supabase.from("tasks").upsert(
-        snapshot.tasks.map(e => ({ ...toTaskRow(e), id: e.id, order: e.order, created_at: e.createdAt }))
-      ),
-      supabase.from("time_logs").upsert(
-        snapshot.timeLogs.map(e => ({ ...toTimeLogRow(e), id: e.id, created_at: e.createdAt }))
-      ),
-      supabase.from("deliverables").upsert(
-        snapshot.deliverables.map(e => ({ ...toDeliverableRow(e), id: e.id, created_at: e.createdAt }))
-      ),
+      supabase.from("tasks").upsert(snapshot.tasks.map(e => ({ ...toTaskRow(e), id: e.id, order: e.order, created_at: e.createdAt }))),
+      supabase.from("time_logs").upsert(snapshot.timeLogs.map(e => ({ ...toTimeLogRow(e), id: e.id, created_at: e.createdAt }))),
+      supabase.from("deliverables").upsert(snapshot.deliverables.map(e => ({ ...toDeliverableRow(e), id: e.id, created_at: e.createdAt }))),
     ]);
   }
 
   async clearAll(): Promise<void> {
-    // respect FK order: tasks/time_logs/deliverables before projects before clients
     await supabase.from("tasks").delete().not("id", "is", null);
     await supabase.from("time_logs").delete().not("id", "is", null);
     await supabase.from("deliverables").delete().not("id", "is", null);
@@ -497,6 +663,9 @@ export class SupabaseRepository implements DataRepository {
     await supabase.from("clients").delete().not("id", "is", null);
     await supabase.from("books").delete().not("id", "is", null);
     await supabase.from("movies").delete().not("id", "is", null);
+    await supabase.from("journal_entries").delete().not("id", "is", null);
+    await supabase.from("problem_logs").delete().not("id", "is", null);
+    await supabase.from("journal_habits").delete().not("id", "is", null);
   }
 }
 

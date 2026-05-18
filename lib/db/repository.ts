@@ -10,6 +10,9 @@ import type {
   Deliverable, DeliverableInput,
   Book,      BookInput,
   Movie,     MovieInput,
+  JournalEntry,  JournalEntryInput,
+  ProblemLog,    ProblemLogInput,
+  JournalHabit,  JournalHabitInput,
   ExportSnapshot,
 } from "./schemas";
 
@@ -61,6 +64,26 @@ export interface DataRepository {
   createMovie(data: MovieInput): Promise<Movie>;
   updateMovie(id: string, data: Partial<MovieInput>): Promise<Movie>;
   deleteMovie(id: string): Promise<void>;
+
+  // ── Journal Entries ──────────────────────────────────────────
+  listJournalEntries(opts?: { since?: string; until?: string }): Promise<JournalEntry[]>;
+  getJournalEntry(date: string): Promise<JournalEntry | undefined>;
+  upsertJournalEntry(data: JournalEntryInput & { id?: string }): Promise<JournalEntry>;
+  deleteJournalEntry(id: string): Promise<void>;
+
+  // ── Problem Logs ─────────────────────────────────────────────
+  listProblemLogs(opts?: { entryDate?: string; tag?: string; search?: string }): Promise<ProblemLog[]>;
+  getProblemLog(id: string): Promise<ProblemLog | undefined>;
+  createProblemLog(data: ProblemLogInput): Promise<ProblemLog>;
+  updateProblemLog(id: string, data: Partial<ProblemLogInput>): Promise<ProblemLog>;
+  deleteProblemLog(id: string): Promise<void>;
+
+  // ── Journal Habits ───────────────────────────────────────────
+  listJournalHabits(): Promise<JournalHabit[]>;
+  createJournalHabit(data: JournalHabitInput): Promise<JournalHabit>;
+  updateJournalHabit(id: string, data: Partial<JournalHabitInput>): Promise<JournalHabit>;
+  deleteJournalHabit(id: string): Promise<void>;
+  reorderJournalHabits(orderedIds: string[]): Promise<void>;
 
   // ── Export / Import ──────────────────────────────────────────
   exportAll(): Promise<ExportSnapshot>;

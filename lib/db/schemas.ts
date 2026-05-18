@@ -120,16 +120,64 @@ export type DeliverableInput= Omit<Deliverable,"id" | "createdAt">;
 export type BookInput       = Omit<Book,       "id" | "createdAt">;
 export type MovieInput      = Omit<Movie,      "id" | "createdAt">;
 
+// ─── Journal Entry ────────────────────────────────────────────
+export const JournalEntrySchema = z.object({
+  id:            z.string().uuid(),
+  date:          z.string(), // "YYYY-MM-DD"
+  mood:          z.number().int().min(1).max(5).optional(),
+  energy:        z.number().int().min(1).max(5).optional(),
+  freeWrite:     z.string().optional(),
+  wins:          z.array(z.string()).default([]),
+  ideas:         z.array(z.string()).default([]),
+  tomorrowFocus: z.string().optional(),
+  habits:        z.record(z.string(), z.boolean()).default({}),
+  updatedAt:     z.string().datetime({ offset: true }),
+  createdAt:     z.string().datetime({ offset: true }),
+});
+export type JournalEntry = z.infer<typeof JournalEntrySchema>;
+export type JournalEntryInput = Omit<JournalEntry, "id" | "createdAt" | "updatedAt">;
+
+// ─── Problem Log ──────────────────────────────────────────────
+export const ProblemLogSchema = z.object({
+  id:                   z.string().uuid(),
+  entryDate:            z.string(), // "YYYY-MM-DD"
+  title:                z.string().min(1),
+  whatTheProblemWas:    z.string().optional(),
+  context:              z.string().optional(),
+  whatDidntWork:        z.string().optional(),
+  whatSolvedIt:         z.string().optional(),
+  whyItWorked:          z.string().optional(),
+  tags:                 z.array(z.string()).default([]),
+  createdAt:            z.string().datetime({ offset: true }),
+  updatedAt:            z.string().datetime({ offset: true }),
+});
+export type ProblemLog = z.infer<typeof ProblemLogSchema>;
+export type ProblemLogInput = Omit<ProblemLog, "id" | "createdAt" | "updatedAt">;
+
+// ─── Journal Habit ────────────────────────────────────────────
+export const JournalHabitSchema = z.object({
+  id:        z.string().uuid(),
+  name:      z.string().min(1),
+  order:     z.number().int().nonnegative().default(0),
+  active:    z.boolean().default(true),
+  createdAt: z.string().datetime({ offset: true }),
+});
+export type JournalHabit = z.infer<typeof JournalHabitSchema>;
+export type JournalHabitInput = Omit<JournalHabit, "id" | "createdAt">;
+
 // ─── Export snapshot (for export/import) ─────────────────────
 export const ExportSnapshotSchema = z.object({
-  version:      z.literal(1),
-  exportedAt:   z.string().datetime({ offset: true }),
-  clients:      z.array(ClientSchema),
-  projects:     z.array(ProjectSchema),
-  tasks:        z.array(TaskSchema),
-  timeLogs:     z.array(TimeLogSchema),
-  deliverables: z.array(DeliverableSchema),
-  books:        z.array(BookSchema),
-  movies:       z.array(MovieSchema),
+  version:       z.literal(2),
+  exportedAt:    z.string().datetime({ offset: true }),
+  clients:       z.array(ClientSchema),
+  projects:      z.array(ProjectSchema),
+  tasks:         z.array(TaskSchema),
+  timeLogs:      z.array(TimeLogSchema),
+  deliverables:  z.array(DeliverableSchema),
+  books:         z.array(BookSchema),
+  movies:        z.array(MovieSchema),
+  journalEntries: z.array(JournalEntrySchema).default([]),
+  problemLogs:   z.array(ProblemLogSchema).default([]),
+  journalHabits: z.array(JournalHabitSchema).default([]),
 });
 export type ExportSnapshot = z.infer<typeof ExportSnapshotSchema>;

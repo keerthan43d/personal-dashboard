@@ -1,22 +1,49 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Download, Upload, Trash2, Database, CloudOff,
-  Info, CheckCircle2, AlertTriangle,
+  Info, CheckCircle2, AlertTriangle, Plus, GripVertical,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button }   from "@/components/ui/button";
+import { Input }    from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Topbar }   from "@/components/layout/topbar";
 import { PageShell } from "@/components/shared/page-shell";
 import { repo }     from "@/lib/db";
 import { ExportSnapshotSchema } from "@/lib/db/schemas";
+import { useJournal } from "@/lib/hooks/use-journal";
+import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [importing, setImporting] = useState(false);
   const [clearing,  setClearing]  = useState(false);
+
+  // Habits management
+  const { habits, loadHabits, addHabit, editHabit, removeHabit, reorderHabits } = useJournal();
+  const [newHabitName, setNewHabitName] = useState("");
+
+  useEffect(() => { loadHabits(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleAddHabit() {
+    const name = newHabitName.trim();
+    if (!name) return;
+    await addHabit({ name, order: habits.length, active: true });
+    setNewHabitName("");
+    toast.success(`Habit "${name}" added`);
+  }
+
+  async function handleToggleHabit(id: string, active: boolean) {
+    await editHabit(id, { active: !active });
+  }
+
+  async function handleDeleteHabit(id: string, name: string) {
+    if (!confirm(`Remove habit "${name}"? It won't affect existing journal entries.`)) return;
+    await removeHabit(id);
+    toast.success("Habit removed");
+  }
 
   async function handleExport() {
     try {
@@ -81,6 +108,69 @@ export default function SettingsPage() {
 
       <PageShell>
         <div className="max-w-xl mx-auto space-y-6">
+
+          {/* ── Journal Habits ──────────────────────────────── */}
+          <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <h2 className="font-display font-semibold text-[#f5f5f5] mb-1">Journal Habits</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Habits you track daily in your journal. Toggle active/inactive without losing history.
+            </p>
+
+            <div className="border border-white/8 bg-[#0d0d0d] divide-y divide-white/5">
+              {habits.length === 0 && (
+                <p className="px-4 py-3 text-xs text-white/30 italic">No habits yet.</p>
+              )}
+              {habits.map((h) => (
+                <div key={h.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <GripVertical className="w-3.5 h-3.5 text-white/15 flex-shrink-0" />
+                  <span className={cn(
+                    "flex-1 text-sm",
+                    h.active ? "text-white/75" : "text-white/25 line-through"
+                  )}>
+                    {h.name}
+                  </span>
+                  <button
+                    onClick={() => handleToggleHabit(h.id, h.active)}
+                    className={cn(
+                      "text-[9px] font-black tracking-[0.1em] uppercase border px-2 py-1 transition-colors",
+                      h.active
+                        ? "border-[#FFD600]/30 text-[#FFD600]/60 hover:border-[#FFD600]/50"
+                        : "border-white/10 text-white/25 hover:border-white/20"
+                    )}
+                  >
+                    {h.active ? "Active" : "Off"}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteHabit(h.id, h.name)}
+                    className="text-white/20 hover:text-rose-400 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+
+              {/* Add habit row */}
+              <div className="flex items-center gap-2 px-4 py-2.5">
+                <Plus className="w-3.5 h-3.5 text-white/20 flex-shrink-0" />
+                <Input
+                  value={newHabitName}
+                  onChange={(e) => setNewHabitName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddHabit()}
+                  placeholder="Add habit name…"
+                  className="flex-1 bg-transparent border-0 border-b border-white/10 px-0 text-sm text-white/70 placeholder:text-white/20 focus-visible:ring-0 focus:border-[#FFD600]/30"
+                />
+                {newHabitName.trim() && (
+                  <Button
+                    size="sm"
+                    onClick={handleAddHabit}
+                    className="bg-[#FFD600] text-black hover:bg-[#FFD600]/90 font-black text-[9px] tracking-[0.08em] uppercase h-7 px-3"
+                  >
+                    Add
+                  </Button>
+                )}
+              </div>
+            </div>
+          </motion.section>
 
           {/* ── Data export / import ───────────────────────── */}
           <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>

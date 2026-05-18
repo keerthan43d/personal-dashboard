@@ -13,19 +13,25 @@ import type {
   Deliverable, DeliverableInput,
   Book,      BookInput,
   Movie,     MovieInput,
+  JournalEntry,  JournalEntryInput,
+  ProblemLog,    ProblemLogInput,
+  JournalHabit,  JournalHabitInput,
   ExportSnapshot,
 } from "./schemas";
 import type { DataRepository } from "./repository";
 
 // ─── Dexie schema ─────────────────────────────────────────────
 class CommandChamberDB extends Dexie {
-  clients!:      Table<Client>;
-  projects!:     Table<Project>;
-  tasks!:        Table<Task>;
-  timeLogs!:     Table<TimeLog>;
-  deliverables!: Table<Deliverable>;
-  books!:        Table<Book>;
-  movies!:       Table<Movie>;
+  clients!:       Table<Client>;
+  projects!:      Table<Project>;
+  tasks!:         Table<Task>;
+  timeLogs!:      Table<TimeLog>;
+  deliverables!:  Table<Deliverable>;
+  books!:         Table<Book>;
+  movies!:        Table<Movie>;
+  journalEntries!: Table<JournalEntry>;
+  problemLogs!:   Table<ProblemLog>;
+  journalHabits!: Table<JournalHabit>;
 
   constructor() {
     super("CommandChamberDB");
@@ -37,6 +43,18 @@ class CommandChamberDB extends Dexie {
       deliverables: "id, clientId, projectId, deliveredAt, createdAt",
       books:        "id, status, createdAt, finishedAt",
       movies:       "id, status, createdAt, watchedAt",
+    });
+    this.version(2).stores({
+      clients:       "id, status, createdAt",
+      projects:      "id, clientId, status, deadline, createdAt",
+      tasks:         "id, projectId, clientId, done, order, createdAt",
+      timeLogs:      "id, clientId, projectId, date, createdAt",
+      deliverables:  "id, clientId, projectId, deliveredAt, createdAt",
+      books:         "id, status, createdAt, finishedAt",
+      movies:        "id, status, createdAt, watchedAt",
+      journalEntries: "id, date, updatedAt",
+      problemLogs:   "id, entryDate, createdAt, *tags",
+      journalHabits: "id, order, active",
     });
   }
 }
@@ -265,9 +283,108 @@ export class LocalRepository implements DataRepository {
     await db.movies.delete(id);
   }
 
+  // ── Journal Entries ──────────────────────────────────────────
+  async listJournalEntries(opts?: { since?: string; until?: string }): Promise<JournalEntry[]> {
+    let all = await db.journalEntries.orderBy("date").toArray();
+    if (opts?.since) all = all.filter((e) => e.date >= opts.since!);
+    if (opts?.until) all = all.filter((e) => e.date <= opts.until!);
+    return all.reverse();
+  }
+
+  async getJournalEntry(date: string): Promise<JournalEntry | undefined> {
+    return db.journalEntries.where("date").equals(date).first();
+  }
+
+  async upsertJournalEntry(data: JournalEntryInput & { id?: string }): Promise<JournalEntry> {
+    const existing = await db.journalEntries.where("date").equals(data.date).first();
+    if (existing) {
+      const updated: JournalEntry = { ...existing, ...data, updatedAt: now() };
+      await db.journalEntries.put(updated);
+      return updated;
+    }
+    const entry: JournalEntry = { ...data, id: data.id ?? uuid(), createdAt: now(), updatedAt: now() };
+    await db.journalEntries.add(entry);
+    return entry;
+  }
+
+  async deleteJournalEntry(id: string): Promise<void> {
+    await db.journalEntries.delete(id);
+  }
+
+  // ── Problem Logs ─────────────────────────────────────────────
+  async listProblemLogs(opts?: { entryDate?: string; tag?: string; search?: string }): Promise<ProblemLog[]> {
+    let all: ProblemLog[];
+    if (opts?.tag) {
+      all = await db.problemLogs.where("tags").equals(opts.tag).toArray();
+    } else if (opts?.entryDate) {
+      all = await db.problemLogs.where("entryDate").equals(opts.entryDate).toArray();
+    } else {
+      all = await db.problemLogs.orderBy("createdAt").reverse().toArray();
+    }
+    if (opts?.search) {
+      const q = opts.search.toLowerCase();
+      all = all.filter((p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.whatTheProblemWas?.toLowerCase().includes(q) ||
+        p.context?.toLowerCase().includes(q) ||
+        p.whatSolvedIt?.toLowerCase().includes(q) ||
+        p.whyItWorked?.toLowerCase().includes(q)
+      );
+    }
+    return all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async getProblemLog(id: string): Promise<ProblemLog | undefined> {
+    return db.problemLogs.get(id);
+  }
+
+  async createProblemLog(data: ProblemLogInput): Promise<ProblemLog> {
+    const problem: ProblemLog = { ...data, id: uuid(), createdAt: now(), updatedAt: now() };
+    await db.problemLogs.add(problem);
+    return problem;
+  }
+
+  async updateProblemLog(id: string, data: Partial<ProblemLogInput>): Promise<ProblemLog> {
+    await db.problemLogs.update(id, { ...data, updatedAt: now() });
+    return (await db.problemLogs.get(id))!;
+  }
+
+  async deleteProblemLog(id: string): Promise<void> {
+    await db.problemLogs.delete(id);
+  }
+
+  // ── Journal Habits ───────────────────────────────────────────
+  async listJournalHabits(): Promise<JournalHabit[]> {
+    return db.journalHabits.orderBy("order").toArray();
+  }
+
+  async createJournalHabit(data: JournalHabitInput): Promise<JournalHabit> {
+    const count = await db.journalHabits.count();
+    const habit: JournalHabit = { ...data, order: data.order ?? count, id: uuid(), createdAt: now() };
+    await db.journalHabits.add(habit);
+    return habit;
+  }
+
+  async updateJournalHabit(id: string, data: Partial<JournalHabitInput>): Promise<JournalHabit> {
+    await db.journalHabits.update(id, data);
+    return (await db.journalHabits.get(id))!;
+  }
+
+  async deleteJournalHabit(id: string): Promise<void> {
+    await db.journalHabits.delete(id);
+  }
+
+  async reorderJournalHabits(orderedIds: string[]): Promise<void> {
+    await db.transaction("rw", db.journalHabits, async () => {
+      for (let i = 0; i < orderedIds.length; i++) {
+        await db.journalHabits.update(orderedIds[i], { order: i });
+      }
+    });
+  }
+
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [clients, projects, tasks, timeLogs, deliverables, books, movies] =
+    const [clients, projects, tasks, timeLogs, deliverables, books, movies, journalEntries, problemLogs, journalHabits] =
       await Promise.all([
         db.clients.toArray(),
         db.projects.toArray(),
@@ -276,12 +393,18 @@ export class LocalRepository implements DataRepository {
         db.deliverables.toArray(),
         db.books.toArray(),
         db.movies.toArray(),
+        db.journalEntries.toArray(),
+        db.problemLogs.toArray(),
+        db.journalHabits.toArray(),
       ]);
-    return { version: 1, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies };
+    return { version: 2, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies, journalEntries, problemLogs, journalHabits };
   }
 
   async importAll(snapshot: ExportSnapshot, merge = false): Promise<void> {
-    await db.transaction("rw", [db.clients, db.projects, db.tasks, db.timeLogs, db.deliverables, db.books, db.movies], async () => {
+    await db.transaction("rw", [
+      db.clients, db.projects, db.tasks, db.timeLogs, db.deliverables,
+      db.books, db.movies, db.journalEntries, db.problemLogs, db.journalHabits,
+    ], async () => {
       if (!merge) await this.clearAll();
       await db.clients.bulkPut(snapshot.clients);
       await db.projects.bulkPut(snapshot.projects);
@@ -290,6 +413,9 @@ export class LocalRepository implements DataRepository {
       await db.deliverables.bulkPut(snapshot.deliverables);
       await db.books.bulkPut(snapshot.books);
       await db.movies.bulkPut(snapshot.movies);
+      if (snapshot.journalEntries) await db.journalEntries.bulkPut(snapshot.journalEntries);
+      if (snapshot.problemLogs)    await db.problemLogs.bulkPut(snapshot.problemLogs);
+      if (snapshot.journalHabits)  await db.journalHabits.bulkPut(snapshot.journalHabits);
     });
   }
 
@@ -297,6 +423,7 @@ export class LocalRepository implements DataRepository {
     await Promise.all([
       db.clients.clear(), db.projects.clear(), db.tasks.clear(),
       db.timeLogs.clear(), db.deliverables.clear(), db.books.clear(), db.movies.clear(),
+      db.journalEntries.clear(), db.problemLogs.clear(), db.journalHabits.clear(),
     ]);
   }
 }
