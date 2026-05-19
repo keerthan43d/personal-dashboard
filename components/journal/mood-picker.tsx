@@ -27,7 +27,7 @@ export function MoodPicker({ value, onChange }: Props) {
                 "w-11 h-11 border-2 transition-all duration-200",
                 isSelected
                   ? "border-white/40 scale-110"
-                  : "border-transparent opacity-35 hover:opacity-70 hover:scale-105"
+                  : "border-transparent opacity-60 hover:opacity-90 hover:scale-105"
               )}
               style={{
                 backgroundColor: color,
@@ -39,7 +39,7 @@ export function MoodPicker({ value, onChange }: Props) {
             <span
               className={cn(
                 "text-[8px] font-black tracking-[0.14em] uppercase transition-all duration-150",
-                isSelected ? "text-white" : "text-white/25 group-hover:text-white/50"
+                isSelected ? "text-white" : "text-white/65 group-hover:text-white/90"
               )}
               style={isSelected ? { color: color } : undefined}
             >

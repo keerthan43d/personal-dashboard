@@ -27,7 +27,7 @@ export function TomorrowFocus({ value, onChange }: Props) {
         placeholder="What's the one thing you want to focus on tomorrow?"
         className={cn(
           "w-full min-h-[80px] resize-none bg-transparent px-4 py-3",
-          "text-sm text-white/85 placeholder:text-white/22",
+          "text-sm text-white/90 placeholder:text-white/45",
           "outline-none border-none focus:outline-none",
           "leading-relaxed"
         )}

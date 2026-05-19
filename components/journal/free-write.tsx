@@ -30,22 +30,22 @@ export function FreeWrite({ value, onChange, placeholder = "Write anything. This
         <div className="flex items-center gap-3">
           {charCount > 0 ? (
             <>
-              <span className="text-[8px] font-black tracking-[0.1em] uppercase text-white/30">
+              <span className="text-[8px] font-black tracking-[0.1em] uppercase text-white/70">
                 {wordCount}w
               </span>
-              <span className="text-[8px] font-black tracking-[0.1em] uppercase text-white/20">
+              <span className="text-[8px] font-black tracking-[0.1em] uppercase text-white/55">
                 {charCount}c
               </span>
             </>
           ) : (
-            <span className="text-[8px] font-black tracking-[0.1em] uppercase text-white/20">
+            <span className="text-[8px] font-black tracking-[0.1em] uppercase text-white/55">
               Empty
             </span>
           )}
         </div>
         <button
           onClick={() => setPreview((p) => !p)}
-          className="flex items-center gap-1.5 text-[8px] font-black tracking-[0.12em] uppercase text-white/30 hover:text-white/60 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-[8px] font-black tracking-[0.12em] uppercase text-white/70 hover:text-white/60 transition-colors cursor-pointer"
         >
           {preview ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
           {preview ? "Edit" : "Preview"}
@@ -54,7 +54,7 @@ export function FreeWrite({ value, onChange, placeholder = "Write anything. This
 
       {preview ? (
         <div className="min-h-[200px] text-sm text-white/75 leading-relaxed p-4 whitespace-pre-wrap">
-          {value || <span className="text-white/20 italic">Nothing written yet.</span>}
+          {value || <span className="text-white/55 italic">Nothing written yet.</span>}
         </div>
       ) : (
         <textarea
@@ -65,7 +65,7 @@ export function FreeWrite({ value, onChange, placeholder = "Write anything. This
           placeholder={placeholder}
           className={cn(
             "w-full min-h-[200px] resize-none bg-transparent px-4 py-4",
-            "text-sm text-white/85 placeholder:text-white/20",
+            "text-sm text-white/85 placeholder:text-white/55",
             "outline-none border-none focus:outline-none",
             "leading-relaxed"
           )}

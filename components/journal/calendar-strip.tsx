@@ -39,7 +39,7 @@ export function CalendarStrip({ entries, activeDate, currentMonth }: Props) {
       {/* Header */}
       <div className="flex items-center gap-2">
         <div className="w-0.5 h-4 bg-[#FFD600]" />
-        <p className="text-[10px] font-black tracking-[0.14em] uppercase text-white/70">
+        <p className="text-[10px] font-black tracking-[0.14em] uppercase text-white">
           {format(month, "MMMM yyyy")}
         </p>
       </div>
@@ -54,7 +54,7 @@ export function CalendarStrip({ entries, activeDate, currentMonth }: Props) {
                   className="w-2 h-2"
                   style={{ backgroundColor: MOOD_COLORS[n] }}
                 />
-                <span className="text-[8px] font-black tracking-[0.08em] uppercase text-white/40">
+                <span className="text-[8px] font-black tracking-[0.08em] uppercase text-white/70">
                   {moodCount[n]}
                 </span>
               </div>
@@ -66,7 +66,7 @@ export function CalendarStrip({ entries, activeDate, currentMonth }: Props) {
       {/* Calendar grid */}
       <div className="grid grid-cols-7 gap-0.5">
         {DAY_LABELS.map((d) => (
-          <div key={d} className="text-center text-[7px] font-black tracking-[0.08em] uppercase text-white/25 py-1">
+          <div key={d} className="text-center text-[7px] font-black tracking-[0.08em] uppercase text-white/60 py-1">
             {d}
           </div>
         ))}
@@ -92,8 +92,8 @@ export function CalendarStrip({ entries, activeDate, currentMonth }: Props) {
                 isActive
                   ? "text-white border border-[#FFD600]/70 bg-[#FFD600]/8"
                   : entry
-                  ? "text-white/70 hover:text-white/90 hover:bg-white/[0.04]"
-                  : "text-white/25 hover:text-white/45 hover:bg-white/[0.03]",
+                  ? "text-white hover:text-white/90 hover:bg-white/[0.04]"
+                  : "text-white/60 hover:text-white/45 hover:bg-white/[0.03]",
                 !isActive && todayDay && "border border-white/20"
               )}
               style={

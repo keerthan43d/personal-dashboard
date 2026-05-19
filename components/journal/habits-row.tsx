@@ -13,7 +13,7 @@ export function HabitsRow({ habits, checked, onChange }: Props) {
 
   if (active.length === 0) {
     return (
-      <p className="text-xs text-white/30 italic">
+      <p className="text-xs text-white/70 italic">
         No habits configured. Add some in Settings → Habits.
       </p>
     );
@@ -36,7 +36,7 @@ export function HabitsRow({ habits, checked, onChange }: Props) {
               style={{ width: `${(doneCount / totalCount) * 100}%` }}
             />
           </div>
-          <span className="text-[9px] font-black tracking-[0.12em] uppercase text-white/40">
+          <span className="text-[9px] font-black tracking-[0.12em] uppercase text-white/75">
             {doneCount}/{totalCount}
           </span>
         </div>
@@ -53,7 +53,7 @@ export function HabitsRow({ habits, checked, onChange }: Props) {
                 "relative px-3 py-1.5 text-[10px] font-black tracking-[0.1em] uppercase border transition-all duration-150 cursor-pointer overflow-hidden",
                 isDone
                   ? "border-[#FFD600]/60 text-[#FFD600] bg-[#FFD600]/8"
-                  : "border-white/10 text-white/40 hover:border-white/22 hover:text-white/60 hover:bg-white/[0.02]"
+                  : "border-white/10 text-white/75 hover:border-white/22 hover:text-white/60 hover:bg-white/[0.02]"
               )}
               style={
                 isDone

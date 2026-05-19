@@ -34,7 +34,7 @@ export function EnergyPicker({ value, onChange }: Props) {
                 "w-10 h-2.5 cursor-pointer transition-all duration-200 hover:h-3.5"
               )}
               style={{
-                backgroundColor: isFilled ? style.bg : "rgba(255,255,255,0.08)",
+                backgroundColor: isFilled ? style.bg : "rgba(255,255,255,0.18)",
                 boxShadow: isActive ? `0 0 12px ${style.glow}` : "none",
               }}
             />
@@ -44,7 +44,7 @@ export function EnergyPicker({ value, onChange }: Props) {
 
       <span
         className="text-[10px] font-black tracking-[0.14em] uppercase transition-colors duration-200"
-        style={{ color: activeStyle ? activeStyle.text : "rgba(255,255,255,0.25)" }}
+        style={{ color: activeStyle ? activeStyle.text : "rgba(255,255,255,0.70)" }}
       >
         {value ? ENERGY_LABELS[value] : "TAP TO SET"}
       </span>

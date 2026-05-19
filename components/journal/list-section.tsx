@@ -46,7 +46,7 @@ export function ListSection({ items, onChange, placeholder = "Add item…" }: Pr
           <span className="text-sm text-white/80 flex-1 leading-relaxed">{item}</span>
           <button
             onClick={() => remove(i)}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/30 hover:text-rose-400 cursor-pointer"
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/70 hover:text-rose-400 cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -66,7 +66,7 @@ export function ListSection({ items, onChange, placeholder = "Add item…" }: Pr
             }}
             onBlur={commit}
             placeholder={placeholder}
-            className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/25 outline-none"
+            className="flex-1 bg-transparent text-sm text-white/80 placeholder:text-white/60 outline-none"
           />
         </div>
       ) : (
@@ -74,7 +74,7 @@ export function ListSection({ items, onChange, placeholder = "Add item…" }: Pr
           onClick={startAdd}
           className={cn(
             "flex items-center gap-2 text-[10px] font-black tracking-[0.12em] uppercase mt-2",
-            "text-white/30 hover:text-[#FFD600] transition-colors cursor-pointer"
+            "text-white/70 hover:text-[#FFD600] transition-colors cursor-pointer"
           )}
         >
           <Plus className="w-3.5 h-3.5" />

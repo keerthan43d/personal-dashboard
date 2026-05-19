@@ -40,7 +40,7 @@ function SectionCard({
           className="w-0.5 self-stretch"
           style={{ backgroundColor: accent ?? "#FFD600" }}
         />
-        <span className="px-4 py-2.5 text-[10px] font-black tracking-[0.16em] uppercase text-white/60">
+        <span className="px-4 py-2.5 text-[10px] font-black tracking-[0.16em] uppercase text-white">
           {label}
         </span>
       </div>
@@ -146,14 +146,14 @@ export default function JournalPage() {
             <div className="border border-white/8 bg-white/[0.018]">
               <Link
                 href="/journal/problems"
-                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white/40 hover:text-white/75 hover:bg-white/[0.03] transition-all border-b border-white/8 group"
+                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white/75 hover:text-white hover:bg-white/[0.05] transition-all border-b border-white/8 group"
               >
                 <AlertTriangle className="w-3.5 h-3.5 group-hover:text-[#FFD600] transition-colors" />
                 Problem Log
               </Link>
               <Link
                 href="/journal/insights"
-                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white/40 hover:text-white/75 hover:bg-white/[0.03] transition-all group"
+                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white/75 hover:text-white hover:bg-white/[0.05] transition-all group"
               >
                 <BarChart2 className="w-3.5 h-3.5 group-hover:text-[#FFD600] transition-colors" />
                 Insights

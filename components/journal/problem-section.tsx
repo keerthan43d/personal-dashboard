@@ -35,7 +35,7 @@ export function ProblemSection({ entryDate, problems }: Props) {
   return (
     <div className="space-y-2">
       {problems.length === 0 && (
-        <p className="text-xs text-white/20 italic">No problems logged today.</p>
+        <p className="text-xs text-white/60 italic">No problems logged today.</p>
       )}
 
       {problems.map((p) => (
