@@ -173,6 +173,7 @@ export default function ProblemsPage() {
         </div>
 
         <ProblemDialog
+          key={editing?.id ?? "new"}
           open={dialogOpen}
           onClose={() => { setDialogOpen(false); setEditing(undefined); }}
           entryDate={editing?.entryDate ?? todayStr}
