@@ -145,15 +145,15 @@ export default function ProblemsPage() {
                 <Pencil className="w-3.5 h-3.5" />
               </button>
 
-              <p className="text-sm font-semibold text-white/85 pr-5 leading-snug">{p.title}</p>
+              <p className="text-sm font-semibold text-white pr-5 leading-snug">{p.title}</p>
 
-              <p className="text-[10px] font-black tracking-[0.08em] uppercase text-white/25 mt-1">
+              <p className="text-[10px] font-black tracking-[0.08em] uppercase text-white/60 mt-1">
                 {dateFmt(parseISO(p.entryDate), "d MMM yyyy")}
                 {p.context && <> · {p.context}</>}
               </p>
 
               {p.whatSolvedIt && (
-                <p className="text-xs text-white/45 mt-2 line-clamp-2">→ {p.whatSolvedIt}</p>
+                <p className="text-xs text-white/75 mt-2 line-clamp-2">→ {p.whatSolvedIt}</p>
               )}
 
               {p.tags.length > 0 && (
@@ -161,7 +161,7 @@ export default function ProblemsPage() {
                   {p.tags.map((t) => (
                     <span
                       key={t}
-                      className="px-1.5 py-0.5 text-[9px] font-black tracking-[0.08em] uppercase border border-white/10 text-white/30"
+                      className="px-1.5 py-0.5 text-[9px] font-black tracking-[0.08em] uppercase border border-white/20 text-white/60"
                     >
                       {t}
                     </span>

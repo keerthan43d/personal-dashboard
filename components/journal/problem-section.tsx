@@ -44,16 +44,16 @@ export function ProblemSection({ entryDate, problems }: Props) {
           className="group flex items-start gap-3 border border-white/8 bg-white/[0.02] px-3 py-2.5 hover:border-white/15 transition-colors"
         >
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white/80 truncate">{p.title}</p>
+            <p className="text-sm font-semibold text-white truncate">{p.title}</p>
             {p.whatSolvedIt && (
-              <p className="text-xs text-white/40 mt-0.5 truncate">→ {p.whatSolvedIt}</p>
+              <p className="text-xs text-white/70 mt-0.5 truncate">→ {p.whatSolvedIt}</p>
             )}
             {p.tags.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {p.tags.map((t) => (
                   <span
                     key={t}
-                    className="px-1.5 py-0.5 text-[9px] font-black tracking-[0.08em] uppercase border border-white/10 text-white/35"
+                    className="px-1.5 py-0.5 text-[9px] font-black tracking-[0.08em] uppercase border border-white/20 text-white/60"
                   >
                     {t}
                   </span>

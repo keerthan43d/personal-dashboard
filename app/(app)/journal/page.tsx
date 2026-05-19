@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format, addDays, subDays, parseISO } from "date-fns";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Download, BarChart2, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, BarChart2, AlertTriangle, Lightbulb } from "lucide-react";
 import Link from "next/link";
 
 import { Topbar }         from "@/components/layout/topbar";
@@ -146,14 +146,21 @@ export default function JournalPage() {
             <div className="border border-white/8 bg-white/[0.018]">
               <Link
                 href="/journal/problems"
-                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white/75 hover:text-white hover:bg-white/[0.05] transition-all border-b border-white/8 group"
+                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white hover:text-white hover:bg-white/[0.05] transition-all border-b border-white/8 group"
               >
                 <AlertTriangle className="w-3.5 h-3.5 group-hover:text-[#FFD600] transition-colors" />
                 Problem Log
               </Link>
               <Link
+                href="/journal/ideas"
+                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white hover:text-white hover:bg-white/[0.05] transition-all border-b border-white/8 group"
+              >
+                <Lightbulb className="w-3.5 h-3.5 group-hover:text-[#00C9A7] transition-colors" />
+                Ideas
+              </Link>
+              <Link
                 href="/journal/insights"
-                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white/75 hover:text-white hover:bg-white/[0.05] transition-all group"
+                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white hover:text-white hover:bg-white/[0.05] transition-all group"
               >
                 <BarChart2 className="w-3.5 h-3.5 group-hover:text-[#FFD600] transition-colors" />
                 Insights
@@ -192,7 +199,7 @@ export default function JournalPage() {
 
               <div className="flex items-center gap-3">
                 {saveStatus === "saving" && (
-                  <span className="text-[9px] font-black tracking-[0.12em] uppercase text-white/30">
+                  <span className="text-[9px] font-black tracking-[0.12em] uppercase text-white/60">
                     Saving…
                   </span>
                 )}

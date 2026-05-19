@@ -89,7 +89,7 @@ export function ProblemDialog({ open, onClose, entryDate, existing, onSave, onDe
         <div className="space-y-4 mt-2">
           {/* Title */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black tracking-[0.1em] uppercase text-white/40">
+            <label className="text-[10px] font-black tracking-[0.1em] uppercase text-white/70">
               Title <span className="text-rose-400">*</span>
             </label>
             <Input
@@ -103,7 +103,7 @@ export function ProblemDialog({ open, onClose, entryDate, existing, onSave, onDe
           {/* Other fields */}
           {FIELDS.map(({ key, label, rows = 3, placeholder }) => (
             <div key={key} className="space-y-1.5">
-              <label className="text-[10px] font-black tracking-[0.1em] uppercase text-white/40">
+              <label className="text-[10px] font-black tracking-[0.1em] uppercase text-white/70">
                 {label}
               </label>
               <Textarea
@@ -118,12 +118,12 @@ export function ProblemDialog({ open, onClose, entryDate, existing, onSave, onDe
 
           {/* Tags */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black tracking-[0.1em] uppercase text-white/40">Tags</label>
+            <label className="text-[10px] font-black tracking-[0.1em] uppercase text-white/70">Tags</label>
             <div className="flex flex-wrap gap-1.5 mb-2">
               {(form.tags ?? []).map((t) => (
                 <span
                   key={t}
-                  className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-black tracking-[0.08em] uppercase border border-white/15 text-white/50"
+                  className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-black tracking-[0.08em] uppercase border border-white/20 text-white/75"
                 >
                   {t}
                   <button onClick={() => removeTag(t)} className="hover:text-rose-400 transition-colors">
@@ -161,7 +161,7 @@ export function ProblemDialog({ open, onClose, entryDate, existing, onSave, onDe
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-white/40 hover:text-white/60 text-[10px] font-black tracking-[0.08em] uppercase"
+              className="text-white/70 hover:text-white/60 text-[10px] font-black tracking-[0.08em] uppercase"
             >
               Cancel
             </Button>
