@@ -82,6 +82,7 @@ export function ProblemSection({ entryDate, problems }: Props) {
       </button>
 
       <ProblemDialog
+        key={editing?.id ?? "new"}
         open={dialogOpen}
         onClose={() => { setDialogOpen(false); setEditing(undefined); }}
         entryDate={entryDate}
