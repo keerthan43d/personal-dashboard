@@ -14,6 +14,11 @@ import type {
   JournalEntry,  JournalEntryInput,
   ProblemLog,    ProblemLogInput,
   JournalHabit,  JournalHabitInput,
+  OneProject,    OneProjectInput,
+  DeepWorkLog,   DeepWorkLogInput,
+  UrgeLog,       UrgeLogInput,
+  WeeklyScorecard, WeeklyScorecardInput,
+  ShipLog,       ShipLogInput,
   ExportSnapshot,
 } from "./schemas";
 
@@ -92,6 +97,35 @@ export interface DataRepository {
   updateJournalHabit(id: string, data: Partial<JournalHabitInput>): Promise<JournalHabit>;
   deleteJournalHabit(id: string): Promise<void>;
   reorderJournalHabits(orderedIds: string[]): Promise<void>;
+
+  // ── ONE Project ──────────────────────────────────────────────
+  getActiveOneProject(): Promise<OneProject | undefined>;
+  listOneProjects(): Promise<OneProject[]>;
+  createOneProject(data: OneProjectInput): Promise<OneProject>;
+  updateOneProject(id: string, data: Partial<OneProjectInput>): Promise<OneProject>;
+  deleteOneProject(id: string): Promise<void>;
+
+  // ── Deep Work Logs ──────────────────────────────────────────
+  listDeepWorkLogs(opts?: { entryDate?: string }): Promise<DeepWorkLog[]>;
+  createDeepWorkLog(data: DeepWorkLogInput): Promise<DeepWorkLog>;
+  updateDeepWorkLog(id: string, data: Partial<DeepWorkLogInput>): Promise<DeepWorkLog>;
+  deleteDeepWorkLog(id: string): Promise<void>;
+
+  // ── Urge Logs ───────────────────────────────────────────────
+  listUrgeLogs(opts?: { entryDate?: string }): Promise<UrgeLog[]>;
+  createUrgeLog(data: UrgeLogInput): Promise<UrgeLog>;
+  deleteUrgeLog(id: string): Promise<void>;
+
+  // ── Weekly Scorecards ───────────────────────────────────────
+  getWeeklyScorecard(weekStart: string): Promise<WeeklyScorecard | undefined>;
+  listWeeklyScorecards(): Promise<WeeklyScorecard[]>;
+  upsertWeeklyScorecard(data: WeeklyScorecardInput & { id?: string }): Promise<WeeklyScorecard>;
+
+  // ── Ship Logs ───────────────────────────────────────────────
+  listShipLogs(opts?: { entryDate?: string; type?: ShipLog["type"] }): Promise<ShipLog[]>;
+  createShipLog(data: ShipLogInput): Promise<ShipLog>;
+  updateShipLog(id: string, data: Partial<ShipLogInput>): Promise<ShipLog>;
+  deleteShipLog(id: string): Promise<void>;
 
   // ── Export / Import ──────────────────────────────────────────
   exportAll(): Promise<ExportSnapshot>;

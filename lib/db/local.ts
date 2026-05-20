@@ -17,6 +17,11 @@ import type {
   JournalEntry,  JournalEntryInput,
   ProblemLog,    ProblemLogInput,
   JournalHabit,  JournalHabitInput,
+  OneProject,    OneProjectInput,
+  DeepWorkLog,   DeepWorkLogInput,
+  UrgeLog,       UrgeLogInput,
+  WeeklyScorecard, WeeklyScorecardInput,
+  ShipLog,       ShipLogInput,
   ExportSnapshot,
 } from "./schemas";
 import type { DataRepository } from "./repository";
@@ -34,6 +39,11 @@ class CommandChamberDB extends Dexie {
   journalEntries!: Table<JournalEntry>;
   problemLogs!:   Table<ProblemLog>;
   journalHabits!: Table<JournalHabit>;
+  oneProjects!:      Table<OneProject>;
+  deepWorkLogs!:     Table<DeepWorkLog>;
+  urgeLogs!:         Table<UrgeLog>;
+  weeklyScorecards!: Table<WeeklyScorecard>;
+  shipLogs!:         Table<ShipLog>;
 
   constructor() {
     super("CommandChamberDB");
@@ -70,6 +80,24 @@ class CommandChamberDB extends Dexie {
       journalEntries: "id, date, updatedAt",
       problemLogs:   "id, entryDate, createdAt, *tags",
       journalHabits: "id, order, active",
+    });
+    this.version(4).stores({
+      clients:       "id, status, createdAt",
+      projects:      "id, clientId, status, deadline, createdAt",
+      tasks:         "id, projectId, clientId, done, order, createdAt",
+      timeLogs:      "id, clientId, projectId, date, createdAt",
+      deliverables:  "id, clientId, projectId, deliveredAt, createdAt",
+      books:         "id, status, createdAt, finishedAt",
+      movies:        "id, status, createdAt, watchedAt",
+      tvShows:       "id, status, createdAt, watchedAt",
+      journalEntries: "id, date, updatedAt",
+      problemLogs:   "id, entryDate, createdAt, *tags",
+      journalHabits: "id, order, active",
+      oneProjects:      "id, active, createdAt",
+      deepWorkLogs:     "id, entryDate, createdAt",
+      urgeLogs:         "id, entryDate, loggedAt",
+      weeklyScorecards: "id, weekStart",
+      shipLogs:         "id, entryDate, type, createdAt",
     });
   }
 }
@@ -422,9 +450,109 @@ export class LocalRepository implements DataRepository {
     });
   }
 
+  // ── ONE Project ──────────────────────────────────────────────
+  async getActiveOneProject(): Promise<OneProject | undefined> {
+    return db.oneProjects.where("active").equals(1).reverse().sortBy("createdAt").then(a => a[0]);
+  }
+  async listOneProjects(): Promise<OneProject[]> {
+    return db.oneProjects.orderBy("createdAt").reverse().toArray();
+  }
+  async createOneProject(data: OneProjectInput): Promise<OneProject> {
+    if (data.active) {
+      const active = await db.oneProjects.where("active").equals(1).toArray();
+      for (const p of active) await db.oneProjects.update(p.id, { active: false });
+    }
+    const project: OneProject = { ...data, id: uuid(), createdAt: now() };
+    await db.oneProjects.add(project);
+    return project;
+  }
+  async updateOneProject(id: string, data: Partial<OneProjectInput>): Promise<OneProject> {
+    if (data.active) {
+      const active = await db.oneProjects.where("active").equals(1).toArray();
+      for (const p of active) { if (p.id !== id) await db.oneProjects.update(p.id, { active: false }); }
+    }
+    await db.oneProjects.update(id, data);
+    return (await db.oneProjects.get(id))!;
+  }
+  async deleteOneProject(id: string): Promise<void> {
+    await db.oneProjects.delete(id);
+  }
+
+  // ── Deep Work Logs ──────────────────────────────────────────
+  async listDeepWorkLogs(opts?: { entryDate?: string }): Promise<DeepWorkLog[]> {
+    if (opts?.entryDate) return db.deepWorkLogs.where("entryDate").equals(opts.entryDate).reverse().sortBy("createdAt");
+    return db.deepWorkLogs.orderBy("createdAt").reverse().toArray();
+  }
+  async createDeepWorkLog(data: DeepWorkLogInput): Promise<DeepWorkLog> {
+    const log: DeepWorkLog = { ...data, id: uuid(), createdAt: now() };
+    await db.deepWorkLogs.add(log);
+    return log;
+  }
+  async updateDeepWorkLog(id: string, data: Partial<DeepWorkLogInput>): Promise<DeepWorkLog> {
+    await db.deepWorkLogs.update(id, data);
+    return (await db.deepWorkLogs.get(id))!;
+  }
+  async deleteDeepWorkLog(id: string): Promise<void> {
+    await db.deepWorkLogs.delete(id);
+  }
+
+  // ── Urge Logs ───────────────────────────────────────────────
+  async listUrgeLogs(opts?: { entryDate?: string }): Promise<UrgeLog[]> {
+    if (opts?.entryDate) return db.urgeLogs.where("entryDate").equals(opts.entryDate).reverse().sortBy("loggedAt");
+    return db.urgeLogs.orderBy("loggedAt").reverse().toArray();
+  }
+  async createUrgeLog(data: UrgeLogInput): Promise<UrgeLog> {
+    const log: UrgeLog = { ...data, id: uuid(), createdAt: now() };
+    await db.urgeLogs.add(log);
+    return log;
+  }
+  async deleteUrgeLog(id: string): Promise<void> {
+    await db.urgeLogs.delete(id);
+  }
+
+  // ── Weekly Scorecards ───────────────────────────────────────
+  async getWeeklyScorecard(weekStart: string): Promise<WeeklyScorecard | undefined> {
+    return db.weeklyScorecards.where("weekStart").equals(weekStart).first();
+  }
+  async listWeeklyScorecards(): Promise<WeeklyScorecard[]> {
+    return db.weeklyScorecards.orderBy("weekStart").reverse().toArray();
+  }
+  async upsertWeeklyScorecard(data: WeeklyScorecardInput & { id?: string }): Promise<WeeklyScorecard> {
+    const existing = await db.weeklyScorecards.where("weekStart").equals(data.weekStart).first();
+    if (existing) {
+      const updated: WeeklyScorecard = { ...existing, ...data, updatedAt: now() };
+      await db.weeklyScorecards.put(updated);
+      return updated;
+    }
+    const sc: WeeklyScorecard = { ...data, id: data.id ?? uuid(), createdAt: now(), updatedAt: now() };
+    await db.weeklyScorecards.add(sc);
+    return sc;
+  }
+
+  // ── Ship Logs ───────────────────────────────────────────────
+  async listShipLogs(opts?: { entryDate?: string; type?: ShipLog["type"] }): Promise<ShipLog[]> {
+    let all: ShipLog[];
+    if (opts?.entryDate) all = await db.shipLogs.where("entryDate").equals(opts.entryDate).toArray();
+    else all = await db.shipLogs.orderBy("createdAt").reverse().toArray();
+    if (opts?.type) all = all.filter(s => s.type === opts.type);
+    return all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+  async createShipLog(data: ShipLogInput): Promise<ShipLog> {
+    const log: ShipLog = { ...data, id: uuid(), createdAt: now() };
+    await db.shipLogs.add(log);
+    return log;
+  }
+  async updateShipLog(id: string, data: Partial<ShipLogInput>): Promise<ShipLog> {
+    await db.shipLogs.update(id, data);
+    return (await db.shipLogs.get(id))!;
+  }
+  async deleteShipLog(id: string): Promise<void> {
+    await db.shipLogs.delete(id);
+  }
+
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows, journalEntries, problemLogs, journalHabits] =
+    const [clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows, journalEntries, problemLogs, journalHabits, oneProjects, deepWorkLogs, urgeLogs, weeklyScorecards, shipLogs] =
       await Promise.all([
         db.clients.toArray(),
         db.projects.toArray(),
@@ -437,14 +565,20 @@ export class LocalRepository implements DataRepository {
         db.journalEntries.toArray(),
         db.problemLogs.toArray(),
         db.journalHabits.toArray(),
+        db.oneProjects.toArray(),
+        db.deepWorkLogs.toArray(),
+        db.urgeLogs.toArray(),
+        db.weeklyScorecards.toArray(),
+        db.shipLogs.toArray(),
       ]);
-    return { version: 3, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows, journalEntries, problemLogs, journalHabits };
+    return { version: 4 as const, exportedAt: now(), clients, projects, tasks, timeLogs, deliverables, books, movies, tvShows, journalEntries, problemLogs, journalHabits, oneProjects, deepWorkLogs, urgeLogs, weeklyScorecards, shipLogs };
   }
 
   async importAll(snapshot: ExportSnapshot, merge = false): Promise<void> {
     await db.transaction("rw", [
       db.clients, db.projects, db.tasks, db.timeLogs, db.deliverables,
       db.books, db.movies, db.tvShows, db.journalEntries, db.problemLogs, db.journalHabits,
+      db.oneProjects, db.deepWorkLogs, db.urgeLogs, db.weeklyScorecards, db.shipLogs,
     ], async () => {
       if (!merge) await this.clearAll();
       await db.clients.bulkPut(snapshot.clients);
@@ -454,10 +588,15 @@ export class LocalRepository implements DataRepository {
       await db.deliverables.bulkPut(snapshot.deliverables);
       await db.books.bulkPut(snapshot.books);
       await db.movies.bulkPut(snapshot.movies);
-      if (snapshot.tvShows)        await db.tvShows.bulkPut(snapshot.tvShows);
-      if (snapshot.journalEntries) await db.journalEntries.bulkPut(snapshot.journalEntries);
-      if (snapshot.problemLogs)    await db.problemLogs.bulkPut(snapshot.problemLogs);
-      if (snapshot.journalHabits)  await db.journalHabits.bulkPut(snapshot.journalHabits);
+      if (snapshot.tvShows)           await db.tvShows.bulkPut(snapshot.tvShows);
+      if (snapshot.journalEntries)    await db.journalEntries.bulkPut(snapshot.journalEntries);
+      if (snapshot.problemLogs)       await db.problemLogs.bulkPut(snapshot.problemLogs);
+      if (snapshot.journalHabits)     await db.journalHabits.bulkPut(snapshot.journalHabits);
+      if (snapshot.oneProjects)       await db.oneProjects.bulkPut(snapshot.oneProjects);
+      if (snapshot.deepWorkLogs)      await db.deepWorkLogs.bulkPut(snapshot.deepWorkLogs);
+      if (snapshot.urgeLogs)          await db.urgeLogs.bulkPut(snapshot.urgeLogs);
+      if (snapshot.weeklyScorecards)  await db.weeklyScorecards.bulkPut(snapshot.weeklyScorecards);
+      if (snapshot.shipLogs)          await db.shipLogs.bulkPut(snapshot.shipLogs);
     });
   }
 
@@ -467,6 +606,8 @@ export class LocalRepository implements DataRepository {
       db.timeLogs.clear(), db.deliverables.clear(), db.books.clear(),
       db.movies.clear(), db.tvShows.clear(),
       db.journalEntries.clear(), db.problemLogs.clear(), db.journalHabits.clear(),
+      db.oneProjects.clear(), db.deepWorkLogs.clear(), db.urgeLogs.clear(),
+      db.weeklyScorecards.clear(), db.shipLogs.clear(),
     ]);
   }
 }

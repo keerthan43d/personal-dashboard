@@ -13,6 +13,11 @@ import type {
   JournalEntry,  JournalEntryInput,
   ProblemLog,    ProblemLogInput,
   JournalHabit,  JournalHabitInput,
+  OneProject,    OneProjectInput,    Milestone,
+  DeepWorkLog,   DeepWorkLogInput,
+  UrgeLog,       UrgeLogInput,
+  WeeklyScorecard, WeeklyScorecardInput,
+  ShipLog,       ShipLogInput,
   ExportSnapshot,
 } from "./schemas";
 import type { DataRepository } from "./repository";
@@ -314,6 +319,113 @@ function toProblemLogRow(d: Partial<ProblemLogInput>): Partial<ProblemLogRow> {
   if (d.whatSolvedIt       !== undefined) r.what_solved_it         = d.whatSolvedIt       ?? null;
   if (d.whyItWorked        !== undefined) r.why_it_worked          = d.whyItWorked        ?? null;
   if (d.tags               !== undefined) r.tags                   = d.tags               ?? [];
+  return r;
+}
+
+// ─── Productivity row types ──────────────────────────────────
+type OneProjectRow = {
+  id: string; title: string; description: string | null;
+  milestones: Milestone[]; target_date: string | null;
+  started_at: string | null; active: boolean; created_at: string;
+};
+type DeepWorkLogRow = {
+  id: string; entry_date: string; start_time: string;
+  end_time: string | null; duration_minutes: number | null;
+  description: string | null; category: string; mode: string;
+  created_at: string;
+};
+type UrgeLogRow = {
+  id: string; entry_date: string; urge: string;
+  avoiding: string | null; logged_at: string; created_at: string;
+};
+type WeeklyScorecardRow = {
+  id: string; week_start: string;
+  deep_work_score: number | null; shipped_score: number | null;
+  one_project_score: number | null; notes: string | null;
+  created_at: string; updated_at: string;
+};
+type ShipLogRow = {
+  id: string; entry_date: string; title: string;
+  description: string | null; url: string | null;
+  type: string; created_at: string;
+};
+
+function fromOneProjectRow(r: OneProjectRow): OneProject {
+  return {
+    id: r.id, title: r.title, milestones: r.milestones ?? [],
+    active: r.active, createdAt: r.created_at,
+    ...(r.description != null && { description: r.description }),
+    ...(r.target_date != null && { targetDate:  r.target_date }),
+    ...(r.started_at  != null && { startedAt:   r.started_at }),
+  };
+}
+function toOneProjectRow(d: Partial<OneProjectInput>): Record<string, unknown> {
+  const r: Record<string, unknown> = {};
+  if (d.title       !== undefined) r.title       = d.title;
+  if (d.description !== undefined) r.description = d.description ?? null;
+  if (d.milestones  !== undefined) r.milestones  = d.milestones ?? [];
+  if (d.targetDate  !== undefined) r.target_date = d.targetDate  ?? null;
+  if (d.startedAt   !== undefined) r.started_at  = d.startedAt   ?? null;
+  if (d.active      !== undefined) r.active      = d.active;
+  return r;
+}
+
+function fromDeepWorkLogRow(r: DeepWorkLogRow): DeepWorkLog {
+  return {
+    id: r.id, entryDate: r.entry_date, startTime: r.start_time,
+    category: r.category as DeepWorkLog["category"],
+    mode: r.mode as DeepWorkLog["mode"], createdAt: r.created_at,
+    ...(r.end_time         != null && { endTime:         r.end_time }),
+    ...(r.duration_minutes != null && { durationMinutes: r.duration_minutes }),
+    ...(r.description      != null && { description:     r.description }),
+  };
+}
+function toDeepWorkLogRow(d: Partial<DeepWorkLogInput>): Record<string, unknown> {
+  const r: Record<string, unknown> = {};
+  if (d.entryDate       !== undefined) r.entry_date       = d.entryDate;
+  if (d.startTime       !== undefined) r.start_time       = d.startTime;
+  if (d.endTime         !== undefined) r.end_time         = d.endTime         ?? null;
+  if (d.durationMinutes !== undefined) r.duration_minutes = d.durationMinutes ?? null;
+  if (d.description     !== undefined) r.description      = d.description     ?? null;
+  if (d.category        !== undefined) r.category         = d.category;
+  if (d.mode            !== undefined) r.mode             = d.mode;
+  return r;
+}
+
+function fromUrgeLogRow(r: UrgeLogRow): UrgeLog {
+  return {
+    id: r.id, entryDate: r.entry_date, urge: r.urge,
+    loggedAt: r.logged_at, createdAt: r.created_at,
+    ...(r.avoiding != null && { avoiding: r.avoiding }),
+  };
+}
+
+function fromWeeklyScorecardRow(r: WeeklyScorecardRow): WeeklyScorecard {
+  return {
+    id: r.id, weekStart: r.week_start,
+    createdAt: r.created_at, updatedAt: r.updated_at,
+    ...(r.deep_work_score   != null && { deepWorkScore:   r.deep_work_score }),
+    ...(r.shipped_score     != null && { shippedScore:    r.shipped_score }),
+    ...(r.one_project_score != null && { oneProjectScore: r.one_project_score }),
+    ...(r.notes             != null && { notes:           r.notes }),
+  };
+}
+
+function fromShipLogRow(r: ShipLogRow): ShipLog {
+  return {
+    id: r.id, entryDate: r.entry_date, title: r.title,
+    type: r.type as ShipLog["type"], createdAt: r.created_at,
+    ...(r.description != null && { description: r.description }),
+    ...(r.url         != null && { url:         r.url }),
+  };
+}
+function toShipLogRow(d: Partial<ShipLogInput>): Record<string, unknown> {
+  const r: Record<string, unknown> = {};
+  if (d.entryDate    !== undefined) r.entry_date  = d.entryDate;
+  if (d.title        !== undefined) r.title       = d.title;
+  if (d.description  !== undefined) r.description = d.description ?? null;
+  if (d.url          !== undefined) r.url         = d.url         ?? null;
+  if (d.type         !== undefined) r.type        = d.type;
   return r;
 }
 
@@ -672,9 +784,133 @@ export class SupabaseRepository implements DataRepository {
     if (failed?.error) fail(failed.error, "reorderJournalHabits");
   }
 
+  // ── ONE Project ──────────────────────────────────────────────
+  async getActiveOneProject(): Promise<OneProject | undefined> {
+    const { data, error } = await supabase.from("one_project").select("*").eq("active", true).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (error) fail(error, "getActiveOneProject");
+    return data ? fromOneProjectRow(data as OneProjectRow) : undefined;
+  }
+  async listOneProjects(): Promise<OneProject[]> {
+    const { data, error } = await supabase.from("one_project").select("*").order("created_at", { ascending: false });
+    if (error) fail(error, "listOneProjects");
+    return (data as OneProjectRow[]).map(fromOneProjectRow);
+  }
+  async createOneProject(input: OneProjectInput): Promise<OneProject> {
+    // Deactivate others first
+    if (input.active) await supabase.from("one_project").update({ active: false }).eq("active", true);
+    const row = { id: uuid(), created_at: now(), ...toOneProjectRow(input) };
+    const { data, error } = await supabase.from("one_project").insert(row).select().single();
+    if (error) fail(error, "createOneProject");
+    return fromOneProjectRow(data as OneProjectRow);
+  }
+  async updateOneProject(id: string, input: Partial<OneProjectInput>): Promise<OneProject> {
+    if (input.active) await supabase.from("one_project").update({ active: false }).eq("active", true).neq("id", id);
+    const { data, error } = await supabase.from("one_project").update(toOneProjectRow(input)).eq("id", id).select().single();
+    if (error) fail(error, "updateOneProject");
+    return fromOneProjectRow(data as OneProjectRow);
+  }
+  async deleteOneProject(id: string): Promise<void> {
+    const { error } = await supabase.from("one_project").delete().eq("id", id);
+    if (error) fail(error, "deleteOneProject");
+  }
+
+  // ── Deep Work Logs ──────────────────────────────────────────
+  async listDeepWorkLogs(opts?: { entryDate?: string }): Promise<DeepWorkLog[]> {
+    let q = supabase.from("deep_work_logs").select("*").order("created_at", { ascending: false });
+    if (opts?.entryDate) q = q.eq("entry_date", opts.entryDate);
+    const { data, error } = await q;
+    if (error) fail(error, "listDeepWorkLogs");
+    return (data as DeepWorkLogRow[]).map(fromDeepWorkLogRow);
+  }
+  async createDeepWorkLog(input: DeepWorkLogInput): Promise<DeepWorkLog> {
+    const row = { id: uuid(), created_at: now(), ...toDeepWorkLogRow(input) };
+    const { data, error } = await supabase.from("deep_work_logs").insert(row).select().single();
+    if (error) fail(error, "createDeepWorkLog");
+    return fromDeepWorkLogRow(data as DeepWorkLogRow);
+  }
+  async updateDeepWorkLog(id: string, input: Partial<DeepWorkLogInput>): Promise<DeepWorkLog> {
+    const { data, error } = await supabase.from("deep_work_logs").update(toDeepWorkLogRow(input)).eq("id", id).select().single();
+    if (error) fail(error, "updateDeepWorkLog");
+    return fromDeepWorkLogRow(data as DeepWorkLogRow);
+  }
+  async deleteDeepWorkLog(id: string): Promise<void> {
+    const { error } = await supabase.from("deep_work_logs").delete().eq("id", id);
+    if (error) fail(error, "deleteDeepWorkLog");
+  }
+
+  // ── Urge Logs ───────────────────────────────────────────────
+  async listUrgeLogs(opts?: { entryDate?: string }): Promise<UrgeLog[]> {
+    let q = supabase.from("urge_logs").select("*").order("logged_at", { ascending: false });
+    if (opts?.entryDate) q = q.eq("entry_date", opts.entryDate);
+    const { data, error } = await q;
+    if (error) fail(error, "listUrgeLogs");
+    return (data as UrgeLogRow[]).map(fromUrgeLogRow);
+  }
+  async createUrgeLog(input: UrgeLogInput): Promise<UrgeLog> {
+    const row = { id: uuid(), created_at: now(), entry_date: input.entryDate, urge: input.urge, avoiding: input.avoiding ?? null, logged_at: input.loggedAt };
+    const { data, error } = await supabase.from("urge_logs").insert(row).select().single();
+    if (error) fail(error, "createUrgeLog");
+    return fromUrgeLogRow(data as UrgeLogRow);
+  }
+  async deleteUrgeLog(id: string): Promise<void> {
+    const { error } = await supabase.from("urge_logs").delete().eq("id", id);
+    if (error) fail(error, "deleteUrgeLog");
+  }
+
+  // ── Weekly Scorecards ───────────────────────────────────────
+  async getWeeklyScorecard(weekStart: string): Promise<WeeklyScorecard | undefined> {
+    const { data, error } = await supabase.from("weekly_scorecards").select("*").eq("week_start", weekStart).maybeSingle();
+    if (error) fail(error, "getWeeklyScorecard");
+    return data ? fromWeeklyScorecardRow(data as WeeklyScorecardRow) : undefined;
+  }
+  async listWeeklyScorecards(): Promise<WeeklyScorecard[]> {
+    const { data, error } = await supabase.from("weekly_scorecards").select("*").order("week_start", { ascending: false });
+    if (error) fail(error, "listWeeklyScorecards");
+    return (data as WeeklyScorecardRow[]).map(fromWeeklyScorecardRow);
+  }
+  async upsertWeeklyScorecard(input: WeeklyScorecardInput & { id?: string }): Promise<WeeklyScorecard> {
+    const row = {
+      id: input.id ?? uuid(),
+      week_start: input.weekStart,
+      deep_work_score: input.deepWorkScore ?? null,
+      shipped_score: input.shippedScore ?? null,
+      one_project_score: input.oneProjectScore ?? null,
+      notes: input.notes ?? null,
+      updated_at: now(),
+    };
+    const { data, error } = await supabase.from("weekly_scorecards").upsert(row, { onConflict: "week_start" }).select().single();
+    if (error) fail(error, "upsertWeeklyScorecard");
+    return fromWeeklyScorecardRow(data as WeeklyScorecardRow);
+  }
+
+  // ── Ship Logs ───────────────────────────────────────────────
+  async listShipLogs(opts?: { entryDate?: string; type?: ShipLog["type"] }): Promise<ShipLog[]> {
+    let q = supabase.from("ship_logs").select("*").order("created_at", { ascending: false });
+    if (opts?.entryDate) q = q.eq("entry_date", opts.entryDate);
+    if (opts?.type)      q = q.eq("type", opts.type);
+    const { data, error } = await q;
+    if (error) fail(error, "listShipLogs");
+    return (data as ShipLogRow[]).map(fromShipLogRow);
+  }
+  async createShipLog(input: ShipLogInput): Promise<ShipLog> {
+    const row = { id: uuid(), created_at: now(), ...toShipLogRow(input) };
+    const { data, error } = await supabase.from("ship_logs").insert(row).select().single();
+    if (error) fail(error, "createShipLog");
+    return fromShipLogRow(data as ShipLogRow);
+  }
+  async updateShipLog(id: string, input: Partial<ShipLogInput>): Promise<ShipLog> {
+    const { data, error } = await supabase.from("ship_logs").update(toShipLogRow(input)).eq("id", id).select().single();
+    if (error) fail(error, "updateShipLog");
+    return fromShipLogRow(data as ShipLogRow);
+  }
+  async deleteShipLog(id: string): Promise<void> {
+    const { error } = await supabase.from("ship_logs").delete().eq("id", id);
+    if (error) fail(error, "deleteShipLog");
+  }
+
   // ── Export / Import ──────────────────────────────────────────
   async exportAll(): Promise<ExportSnapshot> {
-    const [c, p, t, l, d, b, m, tv, je, pl, jh] = await Promise.all([
+    const [c, p, t, l, d, b, m, tv, je, pl, jh, op, dw, ul, ws, sl] = await Promise.all([
       supabase.from("clients").select("*"),
       supabase.from("projects").select("*"),
       supabase.from("tasks").select("*"),
@@ -686,9 +922,14 @@ export class SupabaseRepository implements DataRepository {
       supabase.from("journal_entries").select("*"),
       supabase.from("problem_logs").select("*"),
       supabase.from("journal_habits").select("*"),
+      supabase.from("one_project").select("*"),
+      supabase.from("deep_work_logs").select("*"),
+      supabase.from("urge_logs").select("*"),
+      supabase.from("weekly_scorecards").select("*"),
+      supabase.from("ship_logs").select("*"),
     ]);
     return {
-      version: 3, exportedAt: now(),
+      version: 4 as const, exportedAt: now(),
       clients:       ((c.data ?? []) as ClientRow[]).map(fromClientRow),
       projects:      ((p.data ?? []) as ProjectRow[]).map(fromProjectRow),
       tasks:         ((t.data ?? []) as TaskRow[]).map(fromTaskRow),
@@ -700,6 +941,11 @@ export class SupabaseRepository implements DataRepository {
       journalEntries: ((je.data ?? []) as JournalEntryRow[]).map(fromJournalEntryRow),
       problemLogs:   ((pl.data ?? []) as ProblemLogRow[]).map(fromProblemLogRow),
       journalHabits: ((jh.data ?? []) as JournalHabitRow[]).map(fromJournalHabitRow),
+      oneProjects:      ((op.data ?? []) as OneProjectRow[]).map(fromOneProjectRow),
+      deepWorkLogs:     ((dw.data ?? []) as DeepWorkLogRow[]).map(fromDeepWorkLogRow),
+      urgeLogs:         ((ul.data ?? []) as UrgeLogRow[]).map(fromUrgeLogRow),
+      weeklyScorecards: ((ws.data ?? []) as WeeklyScorecardRow[]).map(fromWeeklyScorecardRow),
+      shipLogs:         ((sl.data ?? []) as ShipLogRow[]).map(fromShipLogRow),
     };
   }
 
@@ -745,6 +991,11 @@ export class SupabaseRepository implements DataRepository {
     await supabase.from("journal_entries").delete().not("id", "is", null);
     await supabase.from("problem_logs").delete().not("id", "is", null);
     await supabase.from("journal_habits").delete().not("id", "is", null);
+    await supabase.from("one_project").delete().not("id", "is", null);
+    await supabase.from("deep_work_logs").delete().not("id", "is", null);
+    await supabase.from("urge_logs").delete().not("id", "is", null);
+    await supabase.from("weekly_scorecards").delete().not("id", "is", null);
+    await supabase.from("ship_logs").delete().not("id", "is", null);
   }
 }
 

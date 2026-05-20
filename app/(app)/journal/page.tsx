@@ -3,19 +3,24 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format, addDays, subDays, parseISO } from "date-fns";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Download, BarChart2, AlertTriangle, Lightbulb } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, BarChart2, AlertTriangle, Lightbulb, Rocket } from "lucide-react";
 import Link from "next/link";
 
-import { Topbar }         from "@/components/layout/topbar";
-import { PageShell }      from "@/components/shared/page-shell";
-import { MoodPicker }     from "@/components/journal/mood-picker";
-import { EnergyPicker }   from "@/components/journal/energy-picker";
-import { FreeWrite }      from "@/components/journal/free-write";
-import { ListSection }    from "@/components/journal/list-section";
-import { TomorrowFocus }  from "@/components/journal/tomorrow-focus";
-import { HabitsRow }      from "@/components/journal/habits-row";
-import { ProblemSection } from "@/components/journal/problem-section";
-import { CalendarStrip }  from "@/components/journal/calendar-strip";
+import { Topbar }           from "@/components/layout/topbar";
+import { PageShell }        from "@/components/shared/page-shell";
+import { MoodPicker }       from "@/components/journal/mood-picker";
+import { EnergyPicker }     from "@/components/journal/energy-picker";
+import { FreeWrite }        from "@/components/journal/free-write";
+import { ListSection }      from "@/components/journal/list-section";
+import { TomorrowFocus }    from "@/components/journal/tomorrow-focus";
+import { HabitsRow }        from "@/components/journal/habits-row";
+import { ProblemSection }   from "@/components/journal/problem-section";
+import { CalendarStrip }    from "@/components/journal/calendar-strip";
+import { OneProjectBanner } from "@/components/journal/one-project-banner";
+import { DeepWorkSection }  from "@/components/journal/deep-work-section";
+import { ShipLogSection }   from "@/components/journal/ship-log-section";
+import { UrgeLogSection }   from "@/components/journal/urge-log-section";
+import { WeeklyScorecard }  from "@/components/journal/weekly-scorecard";
 
 import { useJournal }         from "@/lib/hooks/use-journal";
 import { exportEntryAsMarkdown, downloadMarkdown } from "@/lib/journal-export";
@@ -142,6 +147,9 @@ export default function JournalPage() {
               />
             </div>
 
+            {/* Weekly Scorecard */}
+            <WeeklyScorecard />
+
             {/* Quick nav links */}
             <div className="border border-white/8 bg-white/[0.018]">
               <Link
@@ -150,6 +158,13 @@ export default function JournalPage() {
               >
                 <AlertTriangle className="w-3.5 h-3.5 group-hover:text-[#FFD600] transition-colors" />
                 Problem Log
+              </Link>
+              <Link
+                href="/journal/ships"
+                className="flex items-center gap-3 px-4 py-3 text-[10px] font-black tracking-[0.12em] uppercase text-white hover:text-white hover:bg-white/[0.05] transition-all border-b border-white/8 group"
+              >
+                <Rocket className="w-3.5 h-3.5 group-hover:text-[#9B59B6] transition-colors" />
+                Ship Log
               </Link>
               <Link
                 href="/journal/ideas"
@@ -228,6 +243,9 @@ export default function JournalPage() {
               transition={{ duration: 0.2 }}
               className="space-y-3"
             >
+              {/* THE ONE PROJECT — always visible at top */}
+              <OneProjectBanner />
+
               {/* Mood + Energy side-by-side on wider screens */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <SectionCard label="Mood">
@@ -245,6 +263,11 @@ export default function JournalPage() {
                 </SectionCard>
               </div>
 
+              {/* Deep Work Timer */}
+              <SectionCard label="Deep Work" accent="#00D9FF">
+                <DeepWorkSection entryDate={dateStr} />
+              </SectionCard>
+
               <SectionCard label="Free Write">
                 <FreeWrite
                   value={draft.freeWrite ?? ""}
@@ -260,6 +283,11 @@ export default function JournalPage() {
                 />
               </SectionCard>
 
+              {/* Ship Log */}
+              <SectionCard label="Ship Log" accent="#9B59B6">
+                <ShipLogSection entryDate={dateStr} />
+              </SectionCard>
+
               <SectionCard label="Problem Log" accent="#E60012">
                 <ProblemSection
                   entryDate={dateStr}
@@ -273,6 +301,11 @@ export default function JournalPage() {
                   onChange={(ideas) => update({ ideas })}
                   placeholder="Random idea…"
                 />
+              </SectionCard>
+
+              {/* Urge Log */}
+              <SectionCard label="Urge Log" accent="#FF3366">
+                <UrgeLogSection entryDate={dateStr} />
               </SectionCard>
 
               <SectionCard label="Tomorrow's Focus" accent="#FF6600">

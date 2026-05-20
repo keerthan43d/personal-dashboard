@@ -186,9 +186,84 @@ export const JournalHabitSchema = z.object({
 export type JournalHabit = z.infer<typeof JournalHabitSchema>;
 export type JournalHabitInput = Omit<JournalHabit, "id" | "createdAt">;
 
+// ─── ONE Project ─────────────────────────────────────────────
+export const MilestoneSchema = z.object({
+  id:    z.string(),
+  label: z.string(),
+  done:  z.boolean().default(false),
+});
+export type Milestone = z.infer<typeof MilestoneSchema>;
+
+export const OneProjectSchema = z.object({
+  id:          z.string().uuid(),
+  title:       z.string().min(1),
+  description: z.string().optional(),
+  milestones:  z.array(MilestoneSchema).default([]),
+  targetDate:  z.string().optional(),
+  startedAt:   z.string().optional(),
+  active:      z.boolean().default(true),
+  createdAt:   z.string().datetime({ offset: true }),
+});
+export type OneProject = z.infer<typeof OneProjectSchema>;
+export type OneProjectInput = Omit<OneProject, "id" | "createdAt">;
+
+// ─── Deep Work Log ───────────────────────────────────────────
+export const DeepWorkLogSchema = z.object({
+  id:              z.string().uuid(),
+  entryDate:       z.string(),
+  startTime:       z.string(),
+  endTime:         z.string().optional(),
+  durationMinutes: z.number().int().optional(),
+  description:     z.string().optional(),
+  category:        z.enum(["project", "client"]).default("project"),
+  mode:            z.enum(["stopwatch", "pomodoro"]).default("stopwatch"),
+  createdAt:       z.string().datetime({ offset: true }),
+});
+export type DeepWorkLog = z.infer<typeof DeepWorkLogSchema>;
+export type DeepWorkLogInput = Omit<DeepWorkLog, "id" | "createdAt">;
+
+// ─── Urge Log ────────────────────────────────────────────────
+export const UrgeLogSchema = z.object({
+  id:        z.string().uuid(),
+  entryDate: z.string(),
+  urge:      z.string().min(1),
+  avoiding:  z.string().optional(),
+  loggedAt:  z.string().datetime({ offset: true }),
+  createdAt: z.string().datetime({ offset: true }),
+});
+export type UrgeLog = z.infer<typeof UrgeLogSchema>;
+export type UrgeLogInput = Omit<UrgeLog, "id" | "createdAt">;
+
+// ─── Weekly Scorecard ────────────────────────────────────────
+export const WeeklyScorecardSchema = z.object({
+  id:              z.string().uuid(),
+  weekStart:       z.string(),
+  deepWorkScore:   z.number().int().min(1).max(5).optional(),
+  shippedScore:    z.number().int().min(1).max(5).optional(),
+  oneProjectScore: z.number().int().min(1).max(5).optional(),
+  notes:           z.string().optional(),
+  createdAt:       z.string().datetime({ offset: true }),
+  updatedAt:       z.string().datetime({ offset: true }),
+});
+export type WeeklyScorecard = z.infer<typeof WeeklyScorecardSchema>;
+export type WeeklyScorecardInput = Omit<WeeklyScorecard, "id" | "createdAt" | "updatedAt">;
+
+// ─── Ship Log ────────────────────────────────────────────────
+export const ShipLogSchema = z.object({
+  id:          z.string().uuid(),
+  entryDate:   z.string(),
+  title:       z.string().min(1),
+  description: z.string().optional(),
+  url:         z.string().optional(),
+  type:        z.enum(["feature", "page", "pitch", "video", "design", "other"]).default("other"),
+  createdAt:   z.string().datetime({ offset: true }),
+});
+export type ShipLog = z.infer<typeof ShipLogSchema>;
+export type ShipLogInput = Omit<ShipLog, "id" | "createdAt">;
+
 // ─── Export snapshot (for export/import) ─────────────────────
 export const ExportSnapshotSchema = z.object({
-  version:       z.literal(3),
+  version:       z.union([z.literal(3), z.literal(4)]),
   exportedAt:    z.string().datetime({ offset: true }),
   clients:       z.array(ClientSchema),
   projects:      z.array(ProjectSchema),
@@ -201,5 +276,10 @@ export const ExportSnapshotSchema = z.object({
   journalEntries: z.array(JournalEntrySchema).default([]),
   problemLogs:   z.array(ProblemLogSchema).default([]),
   journalHabits: z.array(JournalHabitSchema).default([]),
+  oneProjects:      z.array(OneProjectSchema).default([]),
+  deepWorkLogs:     z.array(DeepWorkLogSchema).default([]),
+  urgeLogs:         z.array(UrgeLogSchema).default([]),
+  weeklyScorecards: z.array(WeeklyScorecardSchema).default([]),
+  shipLogs:         z.array(ShipLogSchema).default([]),
 });
 export type ExportSnapshot = z.infer<typeof ExportSnapshotSchema>;
