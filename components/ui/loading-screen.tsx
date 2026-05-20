@@ -60,10 +60,26 @@ export function LoadingScreen() {
           {/* Content */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
 
+            {/* Logo */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mb-6"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo.jpeg"
+                alt="Command Chamber"
+                className="w-28 h-28 sm:w-36 sm:h-36 object-cover"
+                style={{ filter: "drop-shadow(0 0 30px rgba(255,214,0,0.3))" }}
+              />
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
               className="text-center"
             >
               <h1

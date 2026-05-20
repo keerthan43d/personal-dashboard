@@ -29,6 +29,10 @@ const cinzel = Cinzel({
 export const metadata: Metadata = {
   title: "Command Chamber",
   description: "Your personal command center — clients, books, movies.",
+  icons: {
+    icon: "/logo.jpeg",
+    apple: "/logo.jpeg",
+  },
 };
 
 export default function RootLayout({

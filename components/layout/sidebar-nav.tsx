@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -45,9 +46,16 @@ export function SidebarNav() {
       {/* ── Logo / Brand ─────────────────────────────────────── */}
       <SidebarHeader className="px-4 py-4 border-b border-white/8">
         <Link href="/" className="flex items-center gap-3 group">
-          {/* Constructivist square mark */}
-          <div className="flex-shrink-0 w-8 h-8 border border-[#FFD600] flex items-center justify-center">
-            <div className="w-3 h-3 bg-[#FFD600]" />
+          {/* Logo mark */}
+          <div className="flex-shrink-0 w-8 h-8 overflow-hidden">
+            <Image
+              src="/logo.jpeg"
+              alt="Command Chamber"
+              width={32}
+              height={32}
+              className="w-full h-full object-cover"
+              priority
+            />
           </div>
           <AnimatePresence>
             {open && (
