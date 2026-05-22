@@ -2,6 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { AppProvider } from "@/components/layout/app-provider";
 import { AuthGate } from "@/components/auth/auth-gate";
+import { PuckWidget } from "@/components/puck/PuckWidget";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {children}
             </main>
           </div>
+          <PuckWidget />
         </SidebarProvider>
       </AppProvider>
     </AuthGate>

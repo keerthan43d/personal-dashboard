@@ -83,7 +83,7 @@ export default function TvShowDetailPage({ params }: { params: Promise<{ id: str
                   ))}
                 </div>
 
-                <StarRating value={show.rating ?? 0} size="md" onRate={async (n) => { await edit(show.id, { rating: n }); reload(); }} />
+                <StarRating value={show.rating ?? 0} max={10} size="md" onRate={async (n) => { await edit(show.id, { rating: n }); reload(); }} />
 
                 <div className="flex flex-wrap gap-3 mt-3 text-xs text-muted-foreground">
                   {show.seasons && (

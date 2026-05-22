@@ -176,7 +176,7 @@ function ShowCard({ show, onEdit, onRemove }: {
           {show.creator && <p className="text-[10px] text-muted-foreground truncate">{show.creator}</p>}
 
           <div className="flex items-center justify-between pt-0.5">
-            <StarRating value={show.rating ?? 0} readonly />
+            <StarRating value={show.rating ?? 0} max={10} readonly />
             {show.seasons && (
               <span className="text-[10px] text-muted-foreground font-numeric">{show.seasons}S</span>
             )}
