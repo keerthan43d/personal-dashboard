@@ -9,10 +9,10 @@ import {
   BookOpen,
   Film,
   Tv,
-  Megaphone,
   Settings,
   LogOut,
   BookMarked,
+  PenLine,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -34,7 +34,7 @@ const NAV = [
   { href: "/books",     label: "LIBRARY",   icon: BookOpen },
   { href: "/movies",    label: "VISIONS",   icon: Film },
   { href: "/tv-shows",  label: "TV SHOWS",  icon: Tv },
-  { href: "/personal-branding", label: "BRANDING", icon: Megaphone },
+  { href: "/linkedin-workflow", label: "CONTENT", icon: PenLine },
 ];
 
 export function SidebarNav() {
