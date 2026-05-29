@@ -35,7 +35,7 @@ THIS POST:
     const systemPrompt = buildPostSystemPrompt(voiceConfig, recentHooksBlock, extraInstructions);
 
     const postResponse = await openrouter.chat.completions.create({
-      model: DEFAULT_MODELS.post,
+      model: DEFAULT_MODELS.postWriter,
       messages: [
         { role: "system", content: systemPrompt },
         {

@@ -33,7 +33,7 @@ THIS POST:
       : `TOPIC: ${topic}\nANGLE: ${angle}\n\nRESEARCH:\n${research}`;
 
     const res = await openrouter.chat.completions.create({
-      model: DEFAULT_MODELS.post,
+      model: DEFAULT_MODELS.postWriter,
       messages: [
         { role: "system", content: systemPrompt },
         {

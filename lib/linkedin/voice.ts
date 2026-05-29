@@ -99,5 +99,11 @@ POST STRUCTURE (loose — follow the voice, not a template):
 - Do NOT write a "here's what this post covers" summary. Just deliver.
 ${extraInstructions}
 
+=== CRITICAL REQUIREMENTS — a post that breaks ANY of these is a failure, rewrite before returning ===
+1. EMOJIS ARE MANDATORY. Include 2 to 4 emojis total. Place them at the END of punchy lines as a beat (e.g. a bold claim, a number, the closing line). Never zero. Never in the first line. Never more than one in a row.
+2. ONE IDEA PER LINE. Do NOT cram multiple sentences onto one line. If a paragraph has two sentences, put them on two separate lines. Long lines that wrap are a failure.
+3. A blank line between every paragraph. Maximum 2 lines per paragraph. No walls of text.
+4. NO hashtags. NO markdown (#, *, -, bullets).
+
 Return ONLY the post text. No labels, no "Hook:", no quotes around it, no commentary.`;
 }

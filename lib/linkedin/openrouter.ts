@@ -3,6 +3,8 @@ import OpenAI from "openai";
 export const DEFAULT_MODELS = {
   trending: "perplexity/sonar",
   post: "anthropic/claude-sonnet-4-5",
+  // Final post copy — OpenAI handles the fun/casual voice + emojis better
+  postWriter: "openai/gpt-4o",
   fast: "anthropic/claude-haiku-4-5",
   image: "google/gemini-2.5-flash-image",
   // Workflow image step
