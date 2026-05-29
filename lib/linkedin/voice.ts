@@ -76,6 +76,40 @@ export async function getRecentHooksBlock(): Promise<string> {
 }
 
 /**
+ * LinkedIn does not render markdown — asterisks, hashes, and bullet symbols
+ * show up as literal characters and look broken. Models ignore "no markdown"
+ * instructions often enough that we strip it server-side as a guarantee.
+ */
+export function sanitizePost(raw: string): string {
+  let text = raw;
+
+  // Strip leading bullet/header markers per line (-, *, +, •, #, ##…)
+  text = text
+    .split("\n")
+    .map((line) => line.replace(/^\s*(?:[-*+•]|#{1,6})\s+/, ""))
+    .join("\n");
+
+  // Remove bold/italic markers, keep the wrapped text
+  text = text.replace(/\*\*([\s\S]+?)\*\*/g, "$1");
+  text = text.replace(/__([\s\S]+?)__/g, "$1");
+  text = text.replace(/`{1,3}/g, "");
+
+  // Delete any stray asterisks/underscores-as-emphasis that remain
+  text = text.replace(/\*/g, "");
+
+  // Collapse 3+ newlines down to a single blank line
+  text = text.replace(/\n{3,}/g, "\n\n");
+
+  // Trim trailing spaces on each line
+  text = text
+    .split("\n")
+    .map((line) => line.replace(/[ \t]+$/g, ""))
+    .join("\n");
+
+  return text.trim();
+}
+
+/**
  * Builds the full system prompt for writing a post in the user's voice.
  * Shared by the workflow generator and the legacy generator so there is one
  * source of truth for voice.
@@ -103,7 +137,7 @@ ${extraInstructions}
 1. EMOJIS ARE MANDATORY. Include 2 to 4 emojis total. Place them at the END of punchy lines as a beat (e.g. a bold claim, a number, the closing line). Never zero. Never in the first line. Never more than one in a row.
 2. ONE IDEA PER LINE. Do NOT cram multiple sentences onto one line. If a paragraph has two sentences, put them on two separate lines. Long lines that wrap are a failure.
 3. A blank line between every paragraph. Maximum 2 lines per paragraph. No walls of text.
-4. NO hashtags. NO markdown (#, *, -, bullets).
+4. NO hashtags. NO markdown of ANY kind. Never use asterisks (*) for bold or emphasis, never use # headers, never use - or * bullet points. LinkedIn shows these as literal broken characters. Write plain text only. For emphasis, use a short line on its own — not bold.
 
 Return ONLY the post text. No labels, no "Hook:", no quotes around it, no commentary.`;
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOpenRouter, DEFAULT_MODELS } from "@/lib/linkedin/openrouter";
-import { loadVoiceConfig, getRecentHooksBlock, buildPostSystemPrompt } from "@/lib/linkedin/voice";
+import { loadVoiceConfig, getRecentHooksBlock, buildPostSystemPrompt, sanitizePost } from "@/lib/linkedin/voice";
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,7 +45,7 @@ THIS POST:
       ],
     });
 
-    const postContent = postResponse.choices[0].message.content ?? "";
+    const postContent = sanitizePost(postResponse.choices[0].message.content ?? "");
 
     return NextResponse.json({ postContent });
   } catch (err) {
