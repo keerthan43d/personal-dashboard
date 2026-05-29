@@ -172,8 +172,8 @@ function ShowCard({ show, onEdit, onRemove }: {
         </div>
 
         <div className="p-3 space-y-1.5">
-          <h3 className="text-xs font-semibold text-[#f5f5f5] leading-snug line-clamp-2">{show.title}</h3>
-          {show.creator && <p className="text-[10px] text-muted-foreground truncate">{show.creator}</p>}
+          <h3 className="text-xs font-semibold text-[#f5f5f5] leading-snug line-clamp-2 min-h-[2.1rem]">{show.title}</h3>
+          <p className="text-[10px] text-muted-foreground truncate min-h-[0.9rem]">{show.creator}</p>
 
           <div className="flex items-center justify-between pt-0.5">
             <StarRating value={show.rating ?? 0} max={10} readonly />
@@ -182,9 +182,7 @@ function ShowCard({ show, onEdit, onRemove }: {
             )}
           </div>
 
-          {show.genres.length > 0 && (
-            <p className="text-[10px] text-muted-foreground/70 truncate">{show.genres.slice(0,3).join(" · ")}</p>
-          )}
+          <p className="text-[10px] text-muted-foreground/70 truncate min-h-[0.9rem]">{show.genres.slice(0,3).join(" · ")}</p>
         </div>
       </Link>
     </div>

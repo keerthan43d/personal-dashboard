@@ -182,8 +182,8 @@ function BookCard({ book, onEdit, onRemove, onRate }: {
 
         {/* Info */}
         <div className="p-3 space-y-1.5">
-          <h3 className="text-xs font-semibold text-[#f5f5f5] leading-snug line-clamp-2">{book.title}</h3>
-          <p className="text-[10px] text-muted-foreground truncate">{book.author}</p>
+          <h3 className="text-xs font-semibold text-[#f5f5f5] leading-snug line-clamp-2 min-h-[2.1rem]">{book.title}</h3>
+          <p className="text-[10px] text-muted-foreground truncate min-h-[0.9rem]">{book.author}</p>
 
           <div className="flex items-center justify-between pt-0.5">
             <StarRating value={book.rating ?? 0} readonly={!book.rating} />
@@ -192,11 +192,9 @@ function BookCard({ book, onEdit, onRemove, onRate }: {
             )}
           </div>
 
-          {book.takeaways.length > 0 && (
-            <p className="text-[10px] text-muted-foreground/70">
-              {book.takeaways.length} takeaway{book.takeaways.length !== 1 ? "s" : ""}
-            </p>
-          )}
+          <p className="text-[10px] text-muted-foreground/70 min-h-[0.9rem]">
+            {book.takeaways.length > 0 ? `${book.takeaways.length} takeaway${book.takeaways.length !== 1 ? "s" : ""}` : ""}
+          </p>
         </div>
       </Link>
     </div>
