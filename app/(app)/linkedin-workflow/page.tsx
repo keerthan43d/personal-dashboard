@@ -1041,7 +1041,7 @@ function HookStep({
               <span className="text-[9px] font-black uppercase tracking-[0.12em] text-[#FFD600]/70">
                 {opt.archetype}
               </span>
-              <span className="text-[9px] uppercase tracking-wider text-white/30 group-hover:text-[#FFD600]">
+              <span className="text-[9px] uppercase tracking-wider text-white/50 group-hover:text-[#FFD600]">
                 Use this →
               </span>
             </div>
@@ -1402,7 +1402,7 @@ function PlannerView({
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-6">
         <div className="w-12 h-12 border border-white/10 flex items-center justify-center">
-          <Calendar className="w-6 h-6 text-white/30" />
+          <Calendar className="w-6 h-6 text-white/50" />
         </div>
         <div className="text-center space-y-1">
           <p className="text-sm font-semibold text-[#f5f5f5]">Plan your week</p>

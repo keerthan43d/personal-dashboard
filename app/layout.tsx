@@ -46,12 +46,12 @@ export default function RootLayout({
       className={`${inter.variable} ${jbMono.variable} ${cinzel.variable} dark h-full`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-background text-foreground grain">
+      <body className="min-h-full bg-background text-foreground">
         <LoadingScreen />
         <TooltipProvider delayDuration={300}>
           {children}
           <Toaster
-            position="bottom-right"
+            position="top-right"
             theme="dark"
             toastOptions={{
               classNames: {

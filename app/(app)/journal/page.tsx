@@ -227,7 +227,7 @@ export default function JournalPage() {
                   <button
                     onClick={handleExport}
                     title="Download as Markdown"
-                    className="w-7 h-7 flex items-center justify-center border border-white/10 text-white/35 hover:text-white/65 hover:border-white/22 transition-all cursor-pointer"
+                    className="w-7 h-7 flex items-center justify-center border border-white/10 text-white/55 hover:text-white/65 hover:border-white/22 transition-all cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                   </button>

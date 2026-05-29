@@ -63,7 +63,7 @@ export function ProblemSection({ entryDate, problems }: Props) {
           </div>
           <button
             onClick={() => { setEditing(p); setDialogOpen(true); }}
-            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/25 hover:text-white/60 mt-0.5"
+            className="opacity-0 group-hover:opacity-100 transition-opacity text-white/45 hover:text-white/60 mt-0.5"
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
@@ -74,7 +74,7 @@ export function ProblemSection({ entryDate, problems }: Props) {
         onClick={() => { setEditing(undefined); setDialogOpen(true); }}
         className={cn(
           "flex items-center gap-1.5 text-[10px] font-black tracking-[0.1em] uppercase mt-1",
-          "text-white/25 hover:text-white/50 transition-colors"
+          "text-white/45 hover:text-white/50 transition-colors"
         )}
       >
         <Plus className="w-3 h-3" />

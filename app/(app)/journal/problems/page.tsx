@@ -76,12 +76,12 @@ export default function ProblemsPage() {
         {/* Search + filter row */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/50" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search problems…"
-              className="pl-8 bg-transparent border-white/15 text-sm text-white/80 placeholder:text-white/25 focus-visible:ring-[#FFD600]/30"
+              className="pl-8 bg-transparent border-white/15 text-sm text-white/80 placeholder:text-white/45 focus-visible:ring-[#FFD600]/30"
             />
           </div>
 
@@ -93,7 +93,7 @@ export default function ProblemsPage() {
                   "px-2.5 py-1 text-[9px] font-black tracking-[0.1em] uppercase border transition-colors",
                   !tagFilter
                     ? "border-[#FFD600]/50 text-[#FFD600]/80 bg-[#FFD600]/5"
-                    : "border-white/10 text-white/30 hover:border-white/20 hover:text-white/50"
+                    : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/50"
                 )}
               >
                 All
@@ -106,7 +106,7 @@ export default function ProblemsPage() {
                     "px-2.5 py-1 text-[9px] font-black tracking-[0.1em] uppercase border transition-colors",
                     tagFilter === t
                       ? "border-[#FFD600]/50 text-[#FFD600]/80 bg-[#FFD600]/5"
-                      : "border-white/10 text-white/30 hover:border-white/20 hover:text-white/50"
+                      : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/50"
                   )}
                 >
                   {t}
@@ -140,7 +140,7 @@ export default function ProblemsPage() {
             >
               <button
                 onClick={(e) => { e.stopPropagation(); setEditing(p); setDialogOpen(true); }}
-                className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-white/25 hover:text-white/60"
+                className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-white/45 hover:text-white/60"
               >
                 <Pencil className="w-3.5 h-3.5" />
               </button>

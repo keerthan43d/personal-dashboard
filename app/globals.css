@@ -78,7 +78,7 @@
   --secondary:               #111111;
   --secondary-foreground:    #FFFFFF;
   --muted:                   #0D0D0D;
-  --muted-foreground:        #666666;
+  --muted-foreground:        #8A8A8A;
   --accent:                  #111111;
   --accent-foreground:       #FFD600;
   --destructive:             #E60012;  /* Constructivist Red */
@@ -101,7 +101,7 @@
 
   /* Sidebar */
   --sidebar:                    #000000;
-  --sidebar-foreground:         #777777;
+  --sidebar-foreground:         #909090;
   --sidebar-primary:            #FFD600;
   --sidebar-primary-foreground: #000000;
   --sidebar-accent:             #0D0D0D;
@@ -133,8 +133,8 @@
     /* Flat black — no grain, no dot pattern */
   }
 
-  /* Scrollbar — minimal 2px */
-  ::-webkit-scrollbar       { width: 2px; height: 2px; }
+  /* Scrollbar — minimal but grabbable */
+  ::-webkit-scrollbar       { width: 8px; height: 8px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,214,0,0.5); }
@@ -182,9 +182,6 @@
   .status-paused  { background: rgba(255,255,255,0.4); }
   .status-done    { background: rgba(255,255,255,0.2); }
   .status-blocked { background: #E60012; }
-
-  /* Grain — removed in Constructivist design */
-  .grain::after { display: none; }
 
   /* Skeleton */
   .skeleton { @apply animate-pulse bg-white/5; }

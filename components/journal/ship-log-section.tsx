@@ -61,7 +61,7 @@ export function ShipLogSection({ entryDate }: Props) {
 
       {/* Ship list */}
       {shipLogs.length === 0 && (
-        <p className="text-xs text-white/25 italic">Nothing shipped today.</p>
+        <p className="text-xs text-white/45 italic">Nothing shipped today.</p>
       )}
 
       {shipLogs.map((ship) => (
@@ -94,7 +94,7 @@ export function ShipLogSection({ entryDate }: Props) {
               href={ship.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/25 hover:text-white/60 transition-colors shrink-0"
+              className="text-white/45 hover:text-white/60 transition-colors shrink-0"
               onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -105,13 +105,13 @@ export function ShipLogSection({ entryDate }: Props) {
           <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
             <button
               onClick={() => { setEditing(ship); setDialogOpen(true); }}
-              className="text-white/25 hover:text-white/60 transition-colors"
+              className="text-white/45 hover:text-white/60 transition-colors"
             >
               <Pencil className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => removeShip(ship.id)}
-              className="text-white/25 hover:text-rose-400 transition-colors"
+              className="text-white/45 hover:text-rose-400 transition-colors"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -124,7 +124,7 @@ export function ShipLogSection({ entryDate }: Props) {
         onClick={() => { setEditing(undefined); setDialogOpen(true); }}
         className={cn(
           "flex items-center gap-1.5 text-[10px] font-black tracking-[0.1em] uppercase mt-1",
-          "text-white/25 hover:text-[#9B59B6] transition-colors"
+          "text-white/45 hover:text-[#9B59B6] transition-colors"
         )}
       >
         <Plus className="w-3 h-3" />

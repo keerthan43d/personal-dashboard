@@ -115,7 +115,7 @@ export function OneProjectDialog({ open, onClose, existing, onSave }: Props) {
                   />
                   <button
                     onClick={() => removeMilestone(m.id)}
-                    className="text-white/25 hover:text-rose-400 transition-colors shrink-0 p-1"
+                    className="text-white/45 hover:text-rose-400 transition-colors shrink-0 p-1"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -126,7 +126,7 @@ export function OneProjectDialog({ open, onClose, existing, onSave }: Props) {
               onClick={addMilestone}
               className={cn(
                 "flex items-center gap-1.5 text-[10px] font-black tracking-[0.1em] uppercase mt-1.5",
-                "text-white/25 hover:text-white/50 transition-colors"
+                "text-white/45 hover:text-white/50 transition-colors"
               )}
             >
               <Plus className="w-3 h-3" />

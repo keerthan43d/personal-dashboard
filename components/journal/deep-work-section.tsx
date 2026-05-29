@@ -198,7 +198,7 @@ export function DeepWorkSection({ entryDate }: Props) {
                 "px-3 py-1.5 border text-[10px] font-black tracking-[0.08em] uppercase transition-all duration-150",
                 active && isProject && "border-[#00C9A7]/50 text-[#00C9A7] bg-[#00C9A7]/8",
                 active && !isProject && "border-white/30 text-white/70 bg-white/5",
-                !active && "border-white/8 text-white/30 hover:border-white/15 hover:text-white/50"
+                !active && "border-white/8 text-white/50 hover:border-white/15 hover:text-white/50"
               )}
             >
               {isProject ? "My Project" : "Client Work"}
@@ -215,7 +215,7 @@ export function DeepWorkSection({ entryDate }: Props) {
         placeholder="What are you working on?"
         className={cn(
           "w-full px-3 py-2 bg-transparent border border-white/8 text-sm text-white",
-          "placeholder:text-white/25 outline-none transition-colors",
+          "placeholder:text-white/45 outline-none transition-colors",
           "focus:border-[#00D9FF]/30 focus:bg-[#00D9FF]/[0.02]"
         )}
       />
@@ -343,7 +343,7 @@ export function DeepWorkSection({ entryDate }: Props) {
         </span>
 
         {logs.length === 0 && (
-          <p className="text-xs text-white/30 italic py-2">
+          <p className="text-xs text-white/50 italic py-2">
             No deep work sessions logged today.
           </p>
         )}
@@ -388,7 +388,7 @@ export function DeepWorkSection({ entryDate }: Props) {
               {/* Delete */}
               <button
                 onClick={() => deleteLog(log.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-white/25 hover:text-rose-400 cursor-pointer shrink-0"
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-white/45 hover:text-rose-400 cursor-pointer shrink-0"
               >
                 <Trash2 className="w-3 h-3" />
               </button>

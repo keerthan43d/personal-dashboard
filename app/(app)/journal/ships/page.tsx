@@ -81,7 +81,7 @@ export default function ShipsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search ships…"
-              className="pl-8 bg-transparent border-white/15 text-sm text-white placeholder:text-white/35 focus-visible:ring-[#9B59B6]/30"
+              className="pl-8 bg-transparent border-white/15 text-sm text-white placeholder:text-white/55 focus-visible:ring-[#9B59B6]/30"
             />
           </div>
 
@@ -92,7 +92,7 @@ export default function ShipsPage() {
                 "px-2.5 py-1 text-[9px] font-black tracking-[0.1em] uppercase border transition-colors",
                 !typeFilter
                   ? "border-[#9B59B6]/50 text-[#9B59B6] bg-[#9B59B6]/5"
-                  : "border-white/10 text-white/30 hover:border-white/20 hover:text-white/50"
+                  : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/50"
               )}
             >
               All
@@ -105,7 +105,7 @@ export default function ShipsPage() {
                   "px-2.5 py-1 text-[9px] font-black tracking-[0.1em] uppercase border transition-colors",
                   typeFilter === t
                     ? "bg-opacity-5"
-                    : "border-white/10 text-white/30 hover:border-white/20 hover:text-white/50"
+                    : "border-white/10 text-white/50 hover:border-white/20 hover:text-white/50"
                 )}
                 style={typeFilter === t ? {
                   borderColor: `${TYPE_COLORS[t]}80`,
@@ -152,7 +152,7 @@ export default function ShipsPage() {
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-semibold text-white truncate">{s.title}</p>
                     {s.url && (
-                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-[#9B59B6] transition-colors shrink-0">
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-[#9B59B6] transition-colors shrink-0">
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     )}
@@ -177,13 +177,13 @@ export default function ShipsPage() {
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                   <button
                     onClick={() => { setEditing(s); setDialogOpen(true); }}
-                    className="text-white/25 hover:text-white/60"
+                    className="text-white/45 hover:text-white/60"
                   >
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => removeShip(s.id)}
-                    className="text-white/25 hover:text-rose-400"
+                    className="text-white/45 hover:text-rose-400"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

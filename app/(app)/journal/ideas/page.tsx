@@ -57,7 +57,7 @@ export default function IdeasPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search ideas…"
-              className="pl-8 bg-transparent border-white/15 text-sm text-white placeholder:text-white/35 focus-visible:ring-[#00C9A7]/30"
+              className="pl-8 bg-transparent border-white/15 text-sm text-white placeholder:text-white/55 focus-visible:ring-[#00C9A7]/30"
             />
           </div>
         </div>

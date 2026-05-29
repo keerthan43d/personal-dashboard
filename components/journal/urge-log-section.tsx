@@ -105,7 +105,7 @@ export function UrgeLogSection({ entryDate }: Props) {
         {!showAvoiding ? (
           <button
             onClick={() => setShowAvoiding(true)}
-            className="text-[9px] font-black tracking-[0.08em] uppercase text-white/30 hover:text-white/50 transition-colors"
+            className="text-[9px] font-black tracking-[0.08em] uppercase text-white/50 hover:text-white/50 transition-colors"
           >
             what were you avoiding?
           </button>
@@ -136,13 +136,13 @@ export function UrgeLogSection({ entryDate }: Props) {
               transition={{ duration: 0.2 }}
             >
               <div className="group flex items-start gap-3 py-2 px-2 hover:bg-white/[0.02] transition-colors">
-                <span className="text-[10px] font-mono text-white/30 pt-0.5 shrink-0">
+                <span className="text-[10px] font-mono text-white/50 pt-0.5 shrink-0">
                   {formatTime(log.loggedAt)}
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-white leading-snug">{log.urge}</p>
                   {log.avoiding && (
-                    <p className="text-xs text-white/35 mt-0.5">
+                    <p className="text-xs text-white/55 mt-0.5">
                       avoiding: {log.avoiding}
                     </p>
                   )}
@@ -159,7 +159,7 @@ export function UrgeLogSection({ entryDate }: Props) {
         </AnimatePresence>
 
         {urgeLogs.length === 0 && (
-          <p className="text-xs text-white/25 italic py-2">No urges logged today.</p>
+          <p className="text-xs text-white/45 italic py-2">No urges logged today.</p>
         )}
       </div>
     </div>

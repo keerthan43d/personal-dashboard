@@ -105,7 +105,7 @@ export default function DashboardPage() {
     { label: "Active Projects", value: activeProjects.length, icon: TrendingUp,  color: "text-white/70",  href: "/clients" },
     { label: "This Week",       value: formatHours(weekHours), icon: Clock,      color: "text-[#FFD600]", href: "/clients" },
     { label: "Owed",            value: totalOwed > 0 ? formatCurrency(totalOwed) : "—",
-      icon: DollarSign, color: totalOwed > 0 ? "text-[#E60012]" : "text-white/30", href: "/clients" },
+      icon: DollarSign, color: totalOwed > 0 ? "text-[#E60012]" : "text-white/50", href: "/clients" },
   ];
 
   return (
@@ -133,7 +133,7 @@ export default function DashboardPage() {
                     <ArrowRight className="w-3.5 h-3.5 text-white/20 group-hover:text-white/50 transition-colors duration-150" />
                   </div>
                   <p className={cn("font-numeric text-2xl font-black", color)}>{value}</p>
-                  <p className="text-[10px] font-black tracking-[0.1em] uppercase text-white/35 mt-1">{label}</p>
+                  <p className="text-[10px] font-black tracking-[0.1em] uppercase text-white/55 mt-1">{label}</p>
                 </div>
               </Link>
             </motion.div>
@@ -150,13 +150,13 @@ export default function DashboardPage() {
               className="border border-white/10 bg-[#080808] p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-sans font-black text-[11px] tracking-[0.1em] uppercase text-white">Upcoming Deadlines</h3>
-                <Link href="/clients" className="text-[10px] text-white/35 hover:text-[#FFD600] transition-colors duration-150 link-draw">
+                <Link href="/clients" className="text-[10px] text-white/55 hover:text-[#FFD600] transition-colors duration-150 link-draw">
                   View all →
                 </Link>
               </div>
 
               {upcomingDeadlines.length === 0 ? (
-                <div className="flex items-center gap-2 text-xs text-white/35 py-3">
+                <div className="flex items-center gap-2 text-xs text-white/55 py-3">
                   <CheckCircle2 className="w-4 h-4 text-white/20" />
                   No upcoming deadlines
                 </div>
@@ -175,11 +175,11 @@ export default function DashboardPage() {
                           )} />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-medium text-white/80 truncate">{proj.title}</p>
-                            <p className="text-[10px] text-white/35 truncate">{client?.name}</p>
+                            <p className="text-[10px] text-white/55 truncate">{client?.name}</p>
                           </div>
                           <span className={cn(
                             "text-[10px] font-numeric flex-shrink-0",
-                            overdue ? "text-[#E60012]" : dueSoon ? "text-[#FFD600]" : "text-white/35"
+                            overdue ? "text-[#E60012]" : dueSoon ? "text-[#FFD600]" : "text-white/55"
                           )}>
                             {fmt.short(proj.deadline!)}
                           </span>
@@ -196,11 +196,11 @@ export default function DashboardPage() {
               className="border border-white/10 bg-[#080808] p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-sans font-black text-[11px] tracking-[0.1em] uppercase text-white">Open Tasks</h3>
-                <span className="text-[10px] text-white/35">{tasks.filter((t) => !t.done).length} pending</span>
+                <span className="text-[10px] text-white/55">{tasks.filter((t) => !t.done).length} pending</span>
               </div>
 
               {pendingTasks.length === 0 ? (
-                <div className="flex items-center gap-2 text-xs text-white/35 py-3">
+                <div className="flex items-center gap-2 text-xs text-white/55 py-3">
                   <CheckCircle2 className="w-4 h-4 text-white/20" />
                   All tasks complete
                 </div>
@@ -216,7 +216,7 @@ export default function DashboardPage() {
                           <div className="flex-1 min-w-0">
                             <p className="text-xs text-white/70 leading-snug truncate">{task.title}</p>
                             {(proj || client) && (
-                              <p className="text-[10px] text-white/35 truncate">{proj?.title ?? client?.name}</p>
+                              <p className="text-[10px] text-white/55 truncate">{proj?.title ?? client?.name}</p>
                             )}
                           </div>
                         </div>
@@ -224,7 +224,7 @@ export default function DashboardPage() {
                     );
                   })}
                   {tasks.filter((t) => !t.done).length > 8 && (
-                    <p className="text-[10px] text-white/25 text-center pt-1">
+                    <p className="text-[10px] text-white/45 text-center pt-1">
                       +{tasks.filter((t) => !t.done).length - 8} more
                     </p>
                   )}
@@ -244,7 +244,7 @@ export default function DashboardPage() {
               </div>
               <div className="grid gap-1" style={{ gridTemplateColumns: "repeat(7, 1fr)" }}>
                 {["M","T","W","T","F","S","S"].map((d, i) => (
-                  <div key={i} className="text-[9px] text-white/25 text-center pb-1">{d}</div>
+                  <div key={i} className="text-[9px] text-white/45 text-center pb-1">{d}</div>
                 ))}
                 {heatDays.map((day) => {
                   const h = heatMap[day] ?? 0;
@@ -261,7 +261,7 @@ export default function DashboardPage() {
                   );
                 })}
               </div>
-              <div className="flex items-center justify-between mt-2 text-[9px] text-white/25">
+              <div className="flex items-center justify-between mt-2 text-[9px] text-white/45">
                 <span>35 days ago</span>
                 <span>Today</span>
               </div>
@@ -272,11 +272,11 @@ export default function DashboardPage() {
               className="border border-white/10 bg-[#080808] p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-sans font-black text-[11px] tracking-[0.1em] uppercase text-white">Active Projects</h3>
-                <span className="text-[10px] text-white/35">{activeProjects.length}</span>
+                <span className="text-[10px] text-white/55">{activeProjects.length}</span>
               </div>
 
               {activeProjects.length === 0 ? (
-                <p className="text-xs text-white/35 py-3">No active projects</p>
+                <p className="text-xs text-white/55 py-3">No active projects</p>
               ) : (
                 <div className="space-y-3">
                   {activeProjects.slice(0, 4).map((proj) => {
@@ -289,10 +289,10 @@ export default function DashboardPage() {
                         <div className="group cursor-pointer">
                           <div className="flex items-center justify-between mb-1">
                             <p className="text-xs font-medium text-white/80 truncate flex-1">{proj.title}</p>
-                            <span className="text-[10px] font-numeric text-white/35 ml-2 flex-shrink-0">{pct}%</span>
+                            <span className="text-[10px] font-numeric text-white/55 ml-2 flex-shrink-0">{pct}%</span>
                           </div>
                           {client && (
-                            <p className="text-[10px] text-white/35 mb-1.5">{client.name}</p>
+                            <p className="text-[10px] text-white/55 mb-1.5">{client.name}</p>
                           )}
                           <div className="h-0.5 bg-white/[0.06] overflow-hidden">
                             <motion.div className="h-full bg-[#FFD600]"
@@ -317,16 +317,16 @@ export default function DashboardPage() {
               className="border border-white/10 bg-[#080808] p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-sans font-black text-[11px] tracking-[0.1em] uppercase text-white flex items-center gap-2">
-                  <BookOpen className="w-3.5 h-3.5 text-white/35" />
+                  <BookOpen className="w-3.5 h-3.5 text-white/55" />
                   Library
                 </h3>
-                <Link href="/books" className="text-[10px] text-white/35 hover:text-[#FFD600] transition-colors duration-150 link-draw">
+                <Link href="/books" className="text-[10px] text-white/55 hover:text-[#FFD600] transition-colors duration-150 link-draw">
                   View all →
                 </Link>
               </div>
 
               {recentBooks.length === 0 ? (
-                <p className="text-xs text-white/35 py-2">No books yet</p>
+                <p className="text-xs text-white/55 py-2">No books yet</p>
               ) : (
                 <div className="space-y-2.5">
                   {recentBooks.map((book) => (
@@ -344,7 +344,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-white/80 truncate">{book.title}</p>
-                          <p className="text-[10px] text-white/35 truncate">{book.author}</p>
+                          <p className="text-[10px] text-white/55 truncate">{book.author}</p>
                           <StarRating value={book.rating ?? 0} readonly />
                         </div>
                         <StatusBadge status={book.status} />
@@ -360,16 +360,16 @@ export default function DashboardPage() {
               className="border border-white/10 bg-[#080808] p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-sans font-black text-[11px] tracking-[0.1em] uppercase text-white flex items-center gap-2">
-                  <Film className="w-3.5 h-3.5 text-white/35" />
+                  <Film className="w-3.5 h-3.5 text-white/55" />
                   Visions
                 </h3>
-                <Link href="/movies" className="text-[10px] text-white/35 hover:text-[#FFD600] transition-colors duration-150 link-draw">
+                <Link href="/movies" className="text-[10px] text-white/55 hover:text-[#FFD600] transition-colors duration-150 link-draw">
                   View all →
                 </Link>
               </div>
 
               {recentMovies.length === 0 ? (
-                <p className="text-xs text-white/35 py-2">No movies yet</p>
+                <p className="text-xs text-white/55 py-2">No movies yet</p>
               ) : (
                 <div className="space-y-2.5">
                   {recentMovies.map((movie) => (
@@ -387,7 +387,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-white/80 truncate">{movie.title}</p>
-                          <p className="text-[10px] text-white/35 truncate">
+                          <p className="text-[10px] text-white/55 truncate">
                             {movie.director ?? ""}{movie.year ? ` · ${movie.year}` : ""}
                           </p>
                           <StarRating value={movie.rating ?? 0} readonly />

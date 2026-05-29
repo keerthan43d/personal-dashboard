@@ -1,10 +1,10 @@
 "use client";
 import { useState, useRef, useEffect, useCallback } from "react";
-import { X, Send, Loader2, ChevronDown } from "lucide-react";
+import { Send, Loader2, ChevronDown } from "lucide-react";
 import { repo } from "@/lib/db";
 import { buildDataContext, type PuckDataContext } from "@/lib/puck/context-builder";
 
-const PUCK_IMG = "https://i1-e.pinimg.com/736x/01/ff/93/01ff93fa48499c9d0bfe90ea101fe9b0.jpg";
+const PUCK_IMG = "/puck.jpg";
 const MEMORY_KEY = "puck_memory_docs";
 const MEMORY_MAX = 12; // keep last 12 weeks
 
@@ -147,6 +147,14 @@ export function PuckWidget() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Escape closes the panel
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open]);
+
   async function sendMessage() {
     const text = input.trim();
     if (!text || loading) return;
@@ -191,11 +199,11 @@ export function PuckWidget() {
       <button
         onClick={open ? () => setOpen(false) : handleOpen}
         aria-label="Open Puck chat"
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD600]"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 overflow-hidden cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD600]"
         style={{
           boxShadow: pulse && !open
-            ? "0 0 0 4px rgba(255,214,0,0.35), 0 0 20px rgba(255,214,0,0.2)"
-            : "0 0 0 2px rgba(255,214,0,0.6), 0 4px 20px rgba(0,0,0,0.5)",
+            ? "0 0 0 2px rgba(255,214,0,0.4), 0 4px 20px rgba(0,0,0,0.5)"
+            : "0 0 0 2px rgba(255,214,0,0.7), 0 4px 20px rgba(0,0,0,0.5)",
           transition: "box-shadow 1.5s ease",
         }}
       >
@@ -222,7 +230,6 @@ export function PuckWidget() {
             height:       "500px",
             background:   "rgba(14,14,14,0.97)",
             border:       "1px solid rgba(255,214,0,0.2)",
-            borderRadius: "16px",
             backdropFilter: "blur(20px)",
             boxShadow:    "0 0 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,214,0,0.08)",
           }}
@@ -232,7 +239,7 @@ export function PuckWidget() {
             className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
             style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0" style={{ border: "1.5px solid rgba(255,214,0,0.5)" }}>
+            <div className="w-8 h-8 overflow-hidden flex-shrink-0" style={{ border: "1.5px solid rgba(255,214,0,0.5)" }}>
               {imgError ? (
                 <div className="w-full h-full bg-[#1a1a1a] flex items-center justify-center text-[#FFD600] font-black text-sm">P</div>
               ) : (
@@ -241,13 +248,13 @@ export function PuckWidget() {
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-white font-black text-sm tracking-wide">PUCK</div>
-              <div className="text-[10px] text-white/30 tracking-widest uppercase">
+              <div className="text-[10px] text-white/50 tracking-widest uppercase">
                 {dataLoaded ? "Fully loaded — ask me anything" : "Loading your data…"}
               </div>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="text-white/30 hover:text-white/70 transition-colors cursor-pointer p-1"
+              className="text-white/50 hover:text-white/70 transition-colors cursor-pointer p-1"
               aria-label="Close"
             >
               <ChevronDown className="w-4 h-4" />
@@ -259,7 +266,7 @@ export function PuckWidget() {
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "assistant" && (
-                  <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 mr-2 mt-1">
+                  <div className="w-5 h-5 overflow-hidden flex-shrink-0 mr-2 mt-1">
                     {imgError ? (
                       <div className="w-full h-full bg-[#222] flex items-center justify-center text-[#FFD600] text-[9px] font-black">P</div>
                     ) : (
@@ -271,7 +278,6 @@ export function PuckWidget() {
                   className="max-w-[78%] text-sm leading-relaxed"
                   style={{
                     padding:      "8px 12px",
-                    borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
                     background:   msg.role === "user"
                       ? "rgba(255,214,0,0.12)"
                       : "rgba(255,255,255,0.05)",
@@ -287,17 +293,17 @@ export function PuckWidget() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 mr-2 mt-1">
+                <div className="w-5 h-5 overflow-hidden flex-shrink-0 mr-2 mt-1">
                   {imgError ? (
                     <div className="w-full h-full bg-[#222] flex items-center justify-center text-[#FFD600] text-[9px] font-black">P</div>
                   ) : (
                     <img src={PUCK_IMG} alt="" className="w-full h-full object-cover" />
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-2" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px 12px 12px 2px" }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]/60 animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]/60 animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#FFD600]/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                <div className="flex items-center gap-1.5 px-3 py-2" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <span className="w-1.5 h-1.5 bg-[#FFD600]/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 bg-[#FFD600]/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 bg-[#FFD600]/60 animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             )}
@@ -323,7 +329,7 @@ export function PuckWidget() {
               onClick={sendMessage}
               disabled={loading || !input.trim()}
               aria-label="Send"
-              className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110"
+              className="flex-shrink-0 w-8 h-8 flex items-center justify-center cursor-pointer transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110"
               style={{ background: "rgba(255,214,0,0.9)" }}
             >
               {loading

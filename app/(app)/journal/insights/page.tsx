@@ -66,18 +66,18 @@ export default function InsightsPage() {
             transition={{ duration: 0.3 }}
             className="border border-white/8 bg-[#080808] p-4"
           >
-            <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/35 mb-4">
+            <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/55 mb-4">
               Mood & Energy
             </p>
             <MoodChart entries={entries} days={range} />
             <div className="flex gap-4 mt-3">
               <div className="flex items-center gap-1.5">
                 <span className="w-6 h-px bg-[#FFD600]" />
-                <span className="text-[9px] font-black tracking-[0.08em] uppercase text-white/30">Mood</span>
+                <span className="text-[9px] font-black tracking-[0.08em] uppercase text-white/50">Mood</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="w-6 h-px bg-white/30 border-dashed border-t" style={{ borderTopStyle: "dashed" }} />
-                <span className="text-[9px] font-black tracking-[0.08em] uppercase text-white/30">Energy</span>
+                <span className="text-[9px] font-black tracking-[0.08em] uppercase text-white/50">Energy</span>
               </div>
             </div>
           </motion.div>
@@ -90,7 +90,7 @@ export default function InsightsPage() {
               transition={{ delay: 0.1, duration: 0.3 }}
               className="border border-white/8 bg-[#080808] p-4"
             >
-              <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/35 mb-4">
+              <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/55 mb-4">
                 Habit Streak — Last 30 Days
               </p>
               <div className="space-y-2 overflow-x-auto">
@@ -129,7 +129,7 @@ export default function InsightsPage() {
             transition={{ delay: 0.2, duration: 0.3 }}
             className="border border-white/8 bg-[#080808] p-4"
           >
-            <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/35 mb-4">
+            <p className="text-[10px] font-black tracking-[0.12em] uppercase text-white/55 mb-4">
               AI Reflection
             </p>
             <AiSection entries={entries} problems={problems} />

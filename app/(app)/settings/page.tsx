@@ -118,14 +118,14 @@ export default function SettingsPage() {
 
             <div className="border border-white/8 bg-[#0d0d0d] divide-y divide-white/5">
               {habits.length === 0 && (
-                <p className="px-4 py-3 text-xs text-white/30 italic">No habits yet.</p>
+                <p className="px-4 py-3 text-xs text-white/50 italic">No habits yet.</p>
               )}
               {habits.map((h) => (
                 <div key={h.id} className="flex items-center gap-3 px-4 py-2.5">
                   <GripVertical className="w-3.5 h-3.5 text-white/15 flex-shrink-0" />
                   <span className={cn(
                     "flex-1 text-sm",
-                    h.active ? "text-white/75" : "text-white/25 line-through"
+                    h.active ? "text-white/75" : "text-white/45 line-through"
                   )}>
                     {h.name}
                   </span>
@@ -135,7 +135,7 @@ export default function SettingsPage() {
                       "text-[9px] font-black tracking-[0.1em] uppercase border px-2 py-1 transition-colors",
                       h.active
                         ? "border-[#FFD600]/30 text-[#FFD600]/60 hover:border-[#FFD600]/50"
-                        : "border-white/10 text-white/25 hover:border-white/20"
+                        : "border-white/10 text-white/45 hover:border-white/20"
                     )}
                   >
                     {h.active ? "Active" : "Off"}

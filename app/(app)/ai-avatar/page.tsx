@@ -189,7 +189,7 @@ export default function AiAvatarPage() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={photoPreview} alt="avatar" className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-[11px] text-white/35 tracking-wide uppercase">
+                  <span className="text-[11px] text-white/55 tracking-wide uppercase">
                     Click to upload a clear front-facing photo
                   </span>
                 )}
@@ -222,7 +222,7 @@ export default function AiAvatarPage() {
                 className="min-h-[120px] resize-y bg-white/[0.02] border-white/10 text-sm"
               />
               {script.trim() && (
-                <p className="mt-1.5 text-[10px] text-white/30 uppercase tracking-wide">
+                <p className="mt-1.5 text-[10px] text-white/50 uppercase tracking-wide">
                   ~{dur}s of speech · {script.trim().split(/\s+/).filter(Boolean).length} words
                   {dur > 24 && <span className="text-amber-400/70"> · keep under ~24s for best results</span>}
                 </p>
@@ -288,7 +288,7 @@ export default function AiAvatarPage() {
                     <p className="text-[11px] text-rose-300/80">{error}</p>
                   </div>
                 ) : (
-                  <span className="text-[11px] text-white/25 uppercase tracking-wide">
+                  <span className="text-[11px] text-white/45 uppercase tracking-wide">
                     Your video will appear here
                   </span>
                 )}

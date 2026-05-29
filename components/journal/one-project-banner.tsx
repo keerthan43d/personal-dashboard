@@ -89,7 +89,7 @@ export function OneProjectBanner() {
               </div>
               <button
                 onClick={() => setDialogOpen(true)}
-                className="text-white/25 hover:text-white/60 transition-colors shrink-0 mt-1"
+                className="text-white/45 hover:text-white/60 transition-colors shrink-0 mt-1"
               >
                 <Pencil className="w-3.5 h-3.5" />
               </button>

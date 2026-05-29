@@ -99,7 +99,7 @@ export function SidebarNav() {
                     "group relative h-9 transition-all duration-150 ease-linear border-l-2",
                     active
                       ? "border-l-[#FFD600] bg-white/[0.03] text-white"
-                      : "border-l-transparent text-white/35 hover:text-white/70 hover:bg-white/[0.02]"
+                      : "border-l-transparent text-white/55 hover:text-white/70 hover:bg-white/[0.02]"
                   )}
                 >
                   <Link href={href} className="flex items-center gap-3 px-3">
@@ -142,7 +142,7 @@ export function SidebarNav() {
                 "h-9 transition-all duration-150 ease-linear border-l-2",
                 pathname === "/settings"
                   ? "border-l-[#FFD600] bg-white/[0.03] text-white"
-                  : "border-l-transparent text-white/35 hover:text-white/70 hover:bg-white/[0.02]"
+                  : "border-l-transparent text-white/55 hover:text-white/70 hover:bg-white/[0.02]"
               )}
             >
               <Link href="/settings" className="flex items-center gap-3 px-3">
@@ -170,7 +170,7 @@ export function SidebarNav() {
             <SidebarMenuButton
               tooltip="Logout"
               onClick={logout}
-              className="h-9 transition-all duration-150 ease-linear border-l-2 border-l-transparent text-white/35 hover:text-rose-400 hover:bg-rose-500/5 cursor-pointer"
+              className="h-9 transition-all duration-150 ease-linear border-l-2 border-l-transparent text-white/55 hover:text-rose-400 hover:bg-rose-500/5 cursor-pointer"
             >
               <div className="flex items-center gap-3 px-3">
                 <LogOut className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} />

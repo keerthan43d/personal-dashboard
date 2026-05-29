@@ -53,7 +53,7 @@ export function Topbar({ title, subtitle, actions }: TopbarProps) {
     <>
       <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-white/10 bg-black px-4">
         {/* Sidebar toggle */}
-        <SidebarTrigger className="text-white/35 hover:text-white/70 transition-colors duration-150" />
+        <SidebarTrigger className="text-white/55 hover:text-white/70 transition-colors duration-150" />
 
         {/* Title */}
         <div className="flex-1 min-w-0">
@@ -61,7 +61,7 @@ export function Topbar({ title, subtitle, actions }: TopbarProps) {
             {title}
           </h1>
           {subtitle && (
-            <p className="text-[10px] text-white/35 tracking-[0.08em] uppercase truncate mt-0.5">{subtitle}</p>
+            <p className="text-[10px] text-white/55 tracking-[0.08em] uppercase truncate mt-0.5">{subtitle}</p>
           )}
         </div>
 
@@ -73,7 +73,7 @@ export function Topbar({ title, subtitle, actions }: TopbarProps) {
             onClick={() => setOpen(true)}
             className={cn(
               "hidden sm:flex items-center gap-2 h-8 px-3",
-              "bg-transparent border border-white/10 text-white/35",
+              "bg-transparent border border-white/10 text-white/55",
               "hover:border-white/20 hover:text-white/70 transition-all duration-150",
               "text-[10px] font-black tracking-[0.1em] uppercase cursor-pointer"
             )}
