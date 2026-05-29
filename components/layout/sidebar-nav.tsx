@@ -13,6 +13,7 @@ import {
   LogOut,
   BookMarked,
   PenLine,
+  Clapperboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -35,6 +36,7 @@ const NAV = [
   { href: "/movies",    label: "VISIONS",   icon: Film },
   { href: "/tv-shows",  label: "TV SHOWS",  icon: Tv },
   { href: "/linkedin-workflow", label: "CONTENT", icon: PenLine },
+  { href: "/ai-avatar", label: "AVATAR", icon: Clapperboard },
 ];
 
 export function SidebarNav() {
