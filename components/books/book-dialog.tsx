@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Search, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -23,7 +23,7 @@ export function BookDialog({ open, onClose, existing }: BookDialogProps) {
   const [saving, setSaving] = useState(false);
   const [searching, setSearching] = useState(false);
 
-  const [form, setForm] = useState({
+  const buildForm = () => ({
     title:      existing?.title      ?? "",
     author:     existing?.author     ?? "",
     coverUrl:   existing?.coverUrl   ?? "",
@@ -36,6 +36,14 @@ export function BookDialog({ open, onClose, existing }: BookDialogProps) {
     notes:      existing?.notes      ?? "",
     pages:      existing?.pages?.toString() ?? "",
   });
+  const [form, setForm] = useState(buildForm);
+
+  // Reset form each time the dialog opens so a fresh "Add" is empty and
+  // "Edit" loads the selected item (the dialog stays mounted between opens).
+  useEffect(() => {
+    if (open) setForm(buildForm());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, existing?.id]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));

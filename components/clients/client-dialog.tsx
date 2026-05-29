@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -24,7 +24,7 @@ export function ClientDialog({ open, onClose, existing }: ClientDialogProps) {
   const { addClient, editClient } = useClients();
   const [saving, setSaving] = useState(false);
 
-  const [form, setForm] = useState({
+  const buildForm = () => ({
     name:        existing?.name        ?? "",
     company:     existing?.company     ?? "",
     email:       existing?.email       ?? "",
@@ -33,6 +33,14 @@ export function ClientDialog({ open, onClose, existing }: ClientDialogProps) {
     currency:    existing?.currency    ?? "INR",
     notes:       existing?.notes       ?? "",
   });
+  const [form, setForm] = useState(buildForm);
+
+  // Reset form each time the dialog opens so a fresh "Add" is empty and
+  // "Edit" loads the selected item (the dialog stays mounted between opens).
+  useEffect(() => {
+    if (open) setForm(buildForm());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, existing?.id]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
