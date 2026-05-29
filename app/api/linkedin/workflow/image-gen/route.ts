@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_MODELS } from "@/lib/linkedin/openrouter";
 
-type ImageStyle = "minimalist" | "beeple" | "custom";
+type ImageStyle = "minimalist" | "statement" | "beeple" | "custom";
 
 function pickModel(style: ImageStyle): string {
   if (style === "beeple") return DEFAULT_MODELS.imageBeeple;
@@ -71,8 +71,8 @@ export async function POST(req: NextRequest) {
 
     const model = pickModel(style);
 
-    // Append square aspect ratio instruction
-    const fullPrompt = `${prompt.trim()} Square 1:1 aspect ratio.`;
+    // LinkedIn portrait gives the most feed real estate
+    const fullPrompt = `${prompt.trim()} Portrait 4:5 aspect ratio (1080x1350), vertical composition.`;
 
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",

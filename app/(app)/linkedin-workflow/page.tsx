@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Copy, Check, Save, RefreshCw, Loader2,
-  ChevronRight, AlertCircle, CheckCircle2, XCircle,
+  ChevronRight, AlertCircle, CheckCircle2,
   TrendingUp, Calendar, ArrowRight, Globe, ImageIcon, Download,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -97,7 +97,7 @@ type Step =
   | "final"
   | "image";
 
-type ImageStyle = "minimalist" | "beeple" | "custom";
+type ImageStyle = "minimalist" | "statement" | "beeple" | "custom";
 
 function getSteps(type: DayType): Step[] {
   if (type === "research") return ["angle", "research", "approve", "take", "generating", "hook", "final", "image"];
@@ -123,11 +123,17 @@ function getStepLabel(step: Step): string {
 // ── Hook analysis type ────────────────────────────────────────────
 
 interface HookAnalysis {
-  wordCount: number;
-  under12Words: boolean;
-  hasSpecific: boolean;
+  score: number;
+  curiosity: "high" | "medium" | "low";
+  specificity: "high" | "medium" | "low";
+  tension: "high" | "medium" | "low";
   strong: boolean;
   reason: string;
+}
+
+interface HookOption {
+  archetype: string;
+  hook: string;
 }
 
 // ── Planner topic type ────────────────────────────────────────────
@@ -153,6 +159,7 @@ export default function LinkedInWorkflowPage() {
   const [take, setTake] = useState("");
   const [post, setPost] = useState("");
   const [hookAnalysis, setHookAnalysis] = useState<HookAnalysis | null>(null);
+  const [hookOptions, setHookOptions] = useState<HookOption[]>([]);
   const [plannerTopics, setPlannerTopics] = useState<PlannerTopic[]>([]);
 
   const [imageStyle, setImageStyle] = useState<ImageStyle>("minimalist");
@@ -167,6 +174,7 @@ export default function LinkedInWorkflowPage() {
   const [loadingImagePrompt, setLoadingImagePrompt] = useState(false);
   const [loadingImageGen, setLoadingImageGen] = useState(false);
   const [regenHook, setRegenHook] = useState(false);
+  const [loadingHookOptions, setLoadingHookOptions] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Reset when day changes
@@ -178,6 +186,7 @@ export default function LinkedInWorkflowPage() {
     setTake("");
     setPost("");
     setHookAnalysis(null);
+    setHookOptions([]);
     setImageStyle("minimalist");
     setImagePrompt("");
     setImageUrl(null);
@@ -254,6 +263,7 @@ export default function LinkedInWorkflowPage() {
       const hookData = await hookRes.json();
       if (hookRes.ok) setHookAnalysis(hookData.analysis);
 
+      setHookOptions([]);
       setStep("hook");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Generation failed");
@@ -262,6 +272,44 @@ export default function LinkedInWorkflowPage() {
       setLoadingGenerate(false);
     }
   }, [selectedDay, angle, research, notes, take]);
+
+  const handleLoadHookOptions = useCallback(async () => {
+    setLoadingHookOptions(true);
+    try {
+      const res = await fetch("/api/linkedin/workflow/hook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post, action: "options" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setHookOptions(data.options ?? []);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to load hook options");
+    } finally {
+      setLoadingHookOptions(false);
+    }
+  }, [post]);
+
+  const handleApplyHook = useCallback(async (newHook: string) => {
+    const rest = post.split("\n").slice(1).join("\n");
+    const newPost = newHook + "\n" + rest;
+    setPost(newPost);
+    setHookOptions([]);
+    // Re-judge the freshly applied hook
+    try {
+      const res = await fetch("/api/linkedin/workflow/hook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ post: newPost, action: "check" }),
+      });
+      const data = await res.json();
+      if (res.ok) setHookAnalysis(data.analysis);
+    } catch {
+      /* non-fatal — keep the applied hook */
+    }
+    toast.success("Hook applied");
+  }, [post]);
 
   const handleRegenerateHook = useCallback(async () => {
     setRegenHook(true);
@@ -417,6 +465,7 @@ export default function LinkedInWorkflowPage() {
                 setResearch("");
                 setPost("");
                 setHookAnalysis(null);
+                setHookOptions([]);
               }}
               className="text-muted-foreground h-8 text-xs uppercase tracking-wider"
             >
@@ -577,6 +626,10 @@ export default function LinkedInWorkflowPage() {
                   <HookStep
                     post={post}
                     analysis={hookAnalysis}
+                    options={hookOptions}
+                    onLoadOptions={handleLoadHookOptions}
+                    loadingOptions={loadingHookOptions}
+                    onApplyHook={handleApplyHook}
                     onRegenerateHook={handleRegenerateHook}
                     regenHook={regenHook}
                     onProceed={() => goToStep("final")}
@@ -897,42 +950,52 @@ function TakeStep({
 function HookStep({
   post,
   analysis,
+  options,
+  onLoadOptions,
+  loadingOptions,
+  onApplyHook,
   onRegenerateHook,
   regenHook,
   onProceed,
 }: {
   post: string;
   analysis: HookAnalysis | null;
+  options: HookOption[];
+  onLoadOptions: () => void;
+  loadingOptions: boolean;
+  onApplyHook: (hook: string) => void;
   onRegenerateHook: () => void;
   regenHook: boolean;
   onProceed: () => void;
 }) {
   const firstLine = post.split("\n").find((l) => l.trim().length > 0) ?? "";
+  const score = analysis?.score ?? 0;
+  const scoreColor =
+    score >= 7 ? "text-emerald-400" : score >= 5 ? "text-amber-400" : "text-rose-400";
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <div className="p-5 border border-white/6 bg-[#111111] space-y-3">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground">
-          Hook Analysis
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground">
+            Hook Analysis
+          </h3>
+          {analysis && (
+            <span className={cn("text-xs font-black tabular-nums", scoreColor)}>
+              {analysis.score}/10
+            </span>
+          )}
+        </div>
         <p className="text-base font-semibold text-[#f5f5f5] leading-snug">&ldquo;{firstLine}&rdquo;</p>
 
         {analysis && (
           <div className="space-y-2 pt-2 border-t border-white/6">
-            <HookCheck
-              label="Under 12 words"
-              pass={analysis.under12Words}
-              detail={`${analysis.wordCount} words`}
-            />
-            <HookCheck
-              label="Specific number or name"
-              pass={analysis.hasSpecific}
-            />
-            <HookCheck
-              label="Strong hook overall"
-              pass={analysis.strong}
-              detail={analysis.reason}
-            />
+            <div className="flex flex-wrap gap-2">
+              <HookMetric label="Curiosity" level={analysis.curiosity} />
+              <HookMetric label="Tension" level={analysis.tension} />
+              <HookMetric label="Specificity" level={analysis.specificity} />
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-relaxed pt-1">{analysis.reason}</p>
           </div>
         )}
       </div>
@@ -940,9 +1003,52 @@ function HookStep({
       {analysis && !analysis.strong && (
         <div className="flex items-start gap-2 p-3 border border-amber-500/20 bg-amber-500/5 text-amber-400 text-xs">
           <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-          <span>Hook is weak. Regenerate it before posting — it&apos;s the first thing people see.</span>
+          <span>This hook won&apos;t stop the scroll. Try the alternatives below — it&apos;s the first thing people see.</span>
         </div>
       )}
+
+      {/* 3 hook options */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground">
+            Alternative hooks
+          </h3>
+          <button
+            onClick={onLoadOptions}
+            disabled={loadingOptions}
+            className="flex items-center gap-1 text-[10px] text-white/40 hover:text-white/70 transition-colors cursor-pointer disabled:opacity-40"
+          >
+            {loadingOptions ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+            {options.length > 0 ? "More" : "Generate 3 options"}
+          </button>
+        </div>
+
+        {loadingOptions && options.length === 0 && (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-16 skeleton" />
+            ))}
+          </div>
+        )}
+
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => onApplyHook(opt.hook)}
+            className="w-full text-left p-4 border border-white/8 bg-[#111111] hover:border-[#FFD600]/50 hover:bg-[#FFD600]/5 transition-all duration-150 cursor-pointer group"
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[9px] font-black uppercase tracking-[0.12em] text-[#FFD600]/70">
+                {opt.archetype}
+              </span>
+              <span className="text-[9px] uppercase tracking-wider text-white/30 group-hover:text-[#FFD600]">
+                Use this →
+              </span>
+            </div>
+            <p className="text-sm text-[#f5f5f5] leading-snug whitespace-pre-line">{opt.hook}</p>
+          </button>
+        ))}
+      </div>
 
       <div className="flex items-center gap-2">
         <Button
@@ -970,31 +1076,17 @@ function HookStep({
   );
 }
 
-function HookCheck({
-  label,
-  pass,
-  detail,
-}: {
-  label: string;
-  pass: boolean;
-  detail?: string;
-}) {
+function HookMetric({ label, level }: { label: string; level: "high" | "medium" | "low" }) {
+  const color =
+    level === "high"
+      ? "text-emerald-400 border-emerald-400/30 bg-emerald-400/5"
+      : level === "medium"
+      ? "text-amber-400 border-amber-400/30 bg-amber-400/5"
+      : "text-rose-400 border-rose-400/30 bg-rose-400/5";
   return (
-    <div className="flex items-start gap-2">
-      {pass ? (
-        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
-      ) : (
-        <XCircle className="w-3.5 h-3.5 text-rose-400 flex-shrink-0 mt-0.5" />
-      )}
-      <div>
-        <span className={cn("text-xs font-semibold", pass ? "text-emerald-400" : "text-rose-400")}>
-          {label}
-        </span>
-        {detail && (
-          <span className="text-[11px] text-muted-foreground ml-2">{detail}</span>
-        )}
-      </div>
-    </div>
+    <span className={cn("text-[10px] font-bold px-2 py-1 border tracking-wide", color)}>
+      {label}: {level}
+    </span>
   );
 }
 
@@ -1105,6 +1197,7 @@ function FinalStep({
 
 const IMAGE_STYLES: { value: ImageStyle; label: string; hint: string }[] = [
   { value: "minimalist", label: "Minimalist", hint: "Clean, premium, negative space" },
+  { value: "statement", label: "Statement Card", hint: "Big bold text + number" },
   { value: "beeple", label: "Beeple Style", hint: "Surreal, cinematic, hyper-detailed" },
   { value: "custom", label: "Custom", hint: "Write your own prompt" },
 ];
@@ -1146,13 +1239,13 @@ function ImageStep({
         <label className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground block mb-3">
           Image style
         </label>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {IMAGE_STYLES.map((s) => (
             <button
               key={s.value}
               onClick={() => onStyleChange(s.value)}
               className={cn(
-                "flex-1 p-3 text-left transition-all duration-150 border cursor-pointer",
+                "flex-1 min-w-[130px] p-3 text-left transition-all duration-150 border cursor-pointer",
                 style === s.value
                   ? "border-[#FFD600] bg-[#FFD600]/10"
                   : "border-white/8 bg-[#111111] hover:border-white/20"
@@ -1222,11 +1315,15 @@ function ImageStep({
 
       {/* Loading placeholder */}
       {loadingImage && (
-        <div className="aspect-square border border-dashed border-white/10 flex items-center justify-center">
+        <div className="aspect-[4/5] max-w-sm mx-auto border border-dashed border-white/10 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3 text-muted-foreground">
             <Loader2 className="w-8 h-8 animate-spin text-[#FFD600]" />
             <span className="text-xs">
-              {style === "beeple" ? "Rendering cinematic scene…" : "Composing minimalist design…"}
+              {style === "beeple"
+                ? "Rendering cinematic scene…"
+                : style === "statement"
+                ? "Setting bold type…"
+                : "Composing design…"}
             </span>
           </div>
         </div>
@@ -1235,7 +1332,7 @@ function ImageStep({
       {/* Image result */}
       {imageUrl && !loadingImage && (
         <div className="space-y-3">
-          <div className="aspect-square border border-white/8 overflow-hidden relative group">
+          <div className="aspect-[4/5] max-w-sm mx-auto border border-white/8 overflow-hidden relative group">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageUrl}

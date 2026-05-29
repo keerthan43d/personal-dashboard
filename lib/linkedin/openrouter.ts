@@ -6,7 +6,7 @@ export const DEFAULT_MODELS = {
   fast: "anthropic/claude-haiku-4-5",
   image: "google/gemini-2.5-flash-image",
   // Workflow image step
-  promptWriter: "openai/gpt-4o-mini",
+  promptWriter: "openai/gpt-4o",
   imageMinimalist: "google/gemini-2.5-flash-image",
   imageBeeple: "google/gemini-2.5-flash-image",
 } as const;
