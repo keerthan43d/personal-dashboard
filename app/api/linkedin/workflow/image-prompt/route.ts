@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOpenRouter, DEFAULT_MODELS } from "@/lib/linkedin/openrouter";
+import { DESIGN_STYLE_BIBLE } from "@/lib/linkedin/design-style-bible";
 
-type ImageStyle = "editorial" | "minimalist" | "statement" | "beeple";
+type ImageStyle = "artdirector" | "minimalist" | "statement" | "beeple";
 
-const STYLE_DESCRIPTORS: Record<Exclude<ImageStyle, "editorial">, string> = {
+const STYLE_DESCRIPTORS: Record<Exclude<ImageStyle, "artdirector">, string> = {
   minimalist:
     "minimalist editorial design, lots of negative space, clean geometry, sharp typography if any text appears, premium magazine feel",
   statement:
@@ -12,95 +13,63 @@ const STYLE_DESCRIPTORS: Record<Exclude<ImageStyle, "editorial">, string> = {
     "Beeple Everydays digital art style, surreal cinematic scene, hyper-detailed textures, dystopian scale, dramatic god rays, hyper-realistic rendering",
 };
 
-const MOOD_BY_STYLE: Record<Exclude<ImageStyle, "editorial">, string> = {
+const MOOD_BY_STYLE: Record<Exclude<ImageStyle, "artdirector">, string> = {
   minimalist: "calm, premium, confident, breathing room",
   statement: "bold, punchy, confident, scroll-stopping, high-contrast",
   beeple: "epic, dramatic, cinematic, awe-inspiring scale",
 };
 
-// ── Editorial "CONTRAST" template ─────────────────────────────────────
-// This is the user's best-performing LinkedIn layout, hardcoded so every
-// generated image looks like the same clean, premium editorial poster.
-// The model only fills the text/subject SLOTS; the look is fixed in code.
-
-type EditorialSlots = {
-  headline: string; // big bold purple headline, 1–3 words (often "X MEETS Y")
-  subhead: string; // short red uppercase kicker under the headline
-  subject: string; // the two real objects to photograph, tied to the post
-  label: string; // single uppercase word at the very bottom (e.g. PREMIUM)
-};
-
-function buildEditorialPrompt(s: EditorialSlots): string {
-  const headline = s.headline.toUpperCase().trim();
-  const subhead = s.subhead.toUpperCase().trim();
-  const label = s.label.toUpperCase().trim();
-  const subject = s.subject.trim();
-
-  return [
-    "A premium editorial LinkedIn poster on a seamless soft off-white / light warm-grey background (#f3f2ef) with generous negative space.",
-    `TOP: a single heavy uppercase headline "${headline}" centered near the top in deep royal purple, ultra-bold geometric sans-serif (Poppins / Inter Black), large and unignorable.`,
-    `Directly beneath it a short uppercase red subhead "${subhead}" in a smaller bold sans-serif.`,
-    `CENTER: ${subject}, shown as clean real product photography — one object floating in the upper third and one grounded in the lower-center as the visual anchor, with at least one rendered in bold royal purple.`,
-    "SIDES: minimalist flat red line-art illustrations of a hand and forearm reaching in from the left edge and another from the right edge — a single continuous thin red outline with small solid red cuff blocks, editorial doodle style, never photographic.",
-    `BOTTOM: a single small uppercase label "${label}" centered at the very bottom in deep royal purple.`,
-    "Strict three-color discipline: deep royal purple, one bold red accent, and the light grey background ONLY — no other colors. Spell every word of text exactly as written.",
-    "Balanced symmetrical composition, lots of breathing room, premium magazine feel, sharp high detail, portrait 4:5 framing.",
-  ].join(" ");
-}
-
-function parseSlots(raw: string): EditorialSlots {
-  const cleaned = raw
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim();
-  const match = cleaned.match(/\{[\s\S]*\}/);
-  const json = match ? match[0] : cleaned;
-  const parsed = JSON.parse(json) as Partial<EditorialSlots>;
-  return {
-    headline: parsed.headline?.trim() || "NEW MEETS OLD",
-    subhead: parsed.subhead?.trim() || "THE CONTRAST",
-    subject:
-      parsed.subject?.trim() ||
-      "two contrasting objects that represent the post's core idea",
-    label: parsed.label?.trim() || "PREMIUM",
-  };
-}
-
 export async function POST(req: NextRequest) {
   try {
-    const { post, style } = await req.json() as {
+    const { post, style, concept } = await req.json() as {
       post: string;
       style: ImageStyle;
+      concept?: string;
     };
 
     const openrouter = getOpenRouter();
 
-    // ── Editorial: model fills slots, code assembles the fixed layout ──
-    if (style === "editorial") {
+    // ── Art Director: reads post + concept + style bible, designs fresh ──
+    if (style === "artdirector") {
+      const conceptBlock = concept?.trim()
+        ? `THE CREATOR'S CONCEPT for this image (honor it — it is the creative brief):\n${concept.trim()}`
+        : `No concept was given. Read the post and decide the single strongest visual idea yourself.`;
+
       const res = await openrouter.chat.completions.create({
         model: DEFAULT_MODELS.promptWriter,
         messages: [
           {
             role: "system",
-            content: `You generate the TEXT and SUBJECT for a fixed editorial poster layout (a "CONTRAST" style card). You do NOT describe layout, colors, or style — those are locked. You only return the content slots as JSON.
+            content: `You are the lead VISUAL DESIGNER / ART DIRECTOR for a LinkedIn creator. You do not write generic prompts — you DESIGN. For each post you decide the concept, composition, color, type, and subject, then express it as one vivid image-generation prompt.
 
-Return ONLY a JSON object with these keys:
-- "headline": the big bold headline. 1–3 words, uppercase. Prefer a tension/contrast construction like "NEW MEETS OLD", "FAST VS SLOW", "FEAR INTO FUEL". Pull the core idea straight from the post.
-- "subhead": a short punchy kicker, max 5 words, uppercase. Reinforces the headline.
-- "subject": one short phrase naming TWO real, photographable objects that visually represent the post's two contrasting ideas (e.g. "a vintage leather brogue shoe and a modern purple running sneaker"). Concrete physical objects only — no abstractions, no people.
-- "label": a single uppercase word for the bottom, signalling quality or category (e.g. "PREMIUM", "PROVEN", "FOUNDER").
+You work from the creator's own design DNA, distilled from their best-performing posters:
 
-No markdown, no explanation. Just the JSON object.`,
+${DESIGN_STYLE_BIBLE}
+
+YOUR PROCESS:
+1. Read the post and the creator's concept. Find the ONE idea worth showing — a tension, a metaphor, a transformation, a hero object. Not a literal illustration of every word.
+2. Choose a layout from the design DNA's recurring moves (pick 2-3 that fit — never all). Decide the ONE accent color that matches this post's mood.
+3. Decide the exact on-image TEXT: a short bold headline (max ~6 words, pull it from the post/concept) and an optional shorter subhead or kicker. Name which word(s) sit in the highlight box.
+4. Describe the hero subject and its treatment (cut-out, statue, duotone, 3D prop, frame/glow), the backdrop (grid? doodles?), and the footer lockup.
+
+HARD RULES:
+- Make it look ART-DIRECTED and editorial, never stock or generic-AI.
+- It MUST look different from a fixed template — vary composition, accent color, and subject treatment.
+- Quote the exact on-image text so the generator spells it correctly. Keep total on-image text short.
+- Portrait 4:5 framing.
+- Write in natural visual prose. Do NOT echo the design-DNA's section labels or ALL-CAPS terms (e.g. "HIGHLIGHT-BOX TYPOGRAPHY", "CLASSICAL MARBLE STATUE", "QUIET FOOTER LOCKUP") — describe the actual visual instead. The ONLY words in capitals or quotes in your output should be the literal text meant to be printed on the poster.
+
+Return ONLY the final image-generation prompt — one rich paragraph, under 150 words. No labels, no commentary, no markdown.`,
           },
           {
             role: "user",
-            content: `Post:\n\n${post.slice(0, 600)}`,
+            content: `${conceptBlock}\n\nTHE FINAL POST:\n${post.slice(0, 1000)}\n\nDesign the poster and return the image prompt.`,
           },
         ],
       });
 
-      const slots = parseSlots(res.choices[0].message.content ?? "");
-      return NextResponse.json({ prompt: buildEditorialPrompt(slots) });
+      const prompt = res.choices[0].message.content?.trim() ?? "";
+      return NextResponse.json({ prompt });
     }
 
     // ── Other styles: free-form prompt written by the model ──

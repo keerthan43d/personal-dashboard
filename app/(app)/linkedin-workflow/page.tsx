@@ -97,7 +97,7 @@ type Step =
   | "final"
   | "image";
 
-type ImageStyle = "editorial" | "minimalist" | "statement" | "beeple" | "custom";
+type ImageStyle = "artdirector" | "minimalist" | "statement" | "beeple" | "custom";
 
 function getSteps(type: DayType): Step[] {
   if (type === "research") return ["angle", "research", "approve", "take", "generating", "hook", "final", "image"];
@@ -162,7 +162,8 @@ export default function LinkedInWorkflowPage() {
   const [hookOptions, setHookOptions] = useState<HookOption[]>([]);
   const [plannerTopics, setPlannerTopics] = useState<PlannerTopic[]>([]);
 
-  const [imageStyle, setImageStyle] = useState<ImageStyle>("editorial");
+  const [imageStyle, setImageStyle] = useState<ImageStyle>("artdirector");
+  const [imageConcept, setImageConcept] = useState("");
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
@@ -187,7 +188,8 @@ export default function LinkedInWorkflowPage() {
     setPost("");
     setHookAnalysis(null);
     setHookOptions([]);
-    setImageStyle("editorial");
+    setImageStyle("artdirector");
+    setImageConcept("");
     setImagePrompt("");
     setImageUrl(null);
   }, [selectedDay]);
@@ -383,7 +385,7 @@ export default function LinkedInWorkflowPage() {
       const res = await fetch("/api/linkedin/workflow/image-prompt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ post: currentPost, style }),
+        body: JSON.stringify({ post: currentPost, style, concept: style === "artdirector" ? imageConcept : undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -393,7 +395,7 @@ export default function LinkedInWorkflowPage() {
     } finally {
       setLoadingImagePrompt(false);
     }
-  }, []);
+  }, [imageConcept]);
 
   const handleGenerateImage = useCallback(async () => {
     if (!imagePrompt.trim()) return;
@@ -671,6 +673,8 @@ export default function LinkedInWorkflowPage() {
                       setImageUrl(null);
                       handleGenerateImagePrompt(s, post);
                     }}
+                    concept={imageConcept}
+                    onConceptChange={setImageConcept}
                     imagePrompt={imagePrompt}
                     onImagePromptChange={setImagePrompt}
                     onRegeneratePrompt={() => handleGenerateImagePrompt(imageStyle, post)}
@@ -1200,7 +1204,7 @@ function FinalStep({
 // ── Image Step ────────────────────────────────────────────────────
 
 const IMAGE_STYLES: { value: ImageStyle; label: string; hint: string }[] = [
-  { value: "editorial", label: "Editorial Contrast", hint: "Your signature CONTRAST poster" },
+  { value: "artdirector", label: "Art Director", hint: "Designs from your references + concept" },
   { value: "minimalist", label: "Minimalist", hint: "Clean, premium, negative space" },
   { value: "statement", label: "Statement Card", hint: "Big bold text + number" },
   { value: "beeple", label: "Beeple Style", hint: "Surreal, cinematic, hyper-detailed" },
@@ -1211,6 +1215,8 @@ function ImageStep({
   post,
   style,
   onStyleChange,
+  concept,
+  onConceptChange,
   imagePrompt,
   onImagePromptChange,
   onRegeneratePrompt,
@@ -1224,6 +1230,8 @@ function ImageStep({
   post: string;
   style: ImageStyle;
   onStyleChange: (s: ImageStyle) => void;
+  concept: string;
+  onConceptChange: (v: string) => void;
   imagePrompt: string;
   onImagePromptChange: (v: string) => void;
   onRegeneratePrompt: () => void;
@@ -1264,6 +1272,30 @@ function ImageStep({
           ))}
         </div>
       </div>
+
+      {/* Concept box — Art Director designs around this */}
+      {style === "artdirector" && (
+        <div className="space-y-2">
+          <label className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground block">
+            Your concept <span className="text-white/30 normal-case font-normal tracking-normal">(optional — leave blank to let the designer decide)</span>
+          </label>
+          <Textarea
+            value={concept}
+            onChange={(e) => onConceptChange(e.target.value)}
+            rows={3}
+            placeholder="The idea you want shown — e.g. “front-page splash, a marble statue scrolling a phone, blood-red accent”. The art director reads your post + your references and designs around this."
+            className="bg-white/5 border-white/10 text-sm leading-relaxed resize-none placeholder:text-white/20"
+          />
+          <button
+            onClick={onRegeneratePrompt}
+            disabled={loadingPrompt}
+            className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#FFD600]/80 hover:text-[#FFD600] transition-colors cursor-pointer disabled:opacity-40"
+          >
+            {loadingPrompt ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+            Design from concept
+          </button>
+        </div>
+      )}
 
       {/* Prompt box */}
       <div className="space-y-2">
@@ -1328,8 +1360,8 @@ function ImageStep({
                 ? "Rendering cinematic scene…"
                 : style === "statement"
                 ? "Setting bold type…"
-                : style === "editorial"
-                ? "Composing your CONTRAST poster…"
+                : style === "artdirector"
+                ? "Art directing your poster…"
                 : "Composing design…"}
             </span>
           </div>
