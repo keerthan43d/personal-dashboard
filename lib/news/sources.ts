@@ -58,6 +58,33 @@ export const NEWS_CATEGORIES: NewsCategory[] = [
       "https://economictimes.indiatimes.com/rssfeedstopstories.cms",
     ],
   },
+  {
+    id: "behaviour",
+    label: "Human Behaviour",
+    // Philosophy, psychology of the mind, history & fresh discoveries.
+    feeds: [
+      "https://aeon.co/feed.rss",
+      "https://psyche.co/feed.rss",
+      "https://nautil.us/feed/",
+      "https://bigthink.com/feed/",
+      "https://www.smithsonianmag.com/rss/latest_articles/",
+      "https://www.ancient-origins.net/rss.xml",
+      "https://www.atlasobscura.com/feeds/latest",
+    ],
+  },
+  {
+    id: "thinking",
+    label: "Thinking & Leadership",
+    // Critical thinking, mental models, the science of thinking, leadership.
+    feeds: [
+      "https://fs.blog/feed/",
+      "https://nesslabs.com/feed",
+      "https://bigthink.com/feed/",
+      "https://sloanreview.mit.edu/feed/",
+      "https://knowledge.wharton.upenn.edu/feed/",
+      "https://leadershipfreak.blog/feed/",
+    ],
+  },
 ];
 
 export function getCategory(id: string): NewsCategory | undefined {
