@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_MODELS } from "@/lib/linkedin/openrouter";
 
-type ImageStyle = "minimalist" | "statement" | "beeple" | "custom";
+type ImageStyle = "editorial" | "minimalist" | "statement" | "beeple" | "custom";
 
 function pickModel(style: ImageStyle): string {
   if (style === "beeple") return DEFAULT_MODELS.imageBeeple;

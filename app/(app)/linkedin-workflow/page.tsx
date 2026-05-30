@@ -97,7 +97,7 @@ type Step =
   | "final"
   | "image";
 
-type ImageStyle = "minimalist" | "statement" | "beeple" | "custom";
+type ImageStyle = "editorial" | "minimalist" | "statement" | "beeple" | "custom";
 
 function getSteps(type: DayType): Step[] {
   if (type === "research") return ["angle", "research", "approve", "take", "generating", "hook", "final", "image"];
@@ -162,7 +162,7 @@ export default function LinkedInWorkflowPage() {
   const [hookOptions, setHookOptions] = useState<HookOption[]>([]);
   const [plannerTopics, setPlannerTopics] = useState<PlannerTopic[]>([]);
 
-  const [imageStyle, setImageStyle] = useState<ImageStyle>("minimalist");
+  const [imageStyle, setImageStyle] = useState<ImageStyle>("editorial");
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
@@ -187,7 +187,7 @@ export default function LinkedInWorkflowPage() {
     setPost("");
     setHookAnalysis(null);
     setHookOptions([]);
-    setImageStyle("minimalist");
+    setImageStyle("editorial");
     setImagePrompt("");
     setImageUrl(null);
   }, [selectedDay]);
@@ -1196,6 +1196,7 @@ function FinalStep({
 // ── Image Step ────────────────────────────────────────────────────
 
 const IMAGE_STYLES: { value: ImageStyle; label: string; hint: string }[] = [
+  { value: "editorial", label: "Editorial Contrast", hint: "Your signature CONTRAST poster" },
   { value: "minimalist", label: "Minimalist", hint: "Clean, premium, negative space" },
   { value: "statement", label: "Statement Card", hint: "Big bold text + number" },
   { value: "beeple", label: "Beeple Style", hint: "Surreal, cinematic, hyper-detailed" },
@@ -1323,6 +1324,8 @@ function ImageStep({
                 ? "Rendering cinematic scene…"
                 : style === "statement"
                 ? "Setting bold type…"
+                : style === "editorial"
+                ? "Composing your CONTRAST poster…"
                 : "Composing design…"}
             </span>
           </div>
