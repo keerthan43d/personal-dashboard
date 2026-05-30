@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Copy, Check, Save, RefreshCw, Loader2,
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Topbar } from "@/components/layout/topbar";
 import { PageShell } from "@/components/shared/page-shell";
 import { useLinkedIn } from "@/lib/hooks/use-linkedin";
+import { takeNewsSeed } from "@/lib/news/handoff";
 import { cn } from "@/lib/utils";
 
 // ── Day config ───────────────────────────────────────────────────
@@ -28,6 +29,20 @@ interface DayConfig {
   type: DayType;
   pasteLabel?: string;
   pasteHint?: string;
+  __news?: boolean; // synthetic day seeded from the News tab
+}
+
+// Synthetic "day" used when an article is sent over from the News tab.
+function makeNewsDay(category: string): DayConfig {
+  return {
+    jsDay: -1,
+    short: "NEWS",
+    label: "From News",
+    topic: category,
+    description: "From a news article you picked",
+    type: "research",
+    __news: true,
+  };
 }
 
 const DAYS: DayConfig[] = [
@@ -178,6 +193,18 @@ export default function LinkedInWorkflowPage() {
   const [loadingHookOptions, setLoadingHookOptions] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Article handed over from the News tab, applied once on the synthetic day.
+  const seedToApply = useRef<{ title: string; research: string } | null>(null);
+
+  // On mount: if the News tab stashed an article, switch to a synthetic
+  // "From News" day. The reset effect below then seeds research + jumps to Take.
+  useEffect(() => {
+    const seed = takeNewsSeed();
+    if (!seed) return;
+    seedToApply.current = { title: seed.title, research: seed.research };
+    setSelectedDay(makeNewsDay(seed.category));
+  }, []);
+
   // Reset when day changes
   useEffect(() => {
     setStep("angle");
@@ -192,6 +219,15 @@ export default function LinkedInWorkflowPage() {
     setImageConcept("");
     setImagePrompt("");
     setImageUrl(null);
+
+    // Apply a pending news seed only on the synthetic News day.
+    if (selectedDay.__news && seedToApply.current) {
+      const seed = seedToApply.current;
+      seedToApply.current = null;
+      setAngle(seed.title);
+      setResearch(seed.research);
+      setStep("take");
+    }
   }, [selectedDay]);
 
   // ── API calls ──────────────────────────────────────────────────
@@ -501,6 +537,11 @@ export default function LinkedInWorkflowPage() {
               </button>
             );
           })}
+          {selectedDay.__news && (
+            <span className="px-3 py-2 text-[10px] font-black tracking-[0.12em] uppercase bg-[#FFD600] text-black">
+              From News
+            </span>
+          )}
         </div>
 
         {/* ── Sunday planner ────────────────────────────────────── */}

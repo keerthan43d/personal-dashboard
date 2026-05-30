@@ -14,6 +14,7 @@ import {
   BookMarked,
   PenLine,
   Clapperboard,
+  Newspaper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -35,6 +36,7 @@ const NAV = [
   { href: "/books",     label: "LIBRARY",   icon: BookOpen },
   { href: "/movies",    label: "VISIONS",   icon: Film },
   { href: "/tv-shows",  label: "TV SHOWS",  icon: Tv },
+  { href: "/news", label: "NEWS", icon: Newspaper },
   { href: "/linkedin-workflow", label: "CONTENT", icon: PenLine },
   { href: "/ai-avatar", label: "AVATAR", icon: Clapperboard },
 ];
