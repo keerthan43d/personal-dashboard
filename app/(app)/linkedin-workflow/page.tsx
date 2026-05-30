@@ -279,7 +279,7 @@ export default function LinkedInWorkflowPage() {
       const res = await fetch("/api/linkedin/workflow/hook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ post, action: "options" }),
+        body: JSON.stringify({ post, action: "options", topic: angle ? `${selectedDay.topic} — ${angle}` : selectedDay.topic, take, research: selectedDay.type === "research" ? research : undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -289,7 +289,7 @@ export default function LinkedInWorkflowPage() {
     } finally {
       setLoadingHookOptions(false);
     }
-  }, [post]);
+  }, [post, selectedDay.topic, selectedDay.type, angle, take, research]);
 
   const handleApplyHook = useCallback(async (newHook: string) => {
     const rest = post.split("\n").slice(1).join("\n");
@@ -317,7 +317,7 @@ export default function LinkedInWorkflowPage() {
       const res = await fetch("/api/linkedin/workflow/hook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ post, action: "regenerate" }),
+        body: JSON.stringify({ post, action: "regenerate", topic: angle ? `${selectedDay.topic} — ${angle}` : selectedDay.topic, take, research: selectedDay.type === "research" ? research : undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -336,7 +336,7 @@ export default function LinkedInWorkflowPage() {
     } finally {
       setRegenHook(false);
     }
-  }, [post]);
+  }, [post, selectedDay.topic, selectedDay.type, angle, take, research]);
 
   const handleRegeneratePost = useCallback(async () => {
     await handleGenerate();
@@ -915,15 +915,19 @@ function TakeStep({
 
       <div className="space-y-3">
         <label className="text-base font-black text-[#f5f5f5]">
-          What&apos;s your one-line take on this?
+          What&apos;s your take on this?
         </label>
-        <Input
+        <Textarea
           value={take}
           onChange={(e) => onTakeChange(e.target.value)}
-          placeholder="Your honest opinion — agree, disagree, what others are missing…"
-          className="h-12 bg-white/5 border-white/10 text-sm placeholder:text-white/20"
-          onKeyDown={(e) => e.key === "Enter" && take.trim() && onGenerate()}
+          rows={4}
+          placeholder="Your honest opinion — agree, disagree, what others are missing. One line or a few sentences; this becomes the spine of the post."
+          className="bg-white/5 border-white/10 text-sm leading-relaxed resize-none placeholder:text-white/20"
+          onKeyDown={(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && take.trim()) onGenerate();
+          }}
         />
+        <p className="text-[10px] text-muted-foreground/60">Cmd/Ctrl + Enter to generate</p>
       </div>
 
       <Button

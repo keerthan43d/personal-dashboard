@@ -19,16 +19,49 @@ function stripFences(raw: string): string {
   return raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 }
 
+// A hard anchor so regenerated hooks never drift off-topic or invent facts.
+// The research (when present) is the source of truth — read it FIRST, then
+// write a hook grounded only in what it actually says.
+function buildGroundingBlock(topic?: string, take?: string, research?: string): string {
+  const lines: string[] = [];
+
+  if (research?.trim()) {
+    lines.push(
+      "RESEARCH (READ THIS FIRST — it is the source of truth for every factual claim):",
+      research.trim(),
+      ""
+    );
+  }
+
+  lines.push(
+    "GROUNDING (non-negotiable):",
+    "- The hook MUST be about the exact subject below and nothing else.",
+    research?.trim()
+      ? "- Base the hook ONLY on facts, names, numbers, and quotes that appear in the RESEARCH above (or the post text). Read the research before writing."
+      : "- Use ONLY names, numbers, products, versions, and facts that actually appear in the SUBJECT or POST text provided.",
+    "- NEVER invent product names, version numbers, statistics, brands, or comparisons that are not in the source. If you are tempted to add a specific detail that isn't in the source, leave it out.",
+    "- 'Be specific' means pull a real detail FROM the source — not fabricate a plausible-sounding one."
+  );
+
+  if (topic?.trim()) lines.push(`\nSUBJECT (the hook must stay on this): ${topic.trim()}`);
+  if (take?.trim()) lines.push(`USER'S ANGLE / TAKE: ${take.trim().slice(0, 400)}`);
+  return lines.join("\n");
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { post, action } = await req.json() as {
+    const { post, action, topic, take, research } = await req.json() as {
       post: string;
       action: "check" | "options" | "regenerate";
+      topic?: string;
+      take?: string;
+      research?: string;
     };
 
     const openrouter = getOpenRouter();
     const firstLine = firstLineOf(post);
     const restOfPost = post.split("\n").slice(1).join("\n").trimStart();
+    const groundingBlock = buildGroundingBlock(topic, take, research);
 
     // ── Judge the hook on what actually matters: curiosity, tension, specificity ──
     if (action === "check") {
@@ -87,11 +120,13 @@ Return ONLY this JSON, nothing else:
             role: "system",
             content: `You are a LinkedIn hook writer for an Indian digital marketing professional. Write 3 DIFFERENT opening lines for the post below.
 
+${groundingBlock}
+
 ${buildHookSwipeBlock()}
 
 RULES:
-- Each hook uses a DIFFERENT archetype. Maximum variety.
-- 1-2 short lines each. Punchy. Specific (use a number, name, or sharp claim).
+- Each hook uses a DIFFERENT archetype. Maximum variety — but every one stays on the SUBJECT above.
+- 1-2 short lines each. Punchy. Specificity must come from a real detail in the source, never invented.
 - Must make the reader need line three.
 - No emojis in the hook. No hashtags. No markdown.
 - Banned openers: "In today's world", "Have you ever", "We all know".
@@ -129,10 +164,12 @@ Return ONLY this JSON array, nothing else:
           role: "system",
           content: `You are a LinkedIn hook writer. Write ONE new opening line for the post.
 
+${groundingBlock}
+
 ${buildHookSwipeBlock()}
 
 RULES:
-- 1-2 short lines. Punchy. Specific.
+- 1-2 short lines. Punchy. Specificity must come from a real detail in the source, never invented.
 - Must make the reader want line three.
 - No emojis, no hashtags, no markdown.
 - No generic openers like "In today's world" or "Have you ever".

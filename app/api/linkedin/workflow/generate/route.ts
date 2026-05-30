@@ -20,11 +20,24 @@ export async function POST(req: NextRequest) {
       getRecentHooksBlock(),
     ]);
 
+    const sourceLabel = dayType === "paste" ? "MY NOTES" : "RESEARCH";
+    const groundingInstructions = `
+GROUNDING (non-negotiable — read the ${sourceLabel} in full before writing):
+- Read the entire ${sourceLabel} block below before you write a single line.
+- Every factual claim — names, numbers, dates, quotes, companies, results — MUST come from the ${sourceLabel}. Do NOT add facts from your own memory.
+- NEVER invent statistics, product names, version numbers, brands, or events that are not in the ${sourceLabel}. If a detail isn't there, leave it out.
+- The author's TAKE is opinion/framing and is allowed; FACTS must trace back to the ${sourceLabel}.`;
+
     const extraInstructions = `
 THIS POST:
 - Topic: ${topic}
-- The author's personal take is the spine of the post — build the whole post around it, do not just summarize the source material.
-- Make it fun and high-energy, the way the sample posts feel.`;
+- Make it fun and high-energy, the way the sample posts feel.
+
+HOW TO COMBINE THE TWO INPUTS (both are mandatory, neither may be ignored):
+- MY OPINION/TAKE is the SPINE and point of view — the entire post argues, defends, or explores it. Never water it down, never replace it with a neutral recap.
+- The ${sourceLabel} is the EVIDENCE — use its real facts, numbers, names, and examples to back the opinion up and make it credible.
+- A great post = my opinion, PROVEN with the ${sourceLabel}. Not a neutral summary of the ${sourceLabel}, and not an unsupported opinion. Both must be clearly present.
+${groundingInstructions}`;
 
     const systemPrompt = buildPostSystemPrompt(voiceConfig, recentHooksBlock, extraInstructions);
 
@@ -38,7 +51,7 @@ THIS POST:
         { role: "system", content: systemPrompt },
         {
           role: "user",
-          content: `${context}\n\nMY ONE-LINE TAKE: ${take}\n\nWrite the LinkedIn post now. Make it impossible to scroll past.`,
+          content: `${context}\n\nMY OPINION / TAKE (the spine of the post — build around this, backed by the ${sourceLabel} above):\n${take}\n\nWrite the LinkedIn post now. Make it impossible to scroll past.`,
         },
       ],
     });
