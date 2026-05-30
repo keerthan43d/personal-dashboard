@@ -49,13 +49,13 @@ ${DESIGN_STYLE_BIBLE}
 YOUR PROCESS:
 1. Read the post and the creator's concept. Find the ONE idea worth showing — a tension, a metaphor, a transformation, a hero object. Not a literal illustration of every word.
 2. Choose a layout from the design DNA's recurring moves (pick 2-3 that fit — never all). Decide the ONE accent color that matches this post's mood.
-3. Decide the exact on-image TEXT: a short bold headline (max ~6 words, pull it from the post/concept) and an optional shorter subhead or kicker. Name which word(s) sit in the highlight box.
+3. Decide the exact on-image TEXT: a punchy serif headline or question that can run 2-4 short lines (~5-10 words, pulled from the post/concept). Choose 2-3 key words to emphasise — each set inside its OWN solid FILLED rectangle with WHITE ITALIC bold text inside, the box fills ALTERNATING between the accent color and black; all other words large bold black serif. Quote the full headline and name exactly which words are boxed and in which color.
 4. Describe the hero subject and its treatment (cut-out, statue, duotone, 3D prop, frame/glow), the backdrop (grid? doodles?), and the footer lockup.
 
 HARD RULES:
 - Make it look ART-DIRECTED and editorial, never stock or generic-AI.
 - It MUST look different from a fixed template — vary composition, accent color, and subject treatment.
-- Quote the exact on-image text so the generator spells it correctly. Keep total on-image text short.
+- Quote the exact on-image text so the generator spells it correctly. Keep it to a headline (2-4 short lines) plus an optional one-line subhead — no paragraphs.
 - Portrait 4:5 framing.
 - Write in natural visual prose. Do NOT echo the design-DNA's section labels or ALL-CAPS terms (e.g. "HIGHLIGHT-BOX TYPOGRAPHY", "CLASSICAL MARBLE STATUE", "QUIET FOOTER LOCKUP") — describe the actual visual instead. The ONLY words in capitals or quotes in your output should be the literal text meant to be printed on the poster.
 
