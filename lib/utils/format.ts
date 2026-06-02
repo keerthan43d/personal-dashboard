@@ -8,6 +8,16 @@ export function formatCurrency(amount: number, currency = "INR"): string {
   }).format(amount);
 }
 
+/** Format money keeping paise/cents when present (e.g. ₹1,200 or ₹49.50) */
+export function formatMoney(amount: number, currency = "INR"): string {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
+
 /** Format hours: 2.5 → "2h 30m", 0.75 → "45m" */
 export function formatHours(h: number): string {
   const hours = Math.floor(h);

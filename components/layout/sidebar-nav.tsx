@@ -15,6 +15,8 @@ import {
   PenLine,
   Clapperboard,
   Newspaper,
+  Flower2,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +34,8 @@ import { useAuth } from "@/lib/hooks/use-auth";
 const NAV = [
   { href: "/",        label: "DASHBOARD", icon: LayoutDashboard },
   { href: "/journal", label: "JOURNAL",   icon: BookMarked },
+  { href: "/stupa",   label: "THE STUPA", icon: Flower2 },
+  { href: "/expenses", label: "EXPENSES", icon: Wallet },
   { href: "/clients", label: "CLIENTS",   icon: Users },
   { href: "/books",     label: "LIBRARY",   icon: BookOpen },
   { href: "/movies",    label: "VISIONS",   icon: Film },
