@@ -55,7 +55,7 @@ export function SpendBarChart({ data, height = 160, interval = 0 }: Props) {
           contentStyle={{ background: "#111", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 0 }}
           labelStyle={{ color: "rgba(255,255,255,0.5)", fontSize: 10, fontFamily: "monospace" }}
           itemStyle={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}
-          formatter={(v: number) => [`₹${v.toLocaleString("en-IN")}`, "Spent"]}
+          formatter={(v) => [`₹${Number(v ?? 0).toLocaleString("en-IN")}`, "Spent"]}
         />
         <Bar dataKey="amount" name="Spent">
           {data.map((d, i) => (
