@@ -1,9 +1,11 @@
 "use client";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   startOfMonth, endOfMonth, eachDayOfInterval,
-  getDay, format, isToday, parseISO,
+  getDay, format, isToday, parseISO, addMonths, subMonths,
 } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOOD_COLORS, MOOD_LABELS } from "@/lib/journal-constants";
 import type { JournalEntry } from "@/lib/db/schemas";
@@ -18,7 +20,20 @@ const DAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 export function CalendarStrip({ entries, activeDate, currentMonth }: Props) {
   const router = useRouter();
-  const month  = currentMonth ?? new Date();
+  const [viewMonth, setViewMonth] = useState<Date>(currentMonth ?? new Date());
+
+  // Resync the viewed month when the selected date jumps to a different month
+  // (e.g. day-nav or picking a day), but otherwise let the arrows browse freely.
+  const monthKey = format(currentMonth ?? new Date(), "yyyy-MM");
+  const prevKeyRef = useRef(monthKey);
+  useEffect(() => {
+    if (prevKeyRef.current !== monthKey) {
+      setViewMonth(currentMonth ?? new Date());
+      prevKeyRef.current = monthKey;
+    }
+  }, [monthKey, currentMonth]);
+
+  const month  = viewMonth;
   const days   = eachDayOfInterval({ start: startOfMonth(month), end: endOfMonth(month) });
   const offset = getDay(startOfMonth(month));
 
@@ -37,11 +52,29 @@ export function CalendarStrip({ entries, activeDate, currentMonth }: Props) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-2">
-        <div className="w-0.5 h-4 bg-[#FFD600]" />
-        <p className="text-[10px] font-black tracking-[0.14em] uppercase text-white">
-          {format(month, "MMMM yyyy")}
-        </p>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-0.5 h-4 bg-[#FFD600]" />
+          <p className="text-[10px] font-black tracking-[0.14em] uppercase text-white">
+            {format(month, "MMMM yyyy")}
+          </p>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setViewMonth((m) => subMonths(m, 1))}
+            className="w-6 h-6 flex items-center justify-center text-white/40 hover:text-white border border-white/10 hover:border-white/25 transition-all cursor-pointer"
+            aria-label="Previous month"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => setViewMonth((m) => addMonths(m, 1))}
+            className="w-6 h-6 flex items-center justify-center text-white/40 hover:text-white border border-white/10 hover:border-white/25 transition-all cursor-pointer"
+            aria-label="Next month"
+          >
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Mood legend */}

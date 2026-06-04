@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useCallback, useRef, useMemo } from "react";
-import { startOfWeek, format } from "date-fns";
+import { startOfWeek, format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useProductivity } from "@/lib/hooks/use-productivity";
 import type { WeeklyScorecardInput } from "@/lib/db/schemas";
@@ -13,20 +13,25 @@ const DIMENSIONS = [
 
 type ScoreKey = (typeof DIMENSIONS)[number]["key"];
 
-export function WeeklyScorecard() {
+interface Props {
+  /** The day being viewed in the journal (yyyy-MM-dd). Defaults to today. */
+  date?: string;
+}
+
+export function WeeklyScorecard({ date }: Props) {
   const { scorecard, scorecards, loadScorecard, loadScorecards, saveScorecard } = useProductivity();
   const pendingRef = useRef<WeeklyScorecardInput | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const weekStart = useMemo(() => {
-    const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
-    return format(monday, "yyyy-MM-dd");
-  }, []);
+    const base = date ? parseISO(date) : new Date();
+    return format(startOfWeek(base, { weekStartsOn: 1 }), "yyyy-MM-dd");
+  }, [date]);
 
   const weekLabel = useMemo(() => {
-    const monday = startOfWeek(new Date(), { weekStartsOn: 1 });
-    return `WEEK OF ${format(monday, "d MMM").toUpperCase()}`;
-  }, []);
+    const base = date ? parseISO(date) : new Date();
+    return `WEEK OF ${format(startOfWeek(base, { weekStartsOn: 1 }), "d MMM").toUpperCase()}`;
+  }, [date]);
 
   useEffect(() => {
     loadScorecard(weekStart);
@@ -48,13 +53,15 @@ export function WeeklyScorecard() {
     [saveScorecard],
   );
 
-  // Flush on unmount
+  // Flush any pending save when the week changes or on unmount, then reset
+  // so optimistic values never carry across weeks.
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
       if (pendingRef.current) saveScorecard(pendingRef.current);
+      pendingRef.current = null;
     };
-  }, [saveScorecard]);
+  }, [weekStart, saveScorecard]);
 
   function handleScore(key: ScoreKey, value: number) {
     const current: WeeklyScorecardInput = {

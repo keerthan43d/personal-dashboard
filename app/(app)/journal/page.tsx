@@ -148,7 +148,7 @@ export default function JournalPage() {
             </div>
 
             {/* Weekly Scorecard */}
-            <WeeklyScorecard />
+            <WeeklyScorecard date={dateStr} />
 
             {/* Quick nav links */}
             <div className="border border-white/8 bg-white/[0.018]">
