@@ -104,7 +104,7 @@ export default function MoviesPage() {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.04, duration: 0.25 }}
+                  transition={{ delay: Math.min(i * 0.03, 0.4), duration: 0.2 }}
                 >
                   <MovieCard
                     movie={movie}
@@ -157,6 +157,7 @@ function MovieCard({ movie, onEdit, onRemove }: {
           {movie.posterUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={movie.posterUrl} alt={movie.title}
+              loading="lazy" decoding="async"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
