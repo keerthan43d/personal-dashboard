@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { ENERGY_LABELS } from "@/lib/journal-constants";
 
 const LEVEL_STYLES: Record<number, { bg: string; glow: string; text: string }> = {
-  1: { bg: "#334155", glow: "rgba(51,65,85,0.6)",    text: "#94A3B8" },
+  1: { bg: "#DC2626", glow: "rgba(220,38,38,0.6)",   text: "#FCA5A5" },
   2: { bg: "#1D4ED8", glow: "rgba(29,78,216,0.6)",   text: "#93C5FD" },
   3: { bg: "#D97706", glow: "rgba(217,119,6,0.6)",   text: "#FCD34D" },
   4: { bg: "#FFD600", glow: "rgba(255,214,0,0.6)",   text: "#FFD600" },
