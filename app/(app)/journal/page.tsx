@@ -72,28 +72,36 @@ export default function JournalPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Load the entry for this date and hydrate the editable draft exactly ONCE
+  // per date — right after the load settles. We deliberately do NOT keep the
+  // draft in sync with `currentEntry`: auto-save updates currentEntry, and
+  // re-hydrating from it would race with in-progress typing and drop the
+  // characters typed during the save's round-trip.
   useEffect(() => {
-    loadEntry(dateStr);
+    let cancelled = false;
     loadEntries({ since: format(subDays(new Date(), 60), "yyyy-MM-dd") });
     loadProblems({ entryDate: dateStr });
+    (async () => {
+      await loadEntry(dateStr);
+      if (cancelled) return; // user navigated to another date before load finished
+      const entry = useJournal.getState().currentEntry;
+      if (entry && entry.date === dateStr) {
+        setDraft({
+          date:          entry.date,
+          mood:          entry.mood,
+          energy:        entry.energy,
+          freeWrite:     entry.freeWrite     ?? "",
+          wins:          entry.wins          ?? [],
+          ideas:         entry.ideas         ?? [],
+          tomorrowFocus: entry.tomorrowFocus ?? "",
+          habits:        entry.habits        ?? {},
+        });
+      } else {
+        setDraft({ date: dateStr, mood: undefined, energy: undefined, freeWrite: "", wins: [], ideas: [], tomorrowFocus: "", habits: {} });
+      }
+    })();
+    return () => { cancelled = true; };
   }, [dateStr]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (currentEntry) {
-      setDraft({
-        date:          currentEntry.date,
-        mood:          currentEntry.mood,
-        energy:        currentEntry.energy,
-        freeWrite:     currentEntry.freeWrite  ?? "",
-        wins:          currentEntry.wins        ?? [],
-        ideas:         currentEntry.ideas       ?? [],
-        tomorrowFocus: currentEntry.tomorrowFocus ?? "",
-        habits:        currentEntry.habits      ?? {},
-      });
-    } else {
-      setDraft({ date: dateStr, mood: undefined, energy: undefined, freeWrite: "", wins: [], ideas: [], tomorrowFocus: "", habits: {} });
-    }
-  }, [currentEntry, dateStr]);
 
   const autoSave = useCallback((data: JournalEntryInput) => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
