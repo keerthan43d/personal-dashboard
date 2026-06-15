@@ -17,6 +17,7 @@ import {
   Newspaper,
   Flower2,
   Wallet,
+  Crown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -43,6 +44,7 @@ const NAV = [
   { href: "/news", label: "NEWS", icon: Newspaper },
   { href: "/linkedin-workflow", label: "CONTENT", icon: PenLine },
   { href: "/ai-avatar", label: "AVATAR", icon: Clapperboard },
+  { href: "/gods",     label: "GODS OF MARKETING", icon: Crown },
 ];
 
 export function SidebarNav() {
