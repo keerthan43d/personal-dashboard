@@ -18,17 +18,25 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Dynamic import avoids pdf-parse's module-level fs.readFileSync test-data calls
-    // which break Next.js static analysis.
-    const pdfParse = (await import("pdf-parse")).default;
-    const result = await pdfParse(buffer);
+    // Dynamic import keeps pdf-parse out of Next.js's static module graph.
+    // pdf-parse v2 exposes a PDFParse class (no default export).
+    const { PDFParse } = await import("pdf-parse");
+    const parser = new PDFParse({ data: new Uint8Array(buffer) });
+    let text = "";
+    let pages = 0;
+    try {
+      const result = await parser.getText();
+      text = result.text?.trim() ?? "";
+      pages = result.total;
+    } finally {
+      await parser.destroy();
+    }
 
-    const text = result.text?.trim() ?? "";
     if (!text) {
       return NextResponse.json({ error: "Could not extract text from PDF (may be scanned/image-only)" }, { status: 422 });
     }
 
-    return NextResponse.json({ text, pages: result.numpages });
+    return NextResponse.json({ text, pages });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "PDF parse failed" },
