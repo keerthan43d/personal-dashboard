@@ -27,32 +27,13 @@ type MarketingGod = {
   sourceCount: number;
 };
 
-function GodAvatar({ name, avatarUrl, size = "md" }: { name: string; avatarUrl: string | null; size?: "sm" | "md" | "lg" }) {
-  const dim = size === "lg" ? "w-14 h-14 text-2xl" : size === "sm" ? "w-8 h-8 text-sm" : "w-12 h-12 text-xl";
-  if (avatarUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={avatarUrl}
-        alt={name}
-        className={cn(dim, "object-cover border border-[#FFD600]/20 flex-shrink-0")}
-        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-      />
-    );
-  }
-  return (
-    <div className={cn(dim, "flex items-center justify-center bg-[#FFD600]/10 border border-[#FFD600]/20 text-[#FFD600] font-black flex-shrink-0")}>
-      {name.charAt(0).toUpperCase()}
-    </div>
-  );
-}
-
 function GodCard({ god, onDelete, onClick }: {
   god: MarketingGod;
   onDelete: (id: string) => void;
   onClick: (id: string) => void;
 }) {
   const [confirming, setConfirming] = useState(false);
+  const [imgOk, setImgOk] = useState(true);
 
   return (
     <motion.div
@@ -60,51 +41,79 @@ function GodCard({ god, onDelete, onClick }: {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      className="group relative border border-white/8 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/15 transition-all duration-200 cursor-pointer flex flex-col"
+      className="group relative border border-white/10 bg-[#0c0c0c] hover:border-[#FFD600]/40 transition-colors duration-200 cursor-pointer flex flex-col overflow-hidden"
       onClick={() => !confirming && onClick(god.id)}
     >
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          if (confirming) { onDelete(god.id); }
-          else { setConfirming(true); setTimeout(() => setConfirming(false), 3000); }
-        }}
-        className={cn(
-          "absolute top-3 right-3 w-7 h-7 flex items-center justify-center transition-all duration-150 z-10 opacity-0 group-hover:opacity-100",
-          confirming ? "bg-red-500/20 border border-red-500/40 text-red-400" : "text-white/30 hover:text-red-400 hover:bg-red-500/10"
+      {/* ── Portrait ── */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-white/[0.04] to-transparent">
+        {god.avatarUrl && imgOk ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={god.avatarUrl}
+            alt={god.name}
+            className="w-full h-full object-cover grayscale group-hover:grayscale-0 scale-100 group-hover:scale-105 transition-all duration-500 ease-out"
+            onError={() => setImgOk(false)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-6xl font-black text-[#FFD600]/20 group-hover:text-[#FFD600]/40 transition-colors duration-300">
+              {god.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
         )}
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
 
-      {confirming && (
-        <div className="absolute top-3 right-11 text-[9px] font-black tracking-[0.1em] uppercase text-red-400 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-          CLICK TO CONFIRM
-        </div>
-      )}
+        {/* Bottom gradient so name is readable over any image */}
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#0c0c0c] via-[#0c0c0c]/80 to-transparent" />
 
-      <div className="p-5 flex flex-col gap-3 flex-1">
-        <GodAvatar name={god.name} avatarUrl={god.avatarUrl} />
-
-        <div>
-          <p className="text-[13px] font-black tracking-[0.08em] uppercase text-[#FFD600] leading-tight">
+        {/* Name overlaid on portrait */}
+        <div className="absolute inset-x-0 bottom-0 p-4">
+          <p className="text-[15px] font-black tracking-[0.06em] uppercase text-white leading-tight drop-shadow group-hover:text-[#FFD600] transition-colors duration-200">
             {god.name}
           </p>
           {god.title && (
-            <p className="text-[10px] font-bold tracking-[0.1em] uppercase text-white/40 mt-0.5">
+            <p className="text-[10px] font-bold tracking-[0.12em] uppercase text-[#FFD600]/80 mt-1">
               {god.title}
             </p>
           )}
         </div>
 
-        {god.tagline && (
-          <p className="text-[11px] text-white/55 leading-relaxed line-clamp-2">{god.tagline}</p>
+        {/* Delete */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirming) { onDelete(god.id); }
+            else { setConfirming(true); setTimeout(() => setConfirming(false), 3000); }
+          }}
+          className={cn(
+            "absolute top-2.5 right-2.5 w-7 h-7 flex items-center justify-center transition-all duration-150 z-10 backdrop-blur-sm",
+            confirming
+              ? "bg-red-500/30 border border-red-500/50 text-red-300 opacity-100"
+              : "bg-black/40 text-white/60 hover:text-red-400 hover:bg-black/70 opacity-0 group-hover:opacity-100"
+          )}
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+        {confirming && (
+          <div className="absolute top-3 right-11 text-[9px] font-black tracking-[0.1em] uppercase text-red-300 whitespace-nowrap bg-black/60 backdrop-blur-sm px-1.5 py-1 z-10" onClick={(e) => e.stopPropagation()}>
+            CONFIRM?
+          </div>
         )}
+      </div>
 
-        <div className="mt-auto pt-3 border-t border-white/8 flex items-center gap-1.5">
-          <BookOpen className="w-3 h-3 text-white/30" />
-          <span className="text-[9px] font-black tracking-[0.12em] uppercase text-white/30">
+      {/* ── Footer ── */}
+      <div className="px-4 py-3 flex flex-col gap-2 flex-1">
+        {god.tagline && (
+          <p className="text-[11px] text-white/45 leading-relaxed line-clamp-2 italic">
+            “{god.tagline}”
+          </p>
+        )}
+        <div className="mt-auto pt-2 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 text-[9px] font-black tracking-[0.12em] uppercase text-white/35">
+            <BookOpen className="w-3 h-3" />
             {god.sourceCount} {god.sourceCount === 1 ? "SOURCE" : "SOURCES"}
+          </span>
+          <span className="flex items-center gap-1 text-[9px] font-black tracking-[0.14em] uppercase text-[#FFD600]/0 group-hover:text-[#FFD600] transition-colors duration-200">
+            CONSULT <ChevronRight className="w-3 h-3" />
           </span>
         </div>
       </div>
@@ -580,7 +589,7 @@ export default function GodsPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
               <AnimatePresence>
                 {gods.map((god) => (
                   <GodCard key={god.id} god={god} onDelete={handleDelete} onClick={(id) => router.push(`/gods/${id}`)} />
