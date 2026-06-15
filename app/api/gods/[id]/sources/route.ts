@@ -61,28 +61,27 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
   if (se) return NextResponse.json({ error: se.message }, { status: 500 });
 
-  // 2. Chunk + embed (best-effort; don't fail the whole request if embedding fails)
+  // 2. Chunk + embed in batches (best-effort; don't fail the request on error).
+  //    OpenAI's embeddings endpoint accepts an array of inputs, so a whole book
+  //    embeds in a handful of calls instead of one-per-chunk.
   try {
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const chunks = chunkText(content.trim());
+    const BATCH = 96;
 
-    const chunkRows: { god_id: string; source_id: string; content: string; embedding: number[] }[] = [];
-
-    for (const chunk of chunks) {
+    for (let i = 0; i < chunks.length; i += BATCH) {
+      const batch = chunks.slice(i, i + BATCH);
       const res = await openai.embeddings.create({
         model: "text-embedding-3-small",
-        input: chunk,
+        input: batch,
       });
-      chunkRows.push({
+      const rows = batch.map((chunk, j) => ({
         god_id: godId,
         source_id: source.id,
         content: chunk,
-        embedding: res.data[0].embedding,
-      });
-    }
-
-    if (chunkRows.length > 0) {
-      await sb.from("god_chunks").insert(chunkRows);
+        embedding: res.data[j].embedding,
+      }));
+      await sb.from("god_chunks").insert(rows);
     }
   } catch (err) {
     // Embedding failure is non-fatal — chat will fall back to no context

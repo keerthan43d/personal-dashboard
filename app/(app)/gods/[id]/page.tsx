@@ -234,13 +234,11 @@ export default function GodChatPage({ params }: { params: Promise<{ id: string }
       setParsingPdf(true);
       setFileContent("");
       try {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/parse-pdf", { method: "POST", body: fd });
-        const data = await res.json() as { text?: string; pages?: number; error?: string };
-        if (data.error) throw new Error(data.error);
-        setFileContent(data.text ?? "");
-        toast.success(`PDF parsed — ${data.pages ?? "?"} page${(data.pages ?? 1) > 1 ? "s" : ""} extracted`);
+        const { extractPdfText } = await import("@/lib/gods/pdf-client");
+        const { text, pages } = await extractPdfText(file);
+        if (!text) throw new Error("No text found (PDF may be scanned/image-only)");
+        setFileContent(text);
+        toast.success(`PDF parsed — ${pages} page${pages > 1 ? "s" : ""} extracted`);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "PDF parse failed");
       } finally {
