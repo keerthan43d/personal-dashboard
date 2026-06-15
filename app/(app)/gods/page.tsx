@@ -139,6 +139,7 @@ function CreateGodDialog({ open, onClose, onCreated }: {
   const [resTitle, setResTitle] = useState("");
   const [addingSource, setAddingSource] = useState(false);
   const [researching, setResearching] = useState(false);
+  const [parsingPdf, setParsingPdf] = useState(false);
   const [sourcesAdded, setSourcesAdded] = useState(0);
 
   function resetDialog() {
@@ -214,14 +215,33 @@ function CreateGodDialog({ open, onClose, onCreated }: {
     finally { setAddingSource(false); }
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
     if (!fileTitle) setFileTitle(file.name.replace(/\.[^.]+$/, ""));
-    const reader = new FileReader();
-    reader.onload = (ev) => setFileContent(ev.target?.result as string ?? "");
-    reader.readAsText(file);
+
+    if (file.name.toLowerCase().endsWith(".pdf")) {
+      setParsingPdf(true);
+      setFileContent("");
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/parse-pdf", { method: "POST", body: fd });
+        const data = await res.json() as { text?: string; pages?: number; error?: string };
+        if (data.error) throw new Error(data.error);
+        setFileContent(data.text ?? "");
+        toast.success(`PDF parsed — ${data.pages ?? "?"} page${(data.pages ?? 1) > 1 ? "s" : ""} extracted`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "PDF parse failed");
+      } finally {
+        setParsingPdf(false);
+      }
+    } else {
+      const reader = new FileReader();
+      reader.onload = (ev) => setFileContent(ev.target?.result as string ?? "");
+      reader.readAsText(file);
+    }
   }
 
   async function handleResearch(e: React.FormEvent) {
@@ -384,7 +404,7 @@ function CreateGodDialog({ open, onClose, onCreated }: {
                     value={t}
                     className="flex-1 text-[9px] font-black tracking-[0.1em] uppercase data-[state=active]:text-black data-[state=active]:bg-[#FFD600] rounded-none h-8"
                   >
-                    {t === "paste" ? "PASTE TEXT" : t === "upload" ? "FILE (.txt)" : "AI RESEARCH"}
+                    {t === "paste" ? "PASTE TEXT" : t === "upload" ? "PDF / TXT" : "AI RESEARCH"}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -415,9 +435,13 @@ function CreateGodDialog({ open, onClose, onCreated }: {
               <TabsContent value="upload" className="mt-3">
                 <form onSubmit={handleFile} className="flex flex-col gap-2.5">
                   <label className="flex flex-col items-center justify-center gap-2 h-20 border border-dashed border-white/15 hover:border-[#FFD600]/30 cursor-pointer transition-colors">
-                    <FileText className="w-5 h-5 text-white/30" />
-                    <span className="text-[10px] text-white/40">{fileName || "Click to select a .txt file"}</span>
-                    <input type="file" accept=".txt" onChange={handleFileChange} className="hidden" />
+                    {parsingPdf
+                      ? <Loader2 className="w-5 h-5 text-[#FFD600] animate-spin" />
+                      : <FileText className="w-5 h-5 text-white/30" />}
+                    <span className="text-[10px] text-white/40">
+                      {parsingPdf ? "Parsing PDF…" : fileName || "Click to select a .pdf or .txt file"}
+                    </span>
+                    <input type="file" accept=".pdf,.txt" onChange={handleFileChange} className="hidden" disabled={parsingPdf} />
                   </label>
                   <Input
                     value={fileTitle}
@@ -425,7 +449,7 @@ function CreateGodDialog({ open, onClose, onCreated }: {
                     placeholder="Source title"
                     className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 focus:border-[#FFD600]/40 h-9 text-[11px]"
                   />
-                  <button type="submit" disabled={addingSource || !fileContent} className="w-full h-9 bg-[#FFD600] text-black text-[10px] font-black tracking-[0.12em] uppercase hover:bg-[#FFD600]/90 disabled:opacity-50 flex items-center justify-center gap-1.5">
+                  <button type="submit" disabled={addingSource || parsingPdf || !fileContent} className="w-full h-9 bg-[#FFD600] text-black text-[10px] font-black tracking-[0.12em] uppercase hover:bg-[#FFD600]/90 disabled:opacity-50 flex items-center justify-center gap-1.5">
                     {addingSource ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
                     {addingSource ? "EMBEDDING..." : "ADD + EMBED"}
                   </button>

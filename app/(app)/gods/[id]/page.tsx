@@ -126,6 +126,7 @@ export default function GodChatPage({ params }: { params: Promise<{ id: string }
   const [resResult, setResResult] = useState("");
   const [resTitle, setResTitle] = useState("");
   const [addingSource, setAddingSource] = useState(false);
+  const [parsingPdf, setParsingPdf] = useState(false);
   const [researching, setResearching] = useState(false);
 
   useEffect(() => {
@@ -223,14 +224,33 @@ export default function GodChatPage({ params }: { params: Promise<{ id: string }
     finally { setAddingSource(false); }
   }
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
     if (!fileTitle) setFileTitle(file.name.replace(/\.[^.]+$/, ""));
-    const reader = new FileReader();
-    reader.onload = (ev) => setFileContent(ev.target?.result as string ?? "");
-    reader.readAsText(file);
+
+    if (file.name.toLowerCase().endsWith(".pdf")) {
+      setParsingPdf(true);
+      setFileContent("");
+      try {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/parse-pdf", { method: "POST", body: fd });
+        const data = await res.json() as { text?: string; pages?: number; error?: string };
+        if (data.error) throw new Error(data.error);
+        setFileContent(data.text ?? "");
+        toast.success(`PDF parsed — ${data.pages ?? "?"} page${(data.pages ?? 1) > 1 ? "s" : ""} extracted`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "PDF parse failed");
+      } finally {
+        setParsingPdf(false);
+      }
+    } else {
+      const reader = new FileReader();
+      reader.onload = (ev) => setFileContent(ev.target?.result as string ?? "");
+      reader.readAsText(file);
+    }
   }
 
   async function runResearch(e: React.FormEvent) {
@@ -489,7 +509,7 @@ export default function GodChatPage({ params }: { params: Promise<{ id: string }
                             value={t}
                             className="text-[8px] font-black tracking-[0.1em] uppercase data-[state=active]:text-[#FFD600] data-[state=active]:bg-transparent rounded-none h-8 px-1.5 flex-1"
                           >
-                            {t === "paste" ? "PASTE" : t === "upload" ? "FILE (.txt)" : "RESEARCH"}
+                            {t === "paste" ? "PASTE" : t === "upload" ? "PDF/TXT" : "RESEARCH"}
                           </TabsTrigger>
                         ))}
                       </TabsList>
@@ -530,23 +550,26 @@ export default function GodChatPage({ params }: { params: Promise<{ id: string }
                         </form>
                       </TabsContent>
 
-                      {/* File upload (.txt) */}
+                      {/* File upload (.pdf / .txt) */}
                       <TabsContent value="upload" className="p-3">
                         <form onSubmit={addFileSource} className="flex flex-col gap-2.5">
                           <div>
                             <label className="block text-[8px] font-black tracking-[0.12em] uppercase text-white/35 mb-1">
-                              FILE (.txt)
+                              FILE (PDF or TXT)
                             </label>
                             <label className="flex items-center justify-center gap-2 h-16 border border-dashed border-white/15 hover:border-[#FFD600]/30 cursor-pointer transition-colors">
-                              <FileText className="w-4 h-4 text-white/30" />
+                              {parsingPdf
+                                ? <Loader2 className="w-4 h-4 text-[#FFD600] animate-spin" />
+                                : <FileText className="w-4 h-4 text-white/30" />}
                               <span className="text-[10px] text-white/40">
-                                {fileName || "Click to select a .txt file"}
+                                {parsingPdf ? "Parsing PDF…" : fileName || "Click to select a .pdf or .txt file"}
                               </span>
                               <input
                                 type="file"
-                                accept=".txt"
+                                accept=".pdf,.txt"
                                 onChange={handleFileChange}
                                 className="hidden"
+                                disabled={parsingPdf}
                               />
                             </label>
                           </div>
@@ -563,7 +586,7 @@ export default function GodChatPage({ params }: { params: Promise<{ id: string }
                           </div>
                           <button
                             type="submit"
-                            disabled={addingSource || !fileContent}
+                            disabled={addingSource || parsingPdf || !fileContent}
                             className="w-full flex items-center justify-center gap-1.5 h-8 bg-[#FFD600] text-black text-[9px] font-black tracking-[0.12em] uppercase hover:bg-[#FFD600]/90 disabled:opacity-50 transition-colors"
                           >
                             {addingSource ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
