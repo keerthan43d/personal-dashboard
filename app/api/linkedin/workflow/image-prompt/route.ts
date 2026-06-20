@@ -53,6 +53,7 @@ YOUR PROCESS:
 4. Describe the hero subject and its treatment (cut-out, statue, duotone, 3D prop, frame/glow), the backdrop (grid? doodles?), and the footer lockup.
 
 HARD RULES:
+- The hero subject MUST relate to this specific post (and the creator's concept if given). Pick the literal object/person/metaphor the post is actually about. NEVER insert unrelated props — no VR headsets, robots, or random tech gadgets unless the post is genuinely about them.
 - Make it look ART-DIRECTED and editorial, never stock or generic-AI.
 - It MUST look different from a fixed template — vary composition, accent color, and subject treatment.
 - Quote the exact on-image text so the generator spells it correctly. Keep it to a headline (2-4 short lines) plus an optional one-line subhead — no paragraphs.

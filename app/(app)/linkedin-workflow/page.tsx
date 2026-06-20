@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 // ── Day config ───────────────────────────────────────────────────
 
-type DayType = "research" | "paste" | "planner";
+type DayType = "research" | "paste" | "planner" | "custom";
 
 interface DayConfig {
   jsDay: number;
@@ -92,6 +92,14 @@ const DAYS: DayConfig[] = [
     description: "Plan your next 6 days of content",
     type: "planner",
   },
+  {
+    jsDay: -2, short: "CUSTOM", label: "Custom",
+    topic: "Custom Source",
+    description: "Paste any article or research — write a post from it",
+    type: "custom",
+    pasteLabel: "Paste your article or research",
+    pasteHint: "Paste the full article, research, or source material. Every fact in the post will be grounded in this.",
+  },
 ];
 
 function getTodayConfig(): DayConfig {
@@ -106,6 +114,7 @@ type Step =
   | "research"
   | "approve"
   | "notes"
+  | "source"
   | "take"
   | "generating"
   | "hook"
@@ -117,6 +126,7 @@ type ImageStyle = "artdirector" | "minimalist" | "statement" | "beeple" | "custo
 function getSteps(type: DayType): Step[] {
   if (type === "research") return ["angle", "research", "approve", "take", "generating", "hook", "final", "image"];
   if (type === "paste") return ["angle", "notes", "take", "generating", "hook", "final", "image"];
+  if (type === "custom") return ["angle", "source", "take", "generating", "hook", "final", "image"];
   return [];
 }
 
@@ -126,6 +136,7 @@ function getStepLabel(step: Step): string {
     research: "Research",
     approve: "Review",
     notes: "Your Notes",
+    source: "Source",
     take: "Your Take",
     generating: "Generating",
     hook: "Hook Check",
@@ -282,10 +293,12 @@ export default function LinkedInWorkflowPage() {
         body: JSON.stringify({
           topic: selectedDay.topic,
           angle,
-          research: selectedDay.type === "research" ? research : undefined,
+          // Custom pastes an article/research → grounded as factual RESEARCH,
+          // same as the web-research days (just skipping the web pull).
+          research: selectedDay.type === "research" || selectedDay.type === "custom" ? research : undefined,
           notes: selectedDay.type === "paste" ? notes : undefined,
           take,
-          dayType: selectedDay.type,
+          dayType: selectedDay.type === "paste" ? "paste" : "research",
         }),
       });
       const data = await res.json();
@@ -317,7 +330,7 @@ export default function LinkedInWorkflowPage() {
       const res = await fetch("/api/linkedin/workflow/hook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ post, action: "options", topic: angle ? `${selectedDay.topic} — ${angle}` : selectedDay.topic, take, research: selectedDay.type === "research" ? research : undefined }),
+        body: JSON.stringify({ post, action: "options", topic: angle ? `${selectedDay.topic} — ${angle}` : selectedDay.topic, take, research: selectedDay.type === "research" || selectedDay.type === "custom" ? research : undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -355,7 +368,7 @@ export default function LinkedInWorkflowPage() {
       const res = await fetch("/api/linkedin/workflow/hook", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ post, action: "regenerate", topic: angle ? `${selectedDay.topic} — ${angle}` : selectedDay.topic, take, research: selectedDay.type === "research" ? research : undefined }),
+        body: JSON.stringify({ post, action: "regenerate", topic: angle ? `${selectedDay.topic} — ${angle}` : selectedDay.topic, take, research: selectedDay.type === "research" || selectedDay.type === "custom" ? research : undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -605,6 +618,7 @@ export default function LinkedInWorkflowPage() {
                     loadingAngle={loadingAngle}
                     onNext={() => {
                       if (selectedDay.type === "research") handlePullResearch();
+                      else if (selectedDay.type === "custom") goToStep("source");
                       else goToStep("notes");
                     }}
                     loadingResearch={loadingResearch}
@@ -639,6 +653,18 @@ export default function LinkedInWorkflowPage() {
                     day={selectedDay}
                     notes={notes}
                     onNotesChange={setNotes}
+                    onNext={() => goToStep("take")}
+                  />
+                </StepPanel>
+              )}
+
+              {/* Step: Paste article/research (Custom) — feeds the research grounding */}
+              {step === "source" && (
+                <StepPanel key="source">
+                  <NotesStep
+                    day={selectedDay}
+                    notes={research}
+                    onNotesChange={setResearch}
                     onNext={() => goToStep("take")}
                   />
                 </StepPanel>
@@ -697,7 +723,10 @@ export default function LinkedInWorkflowPage() {
                       setImageUrl(null);
                       setImagePrompt("");
                       goToStep("image");
-                      handleGenerateImagePrompt(imageStyle, post);
+                      // Art Director waits for your concept first; other styles auto-draft.
+                      if (imageStyle !== "artdirector" && imageStyle !== "custom") {
+                        handleGenerateImagePrompt(imageStyle, post);
+                      }
                     }}
                   />
                 </StepPanel>
@@ -712,7 +741,11 @@ export default function LinkedInWorkflowPage() {
                     onStyleChange={(s) => {
                       setImageStyle(s);
                       setImageUrl(null);
-                      handleGenerateImagePrompt(s, post);
+                      setImagePrompt("");
+                      // Art Director (and custom) wait for your input first.
+                      if (s !== "artdirector" && s !== "custom") {
+                        handleGenerateImagePrompt(s, post);
+                      }
                     }}
                     concept={imageConcept}
                     onConceptChange={setImageConcept}
@@ -1314,27 +1347,30 @@ function ImageStep({
         </div>
       </div>
 
-      {/* Concept box — Art Director designs around this */}
+      {/* Concept box — Art Director asks for your input FIRST, then designs */}
       {style === "artdirector" && (
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground block">
-            Your concept <span className="text-white/30 normal-case font-normal tracking-normal">(optional — leave blank to let the designer decide)</span>
+        <div className="space-y-2 p-4 border border-[#FFD600]/20 bg-[#FFD600]/5">
+          <label className="text-[10px] font-black uppercase tracking-[0.12em] text-[#FFD600] block">
+            Step 1 — What do you want the image to show?
           </label>
+          <p className="text-[11px] text-[#FFD600]/70">
+            Tell the art director your idea. It designs around this — no random props.
+          </p>
           <Textarea
             value={concept}
             onChange={(e) => onConceptChange(e.target.value)}
             rows={3}
-            placeholder="The idea you want shown — e.g. “front-page splash, a marble statue scrolling a phone, blood-red accent”. The art director reads your post + your references and designs around this."
+            placeholder="e.g. “a phone screen on fire to show a viral post”, or “a split before/after of a messy vs clean dashboard”. Be as specific or loose as you like."
             className="bg-white/5 border-white/10 text-sm leading-relaxed resize-none placeholder:text-white/20"
           />
-          <button
+          <Button
             onClick={onRegeneratePrompt}
             disabled={loadingPrompt}
-            className="flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#FFD600]/80 hover:text-[#FFD600] transition-colors cursor-pointer disabled:opacity-40"
+            className="w-full h-10 bg-[#FFD600] hover:bg-[#FFE033] text-black font-black uppercase tracking-[0.06em] gap-2"
           >
-            {loadingPrompt ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-            Design from concept
-          </button>
+            {loadingPrompt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+            {imagePrompt ? "Redesign from concept" : "Step 2 — Generate prompt"}
+          </Button>
         </div>
       )}
 
