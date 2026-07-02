@@ -18,7 +18,18 @@ export const useMovies = create<MovieStore>((set) => ({
 
   async load() {
     set({ loading: true });
-    const movies = await repo.listMovies();
+    let movies = await repo.listMovies();
+
+    // Retroactive: a rated movie counts as watched — fix legacy watchlist entries
+    // (e.g. movies rated before auto-watched shipped). Runs once; after fixing,
+    // nothing matches so no further writes happen.
+    const toFix = movies.filter((m) => (m.rating ?? 0) > 0 && m.status === "watchlist");
+    if (toFix.length) {
+      await Promise.all(toFix.map((m) => repo.updateMovie(m.id, { status: "watched" })));
+      const fixed = new Set(toFix.map((m) => m.id));
+      movies = movies.map((m) => (fixed.has(m.id) ? { ...m, status: "watched" as const } : m));
+    }
+
     set({ movies, loading: false });
   },
 
@@ -29,7 +40,15 @@ export const useMovies = create<MovieStore>((set) => ({
   },
 
   async edit(id, data) {
-    const updated = await repo.updateMovie(id, data);
+    const patch = { ...data };
+    // Rating a movie means you've watched it — auto-mark watched (and stamp today)
+    // unless the caller explicitly set a status. Centralized so every rating entry
+    // point (detail page, dialog, cards) behaves the same.
+    if ((patch.rating ?? 0) > 0 && patch.status === undefined) {
+      patch.status = "watched";
+      if (patch.watchedAt === undefined) patch.watchedAt = new Date().toLocaleDateString("en-CA");
+    }
+    const updated = await repo.updateMovie(id, patch);
     set((s) => ({ movies: s.movies.map((m) => (m.id === id ? updated : m)) }));
   },
 

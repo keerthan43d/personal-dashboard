@@ -178,7 +178,14 @@ export function MovieDialog({ open, onClose, existing }: MovieDialogProps) {
             <div className="col-span-2 space-y-1.5">
               <Label className="text-xs text-muted-foreground">Rating</Label>
               <div className="h-9 flex items-center">
-                <StarRating value={form.rating} max={10} size="md" onRate={(n) => setForm((f) => ({ ...f, rating: n }))} />
+                <StarRating value={form.rating} max={10} size="md" onRate={(n) => setForm((f) => ({
+                  ...f,
+                  rating: n,
+                  // Rating a movie means you've watched it — auto-mark as watched
+                  // and stamp today's date if one isn't set yet.
+                  status:    n > 0 ? "watched" : f.status,
+                  watchedAt: n > 0 && !f.watchedAt ? new Date().toLocaleDateString("en-CA") : f.watchedAt,
+                }))} />
               </div>
             </div>
 
