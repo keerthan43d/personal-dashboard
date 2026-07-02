@@ -9,7 +9,30 @@ export type MoneyBalance = {
   id: string;
   bank: number;
   cash: number;
+  period: string | null; // yyyy-MM the current data belongs to
   updatedAt: string;
+};
+
+export type ArchivedTxn = {
+  amount: number;
+  description: string;
+  account: ExpenseAccount;
+  category: string | null;
+  type: TxType;
+  spentAt: string;
+};
+
+export type ExpenseArchive = {
+  id: string;
+  period: string;
+  label: string;
+  bankClosing: number;
+  cashClosing: number;
+  incomeTotal: number;
+  expenseTotal: number;
+  txnCount: number;
+  transactions: ArchivedTxn[];
+  createdAt: string;
 };
 
 export type Expense = {
@@ -42,6 +65,7 @@ type BalanceRow = {
   id: string;
   bank_balance: number | string;
   cash_balance: number | string;
+  period: string | null;
   updated_at: string;
 };
 
@@ -50,6 +74,7 @@ function fromBalanceRow(r: BalanceRow): MoneyBalance {
     id: r.id,
     bank: Number(r.bank_balance),
     cash: Number(r.cash_balance),
+    period: r.period ?? null,
     updatedAt: r.updated_at,
   };
 }
@@ -104,11 +129,12 @@ export async function getMoneyBalance(): Promise<MoneyBalance> {
 
 export async function setMoneyBalance(
   id: string,
-  patch: { bank?: number; cash?: number }
+  patch: { bank?: number; cash?: number; period?: string }
 ): Promise<MoneyBalance> {
   const upd: Record<string, unknown> = { updated_at: now() };
   if (patch.bank !== undefined) upd.bank_balance = patch.bank;
   if (patch.cash !== undefined) upd.cash_balance = patch.cash;
+  if (patch.period !== undefined) upd.period = patch.period;
   const { data, error } = await getSupabase()
     .from("money_balance")
     .update(upd)
@@ -154,4 +180,89 @@ export async function createExpense(input: ExpenseInput): Promise<Expense> {
 export async function deleteExpense(id: string): Promise<void> {
   const { error } = await getSupabase().from("expenses").delete().eq("id", id);
   if (error) fail(error, "deleteExpense");
+}
+
+/** Delete every current-month transaction (used by reset + hard reset). */
+export async function deleteAllExpenses(): Promise<void> {
+  const { error } = await getSupabase()
+    .from("expenses")
+    .delete()
+    .neq("id", "00000000-0000-0000-0000-000000000000"); // matches all rows
+  if (error) fail(error, "deleteAllExpenses");
+}
+
+// ─── Archives (Previous Expenses) ─────────────────────────────
+
+type ArchiveRow = {
+  id: string;
+  period: string;
+  label: string;
+  bank_closing: number | string;
+  cash_closing: number | string;
+  income_total: number | string;
+  expense_total: number | string;
+  txn_count: number;
+  transactions: ArchivedTxn[] | null;
+  created_at: string;
+};
+
+function fromArchiveRow(r: ArchiveRow): ExpenseArchive {
+  return {
+    id: r.id,
+    period: r.period,
+    label: r.label,
+    bankClosing: Number(r.bank_closing),
+    cashClosing: Number(r.cash_closing),
+    incomeTotal: Number(r.income_total),
+    expenseTotal: Number(r.expense_total),
+    txnCount: r.txn_count,
+    transactions: r.transactions ?? [],
+    createdAt: r.created_at,
+  };
+}
+
+export type ArchiveInput = {
+  period: string;
+  label: string;
+  bankClosing: number;
+  cashClosing: number;
+  incomeTotal: number;
+  expenseTotal: number;
+  transactions: ArchivedTxn[];
+};
+
+export async function createArchive(input: ArchiveInput): Promise<ExpenseArchive> {
+  const row = {
+    id: uuid(),
+    period: input.period,
+    label: input.label,
+    bank_closing: input.bankClosing,
+    cash_closing: input.cashClosing,
+    income_total: input.incomeTotal,
+    expense_total: input.expenseTotal,
+    txn_count: input.transactions.length,
+    transactions: input.transactions,
+    created_at: now(),
+  };
+  const { data, error } = await getSupabase()
+    .from("expense_archives")
+    .insert(row)
+    .select()
+    .single();
+  if (error) fail(error, "createArchive");
+  return fromArchiveRow(data as ArchiveRow);
+}
+
+export async function listArchives(): Promise<ExpenseArchive[]> {
+  const { data, error } = await getSupabase()
+    .from("expense_archives")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) fail(error, "listArchives");
+  return ((data ?? []) as ArchiveRow[]).map(fromArchiveRow);
+}
+
+export async function deleteArchive(id: string): Promise<void> {
+  const { error } = await getSupabase().from("expense_archives").delete().eq("id", id);
+  if (error) fail(error, "deleteArchive");
 }

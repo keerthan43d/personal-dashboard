@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Wallet } from "lucide-react";
+import { Wallet, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useExpensesStore } from "@/components/expenses/expenses-store";
 import { BalanceCards } from "@/components/expenses/balance-cards";
@@ -8,13 +8,16 @@ import { AddExpenseForm } from "@/components/expenses/add-expense-form";
 import { ExpenseList } from "@/components/expenses/expense-list";
 import { WeeklyView } from "@/components/expenses/weekly-view";
 import { MonthlyView } from "@/components/expenses/monthly-view";
+import { PreviousView } from "@/components/expenses/previous-view";
 import { EditBalanceDialog } from "@/components/expenses/edit-balance-dialog";
+import { ResetDialog } from "@/components/expenses/reset-dialog";
 
-type View = "daily" | "weekly" | "monthly";
+type View = "daily" | "weekly" | "monthly" | "previous";
 
 export default function ExpensesPage() {
   const { load, loaded } = useExpensesStore();
   const [editOpen, setEditOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
   const [view, setView] = useState<View>("daily");
 
   useEffect(() => {
@@ -37,9 +40,9 @@ export default function ExpensesPage() {
           </div>
         </div>
 
-        {/* View tabs */}
+        {/* View tabs + reset */}
         <div className="flex items-center gap-1">
-          {(["daily", "weekly", "monthly"] as View[]).map((v) => (
+          {(["daily", "weekly", "monthly", "previous"] as View[]).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}
@@ -53,6 +56,16 @@ export default function ExpensesPage() {
               {v}
             </button>
           ))}
+
+          <div className="w-px h-5 bg-white/10 mx-1.5" />
+
+          <button
+            onClick={() => setResetOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black tracking-[0.12em] uppercase transition-all text-[#FF5C5C]/70 hover:text-[#FF5C5C] border border-[#E60012]/30 hover:border-[#E60012]/60"
+          >
+            <RotateCcw className="w-3 h-3" />
+            RESET
+          </button>
         </div>
       </div>
 
@@ -69,16 +82,23 @@ export default function ExpensesPage() {
           </div>
         ) : (
           <div className="p-6 flex flex-col gap-6 max-w-4xl">
-            <BalanceCards onEdit={() => setEditOpen(true)} />
-            <AddExpenseForm />
-            {view === "daily" && <ExpenseList />}
-            {view === "weekly" && <WeeklyView />}
-            {view === "monthly" && <MonthlyView />}
+            {view === "previous" ? (
+              <PreviousView />
+            ) : (
+              <>
+                <BalanceCards onEdit={() => setEditOpen(true)} />
+                <AddExpenseForm />
+                {view === "daily" && <ExpenseList />}
+                {view === "weekly" && <WeeklyView />}
+                {view === "monthly" && <MonthlyView />}
+              </>
+            )}
           </div>
         )}
       </div>
 
       <EditBalanceDialog open={editOpen} onClose={() => setEditOpen(false)} />
+      <ResetDialog open={resetOpen} onClose={() => setResetOpen(false)} />
     </div>
   );
 }
