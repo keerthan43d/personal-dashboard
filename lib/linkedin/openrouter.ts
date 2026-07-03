@@ -6,6 +6,8 @@ export const DEFAULT_MODELS = {
   // Final post copy — OpenAI handles the fun/casual voice + emojis better
   postWriter: "openai/gpt-4o",
   fast: "anthropic/claude-haiku-4-5",
+  // Hook writing (LinkedIn workflow) — Poolside Laguna XS 2.1 (free)
+  hookWriter: "poolside/laguna-xs-2.1:free",
   image: "google/gemini-2.5-flash-image",
   // Workflow image step
   promptWriter: "openai/gpt-4o",

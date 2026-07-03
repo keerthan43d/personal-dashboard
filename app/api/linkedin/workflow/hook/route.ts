@@ -114,7 +114,7 @@ Return ONLY this JSON, nothing else:
     // ── Generate 3 distinct hook options the user can pick from ──
     if (action === "options") {
       const res = await openrouter.chat.completions.create({
-        model: DEFAULT_MODELS.post,
+        model: DEFAULT_MODELS.hookWriter,
         messages: [
           {
             role: "system",
@@ -158,7 +158,7 @@ Return ONLY this JSON array, nothing else:
 
     // ── Backward-compat: regenerate a single hook in place ──
     const res = await openrouter.chat.completions.create({
-      model: DEFAULT_MODELS.post,
+      model: DEFAULT_MODELS.hookWriter,
       messages: [
         {
           role: "system",
