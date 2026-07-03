@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Bot, Send, Loader2, Check, ChevronDown, Plus, Trash2,
-  Sparkles, RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,12 +47,14 @@ function ModelPicker({
   onSelect,
   onAdd,
   onRemove,
+  side = "bottom",
 }: {
   models: ArenaModel[];
   selected: ArenaModel;
   onSelect: (m: ArenaModel) => void;
   onAdd: (id: string, name: string) => void;
   onRemove: (id: string) => void;
+  side?: "top" | "bottom";
 }) {
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -69,14 +71,15 @@ function ModelPicker({
   return (
     <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setAdding(false); }}>
       <PopoverTrigger asChild>
-        <button className="flex items-center gap-2 h-9 px-3 bg-white/[0.04] border border-white/10 hover:border-white/20 transition-colors max-w-full">
-          <Bot className="w-4 h-4 text-[#FFD600] flex-shrink-0" />
-          <span className="text-[12px] font-bold text-white truncate">{selected.name}</span>
-          <ChevronDown className="w-3.5 h-3.5 text-white/40 flex-shrink-0" />
+        <button className="flex items-center gap-1.5 h-8 px-2.5 rounded-full bg-white/[0.04] border border-white/10 hover:border-white/25 transition-colors max-w-[220px]">
+          <Bot className="w-3.5 h-3.5 text-[#FFD600] flex-shrink-0" />
+          <span className="text-[11px] font-bold text-white/90 truncate">{selected.name}</span>
+          <ChevronDown className="w-3 h-3 text-white/40 flex-shrink-0" />
         </button>
       </PopoverTrigger>
       <PopoverContent
-        align="start"
+        align="end"
+        side={side}
         className="w-80 bg-[#0c0c0c] border-none ring-1 ring-white/10 p-1.5 flex flex-col gap-0.5"
       >
         <p className="text-[9px] font-black tracking-[0.14em] uppercase text-white/30 px-2 py-1.5">
@@ -178,6 +181,7 @@ export default function LlmArenaPage() {
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const m = loadModels();
@@ -188,6 +192,20 @@ export default function LlmArenaPage() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Auto-grow the textarea like Claude's composer.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 200) + "px";
+  }, [input]);
+
+  function newChat() {
+    setMessages([]);
+    setInput("");
+    textareaRef.current?.focus();
+  }
 
   function addModel(id: string, name: string) {
     if (models.some((m) => m.id === id)) {
@@ -260,35 +278,12 @@ export default function LlmArenaPage() {
   return (
     <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* ── Header ── */}
-      <header className="flex items-center gap-3 border-b border-white/10 bg-black px-4 h-14 flex-shrink-0">
-        <div className="flex items-center gap-2.5 flex-shrink-0">
-          <Bot className="w-5 h-5 text-[#FFD600]" strokeWidth={1.75} />
-          <div className="hidden sm:block">
-            <p className="text-[11px] font-black tracking-[0.12em] uppercase text-white leading-none">LLM ARENA</p>
-            <p className="text-[9px] tracking-[0.1em] uppercase text-white/35 mt-1">TEST ANY OPENROUTER MODEL</p>
-          </div>
+      <header className="flex items-center gap-2.5 border-b border-white/10 bg-black px-4 h-14 flex-shrink-0">
+        <Bot className="w-5 h-5 text-[#FFD600] flex-shrink-0" strokeWidth={1.75} />
+        <div>
+          <p className="text-[11px] font-black tracking-[0.12em] uppercase text-white leading-none">LLM ARENA</p>
+          <p className="text-[9px] tracking-[0.1em] uppercase text-white/35 mt-1">TEST ANY OPENROUTER MODEL</p>
         </div>
-
-        <div className="h-5 w-px bg-white/10 mx-1" />
-
-        <ModelPicker
-          models={models}
-          selected={selected}
-          onSelect={setSelected}
-          onAdd={addModel}
-          onRemove={removeModel}
-        />
-
-        <div className="flex-1" />
-
-        {messages.length > 0 && (
-          <button
-            onClick={() => setMessages([])}
-            className="flex items-center gap-1.5 h-8 px-2.5 text-[9px] font-black tracking-[0.1em] uppercase text-white/40 hover:text-white border border-white/10 hover:border-white/20 transition-colors"
-          >
-            <RotateCcw className="w-3 h-3" /> <span className="hidden sm:inline">NEW CHAT</span>
-          </button>
-        )}
       </header>
 
       {/* ── Messages ── */}
@@ -304,7 +299,7 @@ export default function LlmArenaPage() {
               </p>
               <p className="text-[11px] text-white/25 mt-1 font-mono">{selected.id}</p>
               <p className="text-[11px] text-white/30 mt-3 max-w-xs">
-                Ask anything to test this model. Switch or add models from the picker above.
+                Ask anything to test this model. Switch or add models from the picker below.
               </p>
             </div>
           </div>
@@ -348,25 +343,57 @@ export default function LlmArenaPage() {
         )}
       </div>
 
-      {/* ── Input ── */}
-      <form onSubmit={sendMessage} className="flex-shrink-0 border-t border-white/8 p-4">
-        <div className="max-w-3xl mx-auto flex gap-2">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder={`Message ${selected.name}…`}
-            disabled={streaming}
-            className="flex-1 bg-white/[0.04] border border-white/10 text-white placeholder:text-white/25 focus:border-[#FFD600]/40 focus:outline-none px-4 h-11 text-[13px] disabled:opacity-50"
-          />
-          <button
-            type="submit"
-            disabled={streaming || !input.trim()}
-            className="w-11 h-11 flex items-center justify-center bg-[#FFD600] text-black hover:bg-[#FFD600]/90 disabled:opacity-40 transition-colors flex-shrink-0"
-          >
-            {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-          </button>
-        </div>
-      </form>
+      {/* ── Composer (Claude-style) ── */}
+      <div className="flex-shrink-0 px-4 pb-5 pt-1">
+        <form onSubmit={sendMessage} className="max-w-3xl mx-auto">
+          <div className="rounded-2xl border border-white/12 bg-white/[0.04] focus-within:border-white/25 transition-colors">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(e);
+                }
+              }}
+              rows={1}
+              placeholder="Write a message…"
+              className="w-full bg-transparent resize-none px-4 pt-3.5 pb-1.5 text-[14px] leading-relaxed text-white placeholder:text-white/30 focus:outline-none max-h-52"
+            />
+            <div className="flex items-center justify-between gap-2 px-2.5 pb-2.5">
+              {/* + New chat */}
+              <button
+                type="button"
+                onClick={newChat}
+                title="New chat"
+                aria-label="New chat"
+                className="w-8 h-8 flex items-center justify-center rounded-full border border-white/12 text-white/50 hover:text-white hover:border-white/30 hover:bg-white/[0.04] transition-colors flex-shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+
+              <div className="flex items-center gap-2 min-w-0">
+                <ModelPicker
+                  models={models}
+                  selected={selected}
+                  onSelect={setSelected}
+                  onAdd={addModel}
+                  onRemove={removeModel}
+                  side="top"
+                />
+                <button
+                  type="submit"
+                  disabled={streaming || !input.trim()}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FFD600] text-black hover:bg-[#FFD600]/90 disabled:opacity-40 disabled:hover:bg-[#FFD600] transition-colors flex-shrink-0"
+                >
+                  {streaming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
