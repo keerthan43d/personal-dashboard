@@ -18,6 +18,7 @@ import {
   Flower2,
   Wallet,
   Crown,
+  Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -45,6 +46,7 @@ const NAV = [
   { href: "/linkedin-workflow", label: "CONTENT", icon: PenLine },
   { href: "/ai-avatar", label: "AVATAR", icon: Clapperboard },
   { href: "/gods",     label: "GODS OF MARKETING", icon: Crown },
+  { href: "/llm-arena", label: "LLM ARENA", icon: Bot },
 ];
 
 export function SidebarNav() {
