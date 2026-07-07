@@ -21,6 +21,7 @@ import { DeepWorkSection }  from "@/components/journal/deep-work-section";
 import { ShipLogSection }   from "@/components/journal/ship-log-section";
 import { UrgeLogSection }   from "@/components/journal/urge-log-section";
 import { TodoSection }      from "@/components/journal/todo-section";
+import { HourLogSection }   from "@/components/journal/hour-log-section";
 import { WeeklyScorecard }  from "@/components/journal/weekly-scorecard";
 
 import { useJournal }         from "@/lib/hooks/use-journal";
@@ -280,6 +281,11 @@ export default function JournalPage() {
               {/* To-Do — incomplete items carry forward to today automatically */}
               <SectionCard label="To-Do" accent="#4F9DFF">
                 <TodoSection entryDate={dateStr} today={todayStr} />
+              </SectionCard>
+
+              {/* Hourly Log — rigid 9 AM–7 PM blocks, one note per hour */}
+              <SectionCard label="Hourly Log" accent="#F59E0B">
+                <HourLogSection entryDate={dateStr} today={todayStr} />
               </SectionCard>
 
               <SectionCard label="Free Write">
