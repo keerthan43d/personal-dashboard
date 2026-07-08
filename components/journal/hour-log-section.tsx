@@ -21,6 +21,40 @@ function blockLabel(h: number): string {
     : `${s.h12} ${s.mer}–${e.h12} ${e.mer}`;
 }
 
+/** Auto-growing textarea so the full note is always visible, line by line. */
+function HourInput({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  disabled: boolean;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="—"
+      disabled={disabled}
+      rows={1}
+      autoComplete="off"
+      data-1p-ignore
+      className="flex-1 block bg-transparent px-3 py-2.5 text-sm text-white/85 placeholder:text-white/20 outline-none focus:bg-white/[0.02] min-w-0 resize-none leading-relaxed overflow-hidden disabled:opacity-50"
+    />
+  );
+}
+
 interface Props {
   /** The day being viewed (yyyy-MM-dd). */
   entryDate: string;
@@ -100,26 +134,22 @@ export function HourLogSection({ entryDate, today }: Props) {
           >
             <div
               className={cn(
-                "w-[104px] flex-shrink-0 flex items-center gap-1.5 px-3 border-r text-[10px] font-black tracking-[0.04em] uppercase tabular-nums",
+                "w-[104px] flex-shrink-0 flex items-start gap-1.5 px-3 py-2.5 border-r text-[10px] font-black tracking-[0.04em] uppercase tabular-nums leading-relaxed",
                 active ? "border-[#F59E0B]/30 text-[#F59E0B]" : "border-white/8 text-white/45"
               )}
             >
               {active && (
                 <span
-                  className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] flex-shrink-0"
+                  className="w-1.5 h-1.5 rounded-full bg-[#F59E0B] flex-shrink-0 mt-1"
                   style={{ boxShadow: "0 0 6px rgba(245,158,11,0.7)" }}
                 />
               )}
               {blockLabel(h)}
             </div>
-            <input
+            <HourInput
               value={notes[h] ?? ""}
-              onChange={(e) => onChange(h, e.target.value)}
-              placeholder="—"
+              onChange={(v) => onChange(h, v)}
               disabled={!loaded}
-              autoComplete="off"
-              data-1p-ignore
-              className="flex-1 bg-transparent px-3 py-2.5 text-sm text-white/85 placeholder:text-white/20 outline-none focus:bg-white/[0.02] min-w-0 disabled:opacity-50"
             />
           </div>
         );
