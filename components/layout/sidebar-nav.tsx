@@ -19,6 +19,7 @@ import {
   Wallet,
   Crown,
   Bot,
+  Swords,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -36,6 +37,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 const NAV = [
   { href: "/",        label: "DASHBOARD", icon: LayoutDashboard },
   { href: "/journal", label: "JOURNAL",   icon: BookMarked },
+  { href: "/mma-journal", label: "MMA JOURNAL", icon: Swords },
   { href: "/stupa",   label: "THE STUPA", icon: Flower2 },
   { href: "/expenses", label: "EXPENSES", icon: Wallet },
   { href: "/clients", label: "CLIENTS",   icon: Users },
