@@ -16,8 +16,18 @@ import {
 } from "@/lib/db/mma-repository";
 
 const TOTAL_DAYS = 90;
-/** Rest days: 0 = Sunday, 1 = Monday. Everything else is a training day. */
-const REST_DOW = new Set([0, 1]);
+/**
+ * Rest days changed mid-camp. Up to (but not including) SCHEDULE_SWITCH the
+ * off days were Sunday & Monday. From SCHEDULE_SWITCH onward Sundays became
+ * Chamundi hill-step climbs (a training day) and Saturday took the rest slot —
+ * so the off days are Saturday & Monday. History stays on the old rule.
+ * 0 = Sun, 1 = Mon, 6 = Sat.
+ */
+const SCHEDULE_SWITCH = "2026-08-25";
+const OLD_REST_DOW = new Set([0, 1]); // before the switch: Sun + Mon
+const NEW_REST_DOW = new Set([6, 1]); // from the switch: Sat + Mon
+/** The go-forward schedule, used for the weekday rail / legend. */
+const REST_DOW = NEW_REST_DOW;
 const DOW_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
 const DISCIPLINES = [
@@ -28,6 +38,7 @@ const DISCIPLINES = [
   "MMA",
   "S&C",
   "RUN",
+  "CHAMUNDI CLIMB",
 ] as const;
 
 type Belt = { name: string; at: number; color: string };
@@ -47,8 +58,10 @@ const TAUNTS = [
   "SHOW UP. THAT'S THE WHOLE SECRET.",
 ];
 
-function isRestDay(date: Date) {
-  return REST_DOW.has(date.getDay());
+/** iso = the day's yyyy-MM-dd; picks the rule in force on that date. */
+function isRestDay(date: Date, iso: string) {
+  const rule = iso >= SCHEDULE_SWITCH ? NEW_REST_DOW : OLD_REST_DOW;
+  return rule.has(date.getDay());
 }
 
 type DayCell = {
@@ -110,7 +123,7 @@ export function MmaChallengeSection({ entryDate, today }: { entryDate: string; t
     return Array.from({ length: TOTAL_DAYS }, (_, i) => {
       const d = addDays(start, i);
       const date = format(d, "yyyy-MM-dd");
-      const rest = isRestDay(d);
+      const rest = isRestDay(d, date);
       const session = sessionMap.get(date) ?? null;
       let status: DayCell["status"];
       if (session) status = "trained";
@@ -124,7 +137,7 @@ export function MmaChallengeSection({ entryDate, today }: { entryDate: string; t
 
   /**
    * Calendar layout: one column per week, one row per weekday (Sun→Sat).
-   * Laid out this way the two rest days read as clean horizontal stripes.
+   * Laid out this way the Mon & Sat rest days read as clean horizontal stripes.
    */
   const weeks: (DayCell | null)[][] = useMemo(() => {
     if (!camp) return [];
@@ -161,7 +174,7 @@ export function MmaChallengeSection({ entryDate, today }: { entryDate: string; t
   }, [days, today]);
 
   const viewedDate = parseISO(entryDate);
-  const viewedRest = isRestDay(viewedDate);
+  const viewedRest = isRestDay(viewedDate, entryDate);
   const dayIndex = camp ? differenceInCalendarDays(viewedDate, parseISO(camp.startDate)) + 1 : 0;
   const inCamp = dayIndex >= 1 && dayIndex <= TOTAL_DAYS;
   const currentIndex = camp
@@ -248,8 +261,8 @@ export function MmaChallengeSection({ entryDate, today }: { entryDate: string; t
         <Swords className="w-7 h-7 mx-auto text-[#E60012] mb-3" strokeWidth={2.5} />
         <p className="text-[13px] font-black tracking-[0.14em] uppercase text-white">90-Day Fight Camp</p>
         <p className="mt-2 text-[10px] font-bold tracking-[0.06em] uppercase text-white/40 leading-relaxed max-w-[340px] mx-auto">
-          Train every day except Sunday &amp; Monday. Log the rounds, earn the belts,
-          keep the streak alive.
+          Train every day except Saturday &amp; Monday — Sundays are Chamundi hill-step
+          climbs. Log the rounds, earn the belts, keep the streak alive.
         </p>
         <button
           onClick={handleStart}
@@ -393,7 +406,7 @@ export function MmaChallengeSection({ entryDate, today }: { entryDate: string; t
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[8px] font-black tracking-[0.1em] uppercase text-white/30">
         <span className="flex items-center gap-1"><i className="w-2 h-2 bg-[#6BD98A]" /> Trained</span>
         <span className="flex items-center gap-1"><i className="w-2 h-2 bg-[#E60012]/70" /> Missed</span>
-        <span className="flex items-center gap-1"><i className="w-2 h-2 bg-white/[0.06]" /> Rest (Sun/Mon)</span>
+        <span className="flex items-center gap-1"><i className="w-2 h-2 bg-white/[0.06]" /> Rest (Sat/Mon)</span>
         <span className="flex items-center gap-1"><i className="w-2 h-2 bg-white/[0.03]" /> Ahead</span>
       </div>
 
@@ -411,7 +424,7 @@ export function MmaChallengeSection({ entryDate, today }: { entryDate: string; t
                 Rest Day · Day {dayIndex}
               </p>
               <p className="mt-1 text-[9px] font-bold tracking-[0.08em] uppercase text-white/35 leading-relaxed">
-                Sundays and Mondays are off. Muscle is built outside the gym — eat, sleep, come back sharper.
+                Saturdays and Mondays are off. Muscle is built outside the gym — eat, sleep, come back sharper.
               </p>
             </div>
           </div>
