@@ -8,6 +8,7 @@
  *   • mistakes  — mistakes to work on + how to fix them
  *   • videos    — saved YouTube technique lessons
  *   • metrics   — weight / agility / power measurements over time
+ *   • spars     — sparring footage links (GDrive etc.) + good/bad review notes
  */
 import Dexie, { type Table } from "dexie";
 import { v4 as uuid } from "uuid";
@@ -71,11 +72,26 @@ export type MmaMetric = {
 };
 export type MmaMetricInput = Omit<MmaMetric, "id" | "createdAt">;
 
+export type MmaSpar = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  title: string;
+  url: string; // link to the footage (Google Drive, YouTube, etc.)
+  opponent?: string;
+  rounds?: number;
+  good?: string; // what worked / looked sharp
+  bad?: string; // what broke down / to fix
+  notes?: string; // anything else
+  createdAt: string;
+};
+export type MmaSparInput = Omit<MmaSpar, "id" | "createdAt">;
+
 // ─── Dexie schema ─────────────────────────────────────────────
 class MmaJournalDB extends Dexie {
   mistakes!: Table<MmaMistake>;
   videos!: Table<MmaVideo>;
   metrics!: Table<MmaMetric>;
+  spars!: Table<MmaSpar>;
 
   constructor() {
     super("MmaJournalDB");
@@ -83,6 +99,11 @@ class MmaJournalDB extends Dexie {
       mistakes: "id, date, status, category, createdAt",
       videos: "id, category, createdAt",
       metrics: "id, type, date, createdAt",
+    });
+    // v2 adds sparring footage. Only the new table is listed; Dexie keeps the
+    // rest from v1 untouched, so existing data is preserved.
+    this.version(2).stores({
+      spars: "id, date, createdAt",
     });
   }
 }
@@ -155,6 +176,31 @@ export async function deleteMetric(id: string): Promise<void> {
   await mmaDb.metrics.delete(id);
 }
 
+// ─── Spars (sparring footage) ─────────────────────────────────
+export async function listSpars(): Promise<MmaSpar[]> {
+  const all = await mmaDb.spars.toArray();
+  // Newest session first; ties broken by insertion order.
+  return all.sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+}
+
+export async function createSpar(input: MmaSparInput): Promise<MmaSpar> {
+  const row: MmaSpar = { ...input, id: uuid(), createdAt: now() };
+  await mmaDb.spars.add(row);
+  return row;
+}
+
+export async function updateSpar(
+  id: string,
+  patch: Partial<MmaSparInput>
+): Promise<MmaSpar> {
+  await mmaDb.spars.update(id, patch);
+  return (await mmaDb.spars.get(id))!;
+}
+
+export async function deleteSpar(id: string): Promise<void> {
+  await mmaDb.spars.delete(id);
+}
+
 // ─── YouTube helpers ──────────────────────────────────────────
 /** Pull the 11-char video id out of any common YouTube URL shape. */
 export function youtubeId(url: string): string | null {
@@ -177,3 +223,20 @@ export function youtubeThumb(url: string): string | null {
   const id = youtubeId(url);
   return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 }
+
+// ─── Link source helpers (for sparring footage) ───────────────
+export type LinkSource = "gdrive" | "youtube" | "link";
+
+/** Rough classifier so a footage card can label where the link points. */
+export function linkSource(url: string): LinkSource {
+  if (!url) return "link";
+  if (/drive\.google\.com|docs\.google\.com/i.test(url)) return "gdrive";
+  if (youtubeId(url)) return "youtube";
+  return "link";
+}
+
+export const LINK_SOURCE_LABEL: Record<LinkSource, string> = {
+  gdrive: "Drive",
+  youtube: "YouTube",
+  link: "Link",
+};

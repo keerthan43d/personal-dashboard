@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import {
   Plus, Swords, Play, Scale, Wind, Zap, Pencil, Trash2,
   Check, RotateCcw, ArrowUpRight, ArrowDownRight, Target, ExternalLink,
+  Film, Clapperboard, ThumbsUp, ThumbsDown, User,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,12 +17,13 @@ import { SegmentMeter } from "@/components/mma-journal/segment-meter";
 import { MistakeDialog } from "@/components/mma-journal/mistake-dialog";
 import { VideoDialog } from "@/components/mma-journal/video-dialog";
 import { MetricDialog } from "@/components/mma-journal/metric-dialog";
+import { SparDialog } from "@/components/mma-journal/spar-dialog";
 import {
   useMmaJournal, ratingLabel, AGILITY_LABELS, POWER_LABELS,
 } from "@/components/mma-journal/mma-journal-store";
 import {
-  youtubeThumb,
-  type MmaMistake, type MmaVideo, type MmaMetric,
+  youtubeThumb, linkSource, LINK_SOURCE_LABEL,
+  type MmaMistake, type MmaVideo, type MmaMetric, type MmaSpar,
   type MetricType, type MistakeStatus,
 } from "@/lib/db/mma-journal-repository";
 import { cn } from "@/lib/utils";
@@ -38,10 +40,11 @@ type MistakeFilter = "all" | "working" | "fixed";
 
 export default function MmaJournalPage() {
   const {
-    mistakes, videos, metrics, loaded, load,
+    mistakes, videos, metrics, spars, loaded, load,
     addMistake, editMistake, removeMistake,
     addVideo, editVideo, removeVideo,
     addMetric,
+    addSpar, editSpar, removeSpar,
   } = useMmaJournal();
 
   const [mistakeDialog, setMistakeDialog] = useState(false);
@@ -49,6 +52,8 @@ export default function MmaJournalPage() {
   const [videoDialog, setVideoDialog] = useState(false);
   const [editingVideo, setEditingVideo] = useState<MmaVideo | undefined>();
   const [metricType, setMetricType] = useState<MetricType | null>(null);
+  const [sparDialog, setSparDialog] = useState(false);
+  const [editingSpar, setEditingSpar] = useState<MmaSpar | undefined>();
   const [filter, setFilter] = useState<MistakeFilter>("all");
 
   useEffect(() => { load(); }, []);
@@ -67,7 +72,7 @@ export default function MmaJournalPage() {
     <>
       <Topbar
         title="MMA Journal"
-        subtitle={`${workingCount} in the lab · ${fixedCount} fixed · ${videos.length} lessons`}
+        subtitle={`${workingCount} in the lab · ${fixedCount} fixed · ${videos.length} lessons · ${spars.length} spars`}
         actions={
           <Button onClick={() => { setEditingMistake(undefined); setMistakeDialog(true); }} size="sm"
             className="bg-[#FFD600] hover:bg-[#FFE44D] text-black font-black uppercase tracking-[0.08em] h-8 gap-1.5 transition-colors duration-150">
@@ -187,6 +192,50 @@ export default function MmaJournalPage() {
             </div>
           )}
         </section>
+
+        {/* ══ 04 · SPARRING FOOTAGE ═════════════════════════ */}
+        <section>
+          <SectionHead index="04" title="Sparring Footage" meta={`${spars.length} sessions`}>
+            <button onClick={() => { setEditingSpar(undefined); setSparDialog(true); }}
+              className="flex items-center gap-1.5 px-3 h-7 text-[10px] font-black uppercase tracking-[0.1em] border border-white/12 text-white/70 hover:text-black hover:bg-[#FFD600] hover:border-[#FFD600] transition-colors duration-150">
+              <Plus className="w-3 h-3" strokeWidth={3} /> Add Footage
+            </button>
+          </SectionHead>
+
+          {!loaded ? (
+            <div className="grid gap-2">
+              {Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-28 skeleton" />)}
+            </div>
+          ) : spars.length === 0 ? (
+            <EmptyState icon={<Clapperboard className="w-6 h-6" />}
+              title="No sparring footage yet"
+              description="Drop a Google Drive (or any) link to a spar, then break down what was good and what to fix."
+              action={
+                <Button onClick={() => { setEditingSpar(undefined); setSparDialog(true); }} size="sm"
+                  className="bg-[#FFD600] hover:bg-[#FFE44D] text-black font-black uppercase tracking-[0.08em] gap-1.5">
+                  <Plus className="w-3.5 h-3.5" strokeWidth={3} /> Add Footage
+                </Button>
+              }
+            />
+          ) : (
+            <div className="grid gap-2">
+              <AnimatePresence mode="popLayout">
+                {spars.map((s, i) => (
+                  <motion.div key={s.id} layout
+                    initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 8 }} transition={{ delay: i * 0.02, duration: 0.18, ease: "linear" }}
+                  >
+                    <SparCard
+                      spar={s}
+                      onEdit={() => { setEditingSpar(s); setSparDialog(true); }}
+                      onRemove={async () => { if (!confirm("Delete this footage?")) return; await removeSpar(s.id); toast.success("Deleted"); }}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </section>
       </PageShell>
 
       {/* ══ Dialogs ═══════════════════════════════════════ */}
@@ -219,6 +268,18 @@ export default function MmaJournalPage() {
           defaultUnit={latestWeightUnit(metrics)}
           onClose={() => setMetricType(null)}
           onSave={async (data) => { await addMetric(data); toast.success("Logged"); }}
+        />
+      )}
+      {(sparDialog || editingSpar) && (
+        <SparDialog open existing={editingSpar}
+          onClose={() => { setSparDialog(false); setEditingSpar(undefined); }}
+          onSave={async (data) => {
+            if (editingSpar) { await editSpar(editingSpar.id, data); toast.success("Updated"); }
+            else { await addSpar(data); toast.success("Footage logged 🎬"); }
+          }}
+          onDelete={editingSpar ? async () => {
+            await removeSpar(editingSpar.id); setSparDialog(false); setEditingSpar(undefined); toast.success("Deleted");
+          } : undefined}
         />
       )}
     </>
@@ -483,6 +544,88 @@ function VideoCard({ v, onEdit, onRemove }: { v: MmaVideo; onEdit: () => void; o
           </div>
         </div>
       </a>
+    </div>
+  );
+}
+
+// ═══ Spar card ══════════════════════════════════════════════
+function SparCard({ spar, onEdit, onRemove }: {
+  spar: MmaSpar; onEdit: () => void; onRemove: () => void;
+}) {
+  const src = linkSource(spar.url);
+  return (
+    <div className="group relative flex border border-white/12 bg-[#080808] hover:border-white/25 transition-colors duration-150">
+      {/* film spine */}
+      <div className="w-1 flex-shrink-0 bg-[#FFD600]" />
+
+      <div className="flex-1 p-4 min-w-0">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            {/* meta row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] px-1.5 py-0.5 border border-[#FFD600]/30 text-[#FFD600]">
+                <Film className="w-2.5 h-2.5" strokeWidth={3} /> {LINK_SOURCE_LABEL[src]}
+              </span>
+              <span className="text-[9px] font-black uppercase tracking-[0.12em] text-white/30 font-numeric">
+                {format(parseISO(spar.date), "MMM d")}
+              </span>
+              {spar.opponent && (
+                <span className="flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.12em] text-white/45">
+                  <User className="w-2.5 h-2.5" /> vs {spar.opponent}
+                </span>
+              )}
+              {spar.rounds ? (
+                <span className="text-[9px] font-black uppercase tracking-[0.12em] text-white/45 font-numeric">
+                  {spar.rounds} {spar.rounds === 1 ? "round" : "rounds"}
+                </span>
+              ) : null}
+            </div>
+            <h3 className="text-[15px] font-black uppercase tracking-[0.01em] mt-2 leading-snug text-white">
+              {spar.title}
+            </h3>
+          </div>
+
+          <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+            <IconBtn onClick={onEdit} title="Edit"><Pencil className="w-3.5 h-3.5" /></IconBtn>
+            <IconBtn onClick={onRemove} title="Delete" danger><Trash2 className="w-3.5 h-3.5" /></IconBtn>
+          </div>
+        </div>
+
+        {/* good / bad breakdown */}
+        {(spar.good || spar.bad) && (
+          <div className="mt-3 grid sm:grid-cols-2 gap-2">
+            {spar.good && (
+              <div className="border-l-2 border-[#6BD98A] pl-3">
+                <p className="flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.14em] text-[#6BD98A] mb-1">
+                  <ThumbsUp className="w-2.5 h-2.5" strokeWidth={3} /> What was good
+                </p>
+                <p className="text-xs text-white/75 leading-relaxed whitespace-pre-wrap">{spar.good}</p>
+              </div>
+            )}
+            {spar.bad && (
+              <div className="border-l-2 border-[#E60012] pl-3">
+                <p className="flex items-center gap-1 text-[9px] font-black uppercase tracking-[0.14em] text-[#E60012] mb-1">
+                  <ThumbsDown className="w-2.5 h-2.5" strokeWidth={3} /> What was bad
+                </p>
+                <p className="text-xs text-white/75 leading-relaxed whitespace-pre-wrap">{spar.bad}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* notes */}
+        {spar.notes && (
+          <p className="mt-3 text-[11px] text-white/45 leading-relaxed whitespace-pre-wrap border-t border-white/8 pt-2.5">
+            {spar.notes}
+          </p>
+        )}
+
+        {/* watch link */}
+        <a href={spar.url} target="_blank" rel="noopener noreferrer"
+          className="mt-3 inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-white/40 hover:text-[#FFD600] transition-colors duration-150">
+          <Play className="w-3 h-3 fill-current" /> Watch footage <ExternalLink className="w-2.5 h-2.5" />
+        </a>
+      </div>
     </div>
   );
 }

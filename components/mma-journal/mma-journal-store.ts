@@ -12,18 +12,25 @@ import {
   listMetrics,
   createMetric,
   deleteMetric,
+  listSpars,
+  createSpar,
+  updateSpar,
+  deleteSpar,
   type MmaMistake,
   type MmaMistakeInput,
   type MmaVideo,
   type MmaVideoInput,
   type MmaMetric,
   type MmaMetricInput,
+  type MmaSpar,
+  type MmaSparInput,
 } from "@/lib/db/mma-journal-repository";
 
 type State = {
   mistakes: MmaMistake[];
   videos: MmaVideo[];
   metrics: MmaMetric[];
+  spars: MmaSpar[];
   loaded: boolean;
 
   load: () => Promise<void>;
@@ -38,21 +45,27 @@ type State = {
 
   addMetric: (input: MmaMetricInput) => Promise<void>;
   removeMetric: (id: string) => Promise<void>;
+
+  addSpar: (input: MmaSparInput) => Promise<void>;
+  editSpar: (id: string, patch: Partial<MmaSparInput>) => Promise<void>;
+  removeSpar: (id: string) => Promise<void>;
 };
 
 export const useMmaJournal = create<State>()((set) => ({
   mistakes: [],
   videos: [],
   metrics: [],
+  spars: [],
   loaded: false,
 
   load: async () => {
-    const [mistakes, videos, metrics] = await Promise.all([
+    const [mistakes, videos, metrics, spars] = await Promise.all([
       listMistakes(),
       listVideos(),
       listMetrics(),
+      listSpars(),
     ]);
-    set({ mistakes, videos, metrics, loaded: true });
+    set({ mistakes, videos, metrics, spars, loaded: true });
   },
 
   addMistake: async (input) => {
@@ -90,6 +103,27 @@ export const useMmaJournal = create<State>()((set) => ({
   removeMetric: async (id) => {
     await deleteMetric(id);
     set((s) => ({ metrics: s.metrics.filter((m) => m.id !== id) }));
+  },
+
+  addSpar: async (input) => {
+    const row = await createSpar(input);
+    set((s) => ({
+      spars: [row, ...s.spars].sort(
+        (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt)
+      ),
+    }));
+  },
+  editSpar: async (id, patch) => {
+    const row = await updateSpar(id, patch);
+    set((s) => ({
+      spars: s.spars
+        .map((v) => (v.id === id ? row : v))
+        .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt)),
+    }));
+  },
+  removeSpar: async (id) => {
+    await deleteSpar(id);
+    set((s) => ({ spars: s.spars.filter((v) => v.id !== id) }));
   },
 }));
 
