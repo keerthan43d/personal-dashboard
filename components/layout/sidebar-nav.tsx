@@ -20,6 +20,7 @@ import {
   Crown,
   Bot,
   Swords,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -38,6 +39,7 @@ const NAV = [
   { href: "/",        label: "DASHBOARD", icon: LayoutDashboard },
   { href: "/journal", label: "JOURNAL",   icon: BookMarked },
   { href: "/mma-journal", label: "MMA JOURNAL", icon: Swords },
+  { href: "/marketing-journal", label: "MARKETING JOURNAL", icon: Megaphone },
   { href: "/stupa",   label: "THE STUPA", icon: Flower2 },
   { href: "/expenses", label: "EXPENSES", icon: Wallet },
   { href: "/clients", label: "CLIENTS",   icon: Users },
