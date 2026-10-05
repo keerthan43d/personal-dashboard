@@ -13,7 +13,6 @@ import {
   LogOut,
   BookMarked,
   PenLine,
-  Clapperboard,
   Newspaper,
   Flower2,
   Wallet,
@@ -48,7 +47,6 @@ const NAV = [
   { href: "/tv-shows",  label: "TV SHOWS",  icon: Tv },
   { href: "/news", label: "NEWS", icon: Newspaper },
   { href: "/linkedin-workflow", label: "CONTENT", icon: PenLine },
-  { href: "/ai-avatar", label: "AVATAR", icon: Clapperboard },
   { href: "/gods",     label: "GODS OF MARKETING", icon: Crown },
   { href: "/llm-arena", label: "LLM ARENA", icon: Bot },
 ];
