@@ -11,15 +11,11 @@ import { PageShell }        from "@/components/shared/page-shell";
 import { MoodPicker }       from "@/components/journal/mood-picker";
 import { EnergyPicker }     from "@/components/journal/energy-picker";
 import { FreeWrite }        from "@/components/journal/free-write";
-import { ListSection }      from "@/components/journal/list-section";
 import { TomorrowFocus }    from "@/components/journal/tomorrow-focus";
 import { HabitsRow }        from "@/components/journal/habits-row";
-import { ProblemSection }   from "@/components/journal/problem-section";
 import { CalendarStrip }    from "@/components/journal/calendar-strip";
 import { OneProjectBanner } from "@/components/journal/one-project-banner";
 import { DeepWorkSection }  from "@/components/journal/deep-work-section";
-import { ShipLogSection }   from "@/components/journal/ship-log-section";
-import { UrgeLogSection }   from "@/components/journal/urge-log-section";
 import { TodoSection }      from "@/components/journal/todo-section";
 import { HourLogSection }   from "@/components/journal/hour-log-section";
 import { MmaChallengeSection } from "@/components/journal/mma-challenge-section";
@@ -299,39 +295,6 @@ export default function JournalPage() {
                   value={draft.freeWrite ?? ""}
                   onChange={(v) => update({ freeWrite: v })}
                 />
-              </SectionCard>
-
-              <SectionCard label="Wins" accent="#6BD98A">
-                <ListSection
-                  items={draft.wins}
-                  onChange={(wins) => update({ wins })}
-                  placeholder="What went well today?"
-                />
-              </SectionCard>
-
-              {/* Ship Log */}
-              <SectionCard label="Ship Log" accent="#9B59B6">
-                <ShipLogSection entryDate={dateStr} />
-              </SectionCard>
-
-              <SectionCard label="Problem Log" accent="#E60012">
-                <ProblemSection
-                  entryDate={dateStr}
-                  problems={todayProblems}
-                />
-              </SectionCard>
-
-              <SectionCard label="Ideas" accent="#00C9A7">
-                <ListSection
-                  items={draft.ideas}
-                  onChange={(ideas) => update({ ideas })}
-                  placeholder="Random idea…"
-                />
-              </SectionCard>
-
-              {/* Urge Log */}
-              <SectionCard label="Urge Log" accent="#FF3366">
-                <UrgeLogSection entryDate={dateStr} />
               </SectionCard>
 
               <SectionCard label="Tomorrow's Focus" accent="#FF6600">
