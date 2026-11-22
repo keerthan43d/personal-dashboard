@@ -18,7 +18,7 @@ import { OneProjectBanner } from "@/components/journal/one-project-banner";
 import { DeepWorkSection }  from "@/components/journal/deep-work-section";
 import { TodoSection }      from "@/components/journal/todo-section";
 import { HourLogSection }   from "@/components/journal/hour-log-section";
-import { MmaChallengeSection } from "@/components/journal/mma-challenge-section";
+import { FightCampSection }  from "@/components/journal/fight-camp/fight-camp-section";
 import { WeeklyScorecard }  from "@/components/journal/weekly-scorecard";
 
 import { useJournal }         from "@/lib/hooks/use-journal";
@@ -285,9 +285,9 @@ export default function JournalPage() {
                 <HourLogSection entryDate={dateStr} today={todayStr} />
               </SectionCard>
 
-              {/* 90-Day MMA Fight Camp — rest days are Sunday + Monday */}
-              <SectionCard label="90-Day Fight Camp" accent="#E60012">
-                <MmaChallengeSection entryDate={dateStr} today={todayStr} />
+              {/* Fight Camp — MMA + gym logging, nutrition, body check-in */}
+              <SectionCard label="Fight Camp" accent="#E60012">
+                <FightCampSection entryDate={dateStr} today={todayStr} />
               </SectionCard>
 
               <SectionCard label="Free Write">
